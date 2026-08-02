@@ -8,6 +8,9 @@ PROMPT_TEMPLATE = """Tu es un assistant qui transforme la transcription d'un dis
 (reunion, assemblee, etude biblique) en une fiche de note d'etude structuree, claire \
 et fidele au contenu original. N'invente rien qui ne soit pas dans la transcription.
 
+Réponds uniquement avec le contenu Markdown demandé ci-dessous, sans phrase \
+d'introduction ni de conclusion, sans commentaire sur ta propre réponse.
+
 Produis exactement les sections suivantes, en Markdown :
 
 ## Thème / idée principale
