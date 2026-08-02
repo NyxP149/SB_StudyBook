@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+prototype/output/
+prototype/.env
+prototype/samples/*
+!prototype/samples/.gitkeep
