@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: studybook
+      POSTGRES_USER: studybook
+      POSTGRES_PASSWORD: studybook
+    ports:
+      - "5433:5432"
+    volumes:
+      - studybook_pgdata:/var/lib/postgresql/data
+
+volumes:
+  studybook_pgdata:

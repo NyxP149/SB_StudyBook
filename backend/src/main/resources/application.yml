@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: studybook
+  datasource:
+    url: jdbc:postgresql://localhost:5433/studybook
+    username: studybook
+    password: studybook
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+
+studybook:
+  pipeline:
+    python-executable: ../.venv/Scripts/python.exe
+    script-path: ../prototype/main.py
+    upload-dir: ../prototype/samples/uploads
+    output-dir: ../prototype/output
+    provider: ollama
+    model-size: small
+    timeout-minutes: 10
