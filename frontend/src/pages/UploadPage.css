@@ -185,6 +185,17 @@
   cursor: pointer;
 }
 
+.upload-template-hint {
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.upload-template-hint a {
+  color: var(--gold);
+  font-weight: 600;
+  text-decoration: none;
+}
+
 .upload-error {
   color: var(--burgundy);
   background: var(--burgundy-bg);

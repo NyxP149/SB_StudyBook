@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { submitNote } from '../api/client'
+import { useNavigate, Link } from 'react-router-dom'
+import { listTemplates, submitNote } from '../api/client'
+import type { Template } from '../types'
 import './UploadPage.css'
 
 type RecordingState = 'idle' | 'recording' | 'submitting'
@@ -19,6 +20,8 @@ export function UploadPage() {
   const [seconds, setSeconds] = useState(0)
   const [provider, setProvider] = useState('ollama')
   const [modelSize, setModelSize] = useState('medium')
+  const [templateId, setTemplateId] = useState('')
+  const [templates, setTemplates] = useState<Template[]>([])
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
@@ -28,19 +31,29 @@ export function UploadPage() {
     return () => window.clearInterval(timerRef.current)
   }, [])
 
+  useEffect(() => {
+    listTemplates()
+      .then(setTemplates)
+      .catch(() => setTemplates([]))
+  }, [])
+
   const submit = useCallback(
     async (blob: Blob, filename: string) => {
       setState('submitting')
       setError(null)
       try {
-        const note = await submitNote(blob, filename, { provider, modelSize })
+        const note = await submitNote(blob, filename, {
+          provider,
+          modelSize,
+          templateId: templateId || undefined,
+        })
         navigate(`/notes/${note.id}`)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Échec de l\'envoi.')
         setState('idle')
       }
     },
-    [navigate, provider, modelSize],
+    [navigate, provider, modelSize, templateId],
   )
 
   const handleFile = useCallback(
@@ -173,7 +186,24 @@ export function UploadPage() {
             <option value="large-v3">large-v3 — précis</option>
           </select>
         </label>
+        <label>
+          Template
+          <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} disabled={state === 'submitting'}>
+            <option value="">Structure par défaut</option>
+            {templates.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
+
+      {templates.length === 0 && (
+        <p className="upload-template-hint">
+          <Link to="/templates">Crée un template</Link> pour adapter la structure de la note à ce type de discours.
+        </p>
+      )}
 
       {error && <p className="upload-error">{error}</p>}
     </div>

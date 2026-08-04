@@ -20,6 +20,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <NavLink to="/notes" className={({ isActive }) => (isActive ? 'active' : '')}>
             Mes notes
           </NavLink>
+          <NavLink to="/templates" className={({ isActive }) => (isActive ? 'active' : '')}>
+            Modèles
+          </NavLink>
         </nav>
       </header>
       <main className="shell-main">{children}</main>
