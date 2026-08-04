@@ -28,8 +28,9 @@ public class NoteController {
     public ResponseEntity<NoteResponse> create(
             @RequestParam("audio") MultipartFile audio,
             @RequestParam(value = "provider", required = false) String provider,
-            @RequestParam(value = "modelSize", required = false) String modelSize) {
-        Note note = noteService.submitAudio(audio, provider, modelSize);
+            @RequestParam(value = "modelSize", required = false) String modelSize,
+            @RequestParam(value = "templateId", required = false) UUID templateId) {
+        Note note = noteService.submitAudio(audio, provider, modelSize, templateId);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(NoteResponse.from(note));
     }
 

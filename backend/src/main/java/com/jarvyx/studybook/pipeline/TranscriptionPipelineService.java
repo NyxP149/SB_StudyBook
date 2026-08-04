@@ -3,6 +3,8 @@ package com.jarvyx.studybook.pipeline;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,17 +27,22 @@ public class TranscriptionPipelineService {
         this.properties = properties;
     }
 
-    public PipelineResult run(Path audioFile, String provider, String modelSize) {
+    public PipelineResult run(Path audioFile, String provider, String modelSize, Path templateFile) {
         String effectiveProvider = provider != null ? provider : properties.provider();
         String effectiveModelSize = modelSize != null ? modelSize : properties.modelSize();
 
-        ProcessBuilder processBuilder = new ProcessBuilder(
+        List<String> command = new ArrayList<>(List.of(
                 properties.pythonExecutableAsPath().toString(),
                 properties.scriptPathAsPath().toString(),
                 audioFile.toAbsolutePath().toString(),
                 "--provider", effectiveProvider,
-                "--model-size", effectiveModelSize)
-                .redirectErrorStream(true);
+                "--model-size", effectiveModelSize));
+        if (templateFile != null) {
+            command.add("--template-file");
+            command.add(templateFile.toAbsolutePath().toString());
+        }
+
+        ProcessBuilder processBuilder = new ProcessBuilder(command).redirectErrorStream(true);
 
         Process process;
         String output;

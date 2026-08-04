@@ -31,7 +31,7 @@ public class NoteService {
      * Sauvegarde l'upload et crée la note en statut PENDING, puis retourne
      * immédiatement : le pipeline (lent) tourne en arrière-plan.
      */
-    public Note submitAudio(MultipartFile audio, String provider, String modelSize) {
+    public Note submitAudio(MultipartFile audio, String provider, String modelSize, UUID templateId) {
         if (audio == null || audio.isEmpty()) {
             throw new IllegalArgumentException("Le fichier audio est vide ou manquant.");
         }
@@ -40,10 +40,10 @@ public class NoteService {
         String effectiveModelSize = modelSize != null ? modelSize : pipelineProperties.modelSize();
 
         Path storedFile = storeUpload(audio);
-        Note note = new Note(audio.getOriginalFilename(), effectiveProvider, effectiveModelSize);
+        Note note = new Note(audio.getOriginalFilename(), effectiveProvider, effectiveModelSize, templateId);
         note = noteRepository.save(note);
 
-        pipelineRunner.run(note.getId(), storedFile, effectiveProvider, effectiveModelSize);
+        pipelineRunner.run(note.getId(), storedFile, effectiveProvider, effectiveModelSize, templateId);
         return note;
     }
 

@@ -32,6 +32,8 @@ public class Note {
     @Column(nullable = false)
     private String modelSize;
 
+    private UUID templateId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NoteStatus status;
@@ -48,10 +50,11 @@ public class Note {
     @Column(nullable = false)
     private Instant createdAt;
 
-    public Note(String originalFilename, String provider, String modelSize) {
+    public Note(String originalFilename, String provider, String modelSize, UUID templateId) {
         this.originalFilename = originalFilename;
         this.provider = provider;
         this.modelSize = modelSize;
+        this.templateId = templateId;
         this.status = NoteStatus.PENDING;
         this.createdAt = Instant.now();
     }
