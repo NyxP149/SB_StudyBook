@@ -1,6 +1,7 @@
 package com.jarvyx.studybook.note.dto;
 
 import com.jarvyx.studybook.note.Note;
+import com.jarvyx.studybook.note.NoteStatus;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -9,6 +10,7 @@ public record NoteSummaryResponse(
         String originalFilename,
         String provider,
         String modelSize,
+        NoteStatus status,
         Instant createdAt) {
 
     public static NoteSummaryResponse from(Note note) {
@@ -17,6 +19,7 @@ public record NoteSummaryResponse(
                 note.getOriginalFilename(),
                 note.getProvider(),
                 note.getModelSize(),
+                note.getStatus(),
                 note.getCreatedAt());
     }
 }

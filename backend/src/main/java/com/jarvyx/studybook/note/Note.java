@@ -2,6 +2,8 @@ package com.jarvyx.studybook.note;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,21 +32,38 @@ public class Note {
     @Column(nullable = false)
     private String modelSize;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NoteStatus status;
+
+    @Column(columnDefinition = "TEXT")
     private String transcript;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String noteMarkdown;
+
+    @Column(columnDefinition = "TEXT")
+    private String errorMessage;
 
     @Column(nullable = false)
     private Instant createdAt;
 
-    public Note(String originalFilename, String provider, String modelSize, String transcript, String noteMarkdown) {
+    public Note(String originalFilename, String provider, String modelSize) {
         this.originalFilename = originalFilename;
         this.provider = provider;
         this.modelSize = modelSize;
+        this.status = NoteStatus.PENDING;
+        this.createdAt = Instant.now();
+    }
+
+    public void markDone(String transcript, String noteMarkdown) {
         this.transcript = transcript;
         this.noteMarkdown = noteMarkdown;
-        this.createdAt = Instant.now();
+        this.status = NoteStatus.DONE;
+    }
+
+    public void markFailed(String errorMessage) {
+        this.errorMessage = errorMessage;
+        this.status = NoteStatus.FAILED;
     }
 }

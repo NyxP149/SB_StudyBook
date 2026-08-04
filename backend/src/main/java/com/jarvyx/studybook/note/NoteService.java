@@ -2,8 +2,6 @@ package com.jarvyx.studybook.note;
 
 import com.jarvyx.studybook.pipeline.PipelineException;
 import com.jarvyx.studybook.pipeline.PipelineProperties;
-import com.jarvyx.studybook.pipeline.PipelineResult;
-import com.jarvyx.studybook.pipeline.TranscriptionPipelineService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,34 +15,36 @@ import org.springframework.web.multipart.MultipartFile;
 public class NoteService {
 
     private final NoteRepository noteRepository;
-    private final TranscriptionPipelineService pipelineService;
+    private final NotePipelineRunner pipelineRunner;
     private final PipelineProperties pipelineProperties;
 
     public NoteService(
             NoteRepository noteRepository,
-            TranscriptionPipelineService pipelineService,
+            NotePipelineRunner pipelineRunner,
             PipelineProperties pipelineProperties) {
         this.noteRepository = noteRepository;
-        this.pipelineService = pipelineService;
+        this.pipelineRunner = pipelineRunner;
         this.pipelineProperties = pipelineProperties;
     }
 
-    public Note createFromAudio(MultipartFile audio, String provider, String modelSize) {
+    /**
+     * Sauvegarde l'upload et crée la note en statut PENDING, puis retourne
+     * immédiatement : le pipeline (lent) tourne en arrière-plan.
+     */
+    public Note submitAudio(MultipartFile audio, String provider, String modelSize) {
         if (audio == null || audio.isEmpty()) {
             throw new IllegalArgumentException("Le fichier audio est vide ou manquant.");
         }
 
+        String effectiveProvider = provider != null ? provider : pipelineProperties.provider();
+        String effectiveModelSize = modelSize != null ? modelSize : pipelineProperties.modelSize();
+
         Path storedFile = storeUpload(audio);
-        PipelineResult result = pipelineService.run(storedFile, provider, modelSize);
+        Note note = new Note(audio.getOriginalFilename(), effectiveProvider, effectiveModelSize);
+        note = noteRepository.save(note);
 
-        Note note = new Note(
-                audio.getOriginalFilename(),
-                provider != null ? provider : pipelineProperties.provider(),
-                modelSize != null ? modelSize : pipelineProperties.modelSize(),
-                result.transcript(),
-                result.noteMarkdown());
-
-        return noteRepository.save(note);
+        pipelineRunner.run(note.getId(), storedFile, effectiveProvider, effectiveModelSize);
+        return note;
     }
 
     public List<Note> listAll() {

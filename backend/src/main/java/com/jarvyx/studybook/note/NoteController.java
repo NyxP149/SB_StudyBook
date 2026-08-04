@@ -29,8 +29,8 @@ public class NoteController {
             @RequestParam("audio") MultipartFile audio,
             @RequestParam(value = "provider", required = false) String provider,
             @RequestParam(value = "modelSize", required = false) String modelSize) {
-        Note note = noteService.createFromAudio(audio, provider, modelSize);
-        return ResponseEntity.status(HttpStatus.CREATED).body(NoteResponse.from(note));
+        Note note = noteService.submitAudio(audio, provider, modelSize);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(NoteResponse.from(note));
     }
 
     @GetMapping
