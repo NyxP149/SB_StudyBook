@@ -1,0 +1,53 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 4px 10px 4px 8px;
+  border-radius: 999px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.status-pending {
+  background: rgba(185, 134, 59, 0.14);
+  color: #96662a;
+}
+.status-pending .status-dot {
+  background: var(--gold);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.status-done {
+  background: var(--teal-bg);
+  color: var(--teal);
+}
+.status-done .status-dot {
+  background: var(--teal);
+}
+
+.status-failed {
+  background: var(--burgundy-bg);
+  color: var(--burgundy);
+}
+.status-failed .status-dot {
+  background: var(--burgundy);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0.4;
+  }
+}

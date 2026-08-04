@@ -1,0 +1,82 @@
+:root {
+  --paper: #f6f0e3;
+  --paper-deep: #ece1c8;
+  --paper-card: #fbf7ee;
+  --ink: #241d16;
+  --ink-soft: #5c5040;
+  --ink-faint: #8c8171;
+  --gold: #b8863b;
+  --gold-bright: #d9a44e;
+  --teal: #3f6f4f;
+  --teal-bg: rgba(63, 111, 79, 0.12);
+  --burgundy: #8c3b3b;
+  --burgundy-bg: rgba(140, 59, 59, 0.12);
+  --line: rgba(36, 29, 22, 0.14);
+  --shadow: 0 1px 2px rgba(36, 29, 22, 0.06), 0 8px 24px rgba(36, 29, 22, 0.08);
+  --shadow-lift: 0 4px 8px rgba(36, 29, 22, 0.08), 0 16px 32px rgba(36, 29, 22, 0.12);
+
+  --font-display: 'Fraunces', Georgia, 'Iowan Old Style', serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+
+  color-scheme: light;
+  color: var(--ink);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+  background-image:
+    radial-gradient(circle at 10% 0%, rgba(185, 134, 59, 0.08), transparent 45%),
+    radial-gradient(circle at 100% 30%, rgba(63, 111, 79, 0.06), transparent 40%);
+  background-attachment: fixed;
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  margin: 0;
+  font-weight: 600;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: rgba(185, 134, 59, 0.35);
+}

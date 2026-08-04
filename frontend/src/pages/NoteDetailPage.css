@@ -1,0 +1,212 @@
+.back-link {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--ink-faint);
+  font-size: 13px;
+  margin-bottom: 20px;
+  transition: color 0.15s ease;
+}
+
+.back-link:hover {
+  color: var(--ink);
+}
+
+.note-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.note-detail-header h1 {
+  font-size: clamp(24px, 3.5vw, 34px);
+  line-height: 1.2;
+}
+
+.note-detail-theme {
+  margin-top: 8px;
+  color: var(--ink-soft);
+  font-size: 16px;
+  max-width: 60ch;
+}
+
+.note-detail-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+}
+
+.note-detail-meta .dot {
+  opacity: 0.6;
+}
+
+.note-pending,
+.note-failed {
+  margin-top: 40px;
+  padding: 40px 24px;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.note-pending {
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+
+.brew-icon {
+  font-size: 32px;
+  display: inline-block;
+  animation: sway 2.4s ease-in-out infinite;
+}
+
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+}
+
+.note-pending p {
+  margin-top: 10px;
+}
+
+.note-pending-sub {
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.note-failed {
+  background: var(--burgundy-bg);
+  color: var(--burgundy);
+  text-align: left;
+}
+
+.note-failed pre {
+  white-space: pre-wrap;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+/* --- Rendu du markdown généré --- */
+
+.note-markdown {
+  margin-top: 36px;
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: clamp(24px, 4vw, 44px);
+  box-shadow: var(--shadow);
+}
+
+.note-md-h1 {
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 14px;
+  color: var(--ink-faint);
+}
+
+.note-md-h1:not(:first-child) {
+  margin-top: 32px;
+}
+
+.note-md-h2 {
+  font-size: 19px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  margin-bottom: 10px;
+  color: var(--gold);
+}
+
+.note-md-h2:first-child {
+  margin-top: 0;
+}
+
+.note-md-h3 {
+  font-size: 15px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  margin-top: 16px;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.note-md-icon {
+  font-size: 0.95em;
+}
+
+.note-markdown p {
+  margin: 10px 0;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.note-markdown ul,
+.note-markdown ol {
+  margin: 10px 0;
+  padding-left: 22px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.note-markdown li {
+  margin: 4px 0;
+}
+
+.note-markdown hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 20px 0;
+}
+
+.note-markdown em {
+  color: var(--ink-faint);
+}
+
+/* --- Transcript --- */
+
+.transcript-panel {
+  margin-top: 20px;
+}
+
+.transcript-toggle {
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.transcript-toggle:hover {
+  color: var(--ink);
+}
+
+.transcript-text {
+  margin-top: 8px;
+  padding: 20px;
+  background: var(--paper-deep);
+  border-radius: 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  white-space: pre-wrap;
+}
