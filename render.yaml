@@ -1,0 +1,50 @@
+# Render Blueprint — best-effort starting point.
+# Verify field names against the current Render docs/UI when you connect
+# the repo; blueprint syntax has changed between Render API versions.
+#
+# Two services:
+#  - studybook-backend  : Spring Boot API, built from backend/Dockerfile
+#                          (build context = repo root, so it can also
+#                          COPY the sibling prototype/ directory in).
+#  - studybook-frontend : the Vite/React SPA, served as a static site.
+#
+# Postgres is NOT defined here — this app uses Neon (see DEPLOY.md),
+# not Render's managed Postgres, so DATABASE_* vars are filled in
+# manually in the Render dashboard after creating the Neon project.
+
+services:
+  - type: web
+    name: studybook-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /api/notes
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        sync: false # jdbc:postgresql://<neon-host>/<db>?sslmode=require
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: STUDYBOOK_PIPELINE_PROVIDER
+        value: anthropic
+      - key: STUDYBOOK_PIPELINE_MODEL_SIZE
+        value: small
+      - key: STUDYBOOK_CORS_ALLOWED_ORIGIN
+        sync: false # e.g. https://studybook-frontend.onrender.com
+
+  - type: web
+    name: studybook-frontend
+    env: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false # e.g. https://studybook-backend.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

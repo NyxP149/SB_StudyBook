@@ -20,7 +20,7 @@ from note_generator import DEFAULT_SECTIONS, Section, generate_note
 from providers import get_provider
 from transcriber import DEFAULT_MODEL_SIZE, transcribe
 
-OUTPUT_DIR = Path(__file__).parent / "output"
+DEFAULT_OUTPUT_DIR = Path(__file__).parent / "output"
 
 
 def parse_args() -> argparse.Namespace:
@@ -49,6 +49,11 @@ def parse_args() -> argparse.Namespace:
         "--language",
         default="fr",
         help="Code langue pour la transcription (defaut: fr)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        help="Dossier ou ecrire la transcription et la note generees "
+        "(defaut: dossier 'output' a cote de ce script).",
     )
     parser.add_argument(
         "--template-file",
@@ -100,8 +105,9 @@ def main() -> int:
         print(f"      -> {len(text)} caracteres, langue detectee={result.language} "
               f"({time.time() - t0:.1f}s)")
 
-    OUTPUT_DIR.mkdir(exist_ok=True)
-    transcript_path = OUTPUT_DIR / f"{stem}.transcript.txt"
+    output_dir = Path(args.output_dir) if args.output_dir else DEFAULT_OUTPUT_DIR
+    output_dir.mkdir(parents=True, exist_ok=True)
+    transcript_path = output_dir / f"{stem}.transcript.txt"
     transcript_path.write_text(text, encoding="utf-8")
     print(f"      -> transcription brute sauvee dans {transcript_path}")
 
@@ -113,7 +119,7 @@ def main() -> int:
     print(f"      -> termine ({time.time() - t0:.1f}s)")
 
     print("[3/3] Sauvegarde...")
-    note_path = OUTPUT_DIR / f"{stem}.note.md"
+    note_path = output_dir / f"{stem}.note.md"
     note_path.write_text(note, encoding="utf-8")
     print(f"      -> note sauvee dans {note_path}")
 

@@ -34,7 +34,8 @@ public class TranscriptionPipelineService {
                 properties.scriptPathAsPath().toString(),
                 audioFile.toAbsolutePath().toString(),
                 "--provider", effectiveProvider(provider),
-                "--model-size", effectiveModelSize(modelSize)));
+                "--model-size", effectiveModelSize(modelSize),
+                "--output-dir", properties.outputDirAsPath().toAbsolutePath().toString()));
         appendTemplateArg(command, templateFile);
         return execute(command, audioFile);
     }
@@ -44,7 +45,8 @@ public class TranscriptionPipelineService {
                 properties.pythonExecutableAsPath().toString(),
                 properties.scriptPathAsPath().toString(),
                 "--transcript-file", transcriptFile.toAbsolutePath().toString(),
-                "--provider", effectiveProvider(provider)));
+                "--provider", effectiveProvider(provider),
+                "--output-dir", properties.outputDirAsPath().toAbsolutePath().toString()));
         appendTemplateArg(command, templateFile);
         return execute(command, transcriptFile);
     }

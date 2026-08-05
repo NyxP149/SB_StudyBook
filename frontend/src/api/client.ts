@@ -10,9 +10,10 @@ import type {
   TemplateInput,
 } from '../types'
 
-const NOTES_URL = '/api/notes'
-const TEMPLATES_URL = '/api/templates'
-const FOLDERS_URL = '/api/folders'
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
+const NOTES_URL = `${API_BASE}/api/notes`
+const TEMPLATES_URL = `${API_BASE}/api/templates`
+const FOLDERS_URL = `${API_BASE}/api/folders`
 
 async function parseOrThrow<T>(response: Response): Promise<T> {
   if (!response.ok) {

@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 spring:
   application:
@@ -18,6 +18,8 @@ spring:
       max-request-size: 200MB
 
 studybook:
+  cors:
+    allowed-origin: http://localhost:5174
   pipeline:
     python-executable: ../.venv/Scripts/python.exe
     script-path: ../prototype/main.py
