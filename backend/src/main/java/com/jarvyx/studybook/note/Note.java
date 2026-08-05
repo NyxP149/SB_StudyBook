@@ -29,7 +29,6 @@ public class Note {
     @Column(nullable = false)
     private String provider;
 
-    @Column(nullable = false)
     private String modelSize;
 
     private UUID templateId;

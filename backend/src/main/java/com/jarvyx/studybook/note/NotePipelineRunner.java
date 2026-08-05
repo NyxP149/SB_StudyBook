@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -46,12 +47,21 @@ public class NotePipelineRunner {
 
     @Async("pipelineExecutor")
     public void run(UUID noteId, Path audioFile, String provider, String modelSize, UUID templateId) {
+        process(noteId, templateId, templateFile -> pipelineService.runFromAudio(audioFile, provider, modelSize, templateFile));
+    }
+
+    @Async("pipelineExecutor")
+    public void runFromText(UUID noteId, Path transcriptFile, String provider, UUID templateId) {
+        process(noteId, templateId, templateFile -> pipelineService.runFromText(transcriptFile, provider, templateFile));
+    }
+
+    private void process(UUID noteId, UUID templateId, Function<Path, PipelineResult> pipelineCall) {
         Path templateFile = null;
         try {
             if (templateId != null) {
                 templateFile = writeTemplateFile(templateId);
             }
-            PipelineResult result = pipelineService.run(audioFile, provider, modelSize, templateFile);
+            PipelineResult result = pipelineCall.apply(templateFile);
             noteRepository.findById(noteId).ifPresent(note -> {
                 note.markDone(result.transcript(), result.noteMarkdown());
                 noteRepository.save(note);

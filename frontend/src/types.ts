@@ -4,7 +4,7 @@ export interface NoteSummary {
   id: string
   originalFilename: string
   provider: string
-  modelSize: string
+  modelSize: string | null
   templateId: string | null
   status: NoteStatus
   createdAt: string
@@ -20,6 +20,11 @@ export interface Note extends NoteSummary {
 export interface SubmitOptions {
   provider?: string
   modelSize?: string
+  templateId?: string
+}
+
+export interface SubmitTextOptions {
+  provider?: string
   templateId?: string
 }
 

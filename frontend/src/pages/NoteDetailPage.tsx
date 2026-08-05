@@ -85,8 +85,12 @@ export function NoteDetailPage() {
 
       <div className="note-detail-meta">
         <span>{note.provider}</span>
-        <span className="dot">·</span>
-        <span>{note.modelSize}</span>
+        {note.modelSize && (
+          <>
+            <span className="dot">·</span>
+            <span>{note.modelSize}</span>
+          </>
+        )}
         <span className="dot">·</span>
         <span>{new Date(note.createdAt).toLocaleString('fr-FR')}</span>
       </div>

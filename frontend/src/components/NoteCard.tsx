@@ -24,8 +24,12 @@ export function NoteCard({ note, templateName }: { note: NoteSummary; templateNa
         <span>{formatDate(note.createdAt)}</span>
         <span className="dot">·</span>
         <span>{note.provider}</span>
-        <span className="dot">·</span>
-        <span>{note.modelSize}</span>
+        {note.modelSize && (
+          <>
+            <span className="dot">·</span>
+            <span>{note.modelSize}</span>
+          </>
+        )}
       </div>
       {templateName && <span className="note-card-template">{templateName}</span>}
     </Link>

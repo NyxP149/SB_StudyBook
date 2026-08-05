@@ -38,6 +38,16 @@ public class NoteController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(NoteResponse.from(note));
     }
 
+    @PostMapping(value = "/from-text", consumes = "multipart/form-data")
+    public ResponseEntity<NoteResponse> createFromText(
+            @RequestParam(value = "text", required = false) String text,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "provider", required = false) String provider,
+            @RequestParam(value = "templateId", required = false) UUID templateId) {
+        Note note = noteService.submitText(text, file, provider, templateId);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(NoteResponse.from(note));
+    }
+
     @GetMapping
     public List<NoteSummaryResponse> list() {
         return noteService.listAll().stream().map(NoteSummaryResponse::from).toList();

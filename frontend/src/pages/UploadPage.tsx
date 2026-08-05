@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { listTemplates, submitNote } from '../api/client'
+import { listTemplates, submitNote, submitTextNote } from '../api/client'
 import type { Template } from '../types'
 import './UploadPage.css'
 
 type RecordingState = 'idle' | 'recording' | 'submitting'
+type InputMode = 'audio' | 'text'
 
 function formatDuration(seconds: number) {
   const m = Math.floor(seconds / 60)
@@ -14,6 +15,7 @@ function formatDuration(seconds: number) {
 
 export function UploadPage() {
   const navigate = useNavigate()
+  const [mode, setMode] = useState<InputMode>('audio')
   const [state, setState] = useState<RecordingState>('idle')
   const [error, setError] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -22,6 +24,9 @@ export function UploadPage() {
   const [modelSize, setModelSize] = useState('medium')
   const [templateId, setTemplateId] = useState('')
   const [templates, setTemplates] = useState<Template[]>([])
+  const [pastedText, setPastedText] = useState('')
+  const [textFile, setTextFile] = useState<File | null>(null)
+  const [isTextDragging, setIsTextDragging] = useState(false)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
@@ -77,6 +82,42 @@ export function UploadPage() {
     [handleFile],
   )
 
+  const submitText = useCallback(async () => {
+    setState('submitting')
+    setError(null)
+    try {
+      const note = await submitTextNote(
+        { file: textFile ?? undefined, text: textFile ? undefined : pastedText },
+        { provider, templateId: templateId || undefined },
+      )
+      navigate(`/notes/${note.id}`)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Échec de l'envoi.")
+      setState('idle')
+    }
+  }, [navigate, provider, templateId, pastedText, textFile])
+
+  const handleTextFile = useCallback((file: File) => {
+    const isTextLike = file.name.endsWith('.txt') || file.name.endsWith('.pdf') || file.type === 'application/pdf' || file.type.startsWith('text/')
+    if (!isTextLike) {
+      setError('Dépose un fichier .txt ou .pdf.')
+      return
+    }
+    setError(null)
+    setTextFile(file)
+    setPastedText('')
+  }, [])
+
+  const onTextDrop = useCallback(
+    (e: DragEvent) => {
+      e.preventDefault()
+      setIsTextDragging(false)
+      const file = e.dataTransfer.files[0]
+      if (file) handleTextFile(file)
+    },
+    [handleTextFile],
+  )
+
   const startRecording = useCallback(async () => {
     setError(null)
     try {
@@ -106,67 +147,146 @@ export function UploadPage() {
     mediaRecorderRef.current?.stop()
   }, [])
 
+  const hasTextInput = Boolean(textFile || pastedText.trim())
+
   return (
     <div className="upload-page">
       <header className="upload-intro">
         <h1>Un discours à transformer en note ?</h1>
-        <p>Enregistre-le en direct, ou dépose un fichier audio existant.</p>
+        <p>
+          {mode === 'audio'
+            ? 'Enregistre-le en direct, ou dépose un fichier audio existant.'
+            : 'Colle une transcription, ou dépose un fichier .txt / .pdf déjà écrit.'}
+        </p>
       </header>
 
-      <div className="upload-panel">
-        <div className="record-zone">
-          <button
-            type="button"
-            className={`record-button ${state === 'recording' ? 'is-recording' : ''}`}
-            onClick={state === 'recording' ? stopRecording : startRecording}
-            disabled={state === 'submitting'}
-            aria-label={state === 'recording' ? 'Arrêter l\'enregistrement' : 'Démarrer l\'enregistrement'}
-          >
-            {state === 'recording' && (
-              <>
-                <span className="record-ring ring-1" />
-                <span className="record-ring ring-2" />
-              </>
-            )}
-            <span className="record-icon">{state === 'recording' ? '■' : '●'}</span>
-          </button>
-          <p className="record-caption">
-            {state === 'recording' ? formatDuration(seconds) : state === 'submitting' ? 'Envoi en cours…' : 'Enregistrer'}
-          </p>
-        </div>
-
-        <div className="upload-divider">
-          <span>ou</span>
-        </div>
-
-        <label
-          className={`dropzone ${isDragging ? 'is-dragging' : ''}`}
-          onDragOver={(e) => {
-            e.preventDefault()
-            setIsDragging(true)
-          }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={onDrop}
+      <div className="mode-tabs">
+        <button
+          type="button"
+          className={`mode-tab ${mode === 'audio' ? 'active' : ''}`}
+          onClick={() => setMode('audio')}
+          disabled={state === 'submitting'}
         >
-          <input
-            type="file"
-            accept="audio/*,video/*"
-            hidden
-            disabled={state === 'submitting'}
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              if (file) handleFile(file)
-              e.target.value = ''
-            }}
-          />
-          <span className="dropzone-icon">📎</span>
-          <span>
-            <strong>Dépose un fichier audio</strong>
-            <br />
-            ou clique pour en choisir un
-          </span>
-        </label>
+          🎙️ Audio
+        </button>
+        <button
+          type="button"
+          className={`mode-tab ${mode === 'text' ? 'active' : ''}`}
+          onClick={() => setMode('text')}
+          disabled={state === 'submitting'}
+        >
+          📝 Texte / PDF
+        </button>
       </div>
+
+      {mode === 'audio' ? (
+        <div className="upload-panel">
+          <div className="record-zone">
+            <button
+              type="button"
+              className={`record-button ${state === 'recording' ? 'is-recording' : ''}`}
+              onClick={state === 'recording' ? stopRecording : startRecording}
+              disabled={state === 'submitting'}
+              aria-label={state === 'recording' ? 'Arrêter l\'enregistrement' : 'Démarrer l\'enregistrement'}
+            >
+              {state === 'recording' && (
+                <>
+                  <span className="record-ring ring-1" />
+                  <span className="record-ring ring-2" />
+                </>
+              )}
+              <span className="record-icon">{state === 'recording' ? '■' : '●'}</span>
+            </button>
+            <p className="record-caption">
+              {state === 'recording' ? formatDuration(seconds) : state === 'submitting' ? 'Envoi en cours…' : 'Enregistrer'}
+            </p>
+          </div>
+
+          <div className="upload-divider">
+            <span>ou</span>
+          </div>
+
+          <label
+            className={`dropzone ${isDragging ? 'is-dragging' : ''}`}
+            onDragOver={(e) => {
+              e.preventDefault()
+              setIsDragging(true)
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={onDrop}
+          >
+            <input
+              type="file"
+              accept="audio/*,video/*"
+              hidden
+              disabled={state === 'submitting'}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleFile(file)
+                e.target.value = ''
+              }}
+            />
+            <span className="dropzone-icon">📎</span>
+            <span>
+              <strong>Dépose un fichier audio</strong>
+              <br />
+              ou clique pour en choisir un
+            </span>
+          </label>
+        </div>
+      ) : (
+        <div className="text-panel">
+          <textarea
+            className="text-paste-area"
+            placeholder="Colle ici une transcription ou un texte déjà écrit…"
+            value={pastedText}
+            disabled={state === 'submitting' || Boolean(textFile)}
+            onChange={(e) => setPastedText(e.target.value)}
+            rows={8}
+          />
+
+          <div className="upload-divider">
+            <span>ou</span>
+          </div>
+
+          {textFile ? (
+            <div className="text-file-chip">
+              <span>📄 {textFile.name}</span>
+              <button type="button" onClick={() => setTextFile(null)} disabled={state === 'submitting'}>
+                ✕
+              </button>
+            </div>
+          ) : (
+            <label
+              className={`dropzone ${isTextDragging ? 'is-dragging' : ''}`}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setIsTextDragging(true)
+              }}
+              onDragLeave={() => setIsTextDragging(false)}
+              onDrop={onTextDrop}
+            >
+              <input
+                type="file"
+                accept=".txt,.pdf,text/plain,application/pdf"
+                hidden
+                disabled={state === 'submitting'}
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) handleTextFile(file)
+                  e.target.value = ''
+                }}
+              />
+              <span className="dropzone-icon">📎</span>
+              <span>
+                <strong>Dépose un fichier .txt ou .pdf</strong>
+                <br />
+                ou clique pour en choisir un
+              </span>
+            </label>
+          )}
+        </div>
+      )}
 
       <div className="upload-settings">
         <label>
@@ -177,15 +297,17 @@ export function UploadPage() {
             <option value="stub">Stub (sans IA)</option>
           </select>
         </label>
-        <label>
-          Modèle Whisper
-          <select value={modelSize} onChange={(e) => setModelSize(e.target.value)} disabled={state === 'submitting'}>
-            <option value="tiny">tiny — rapide</option>
-            <option value="small">small</option>
-            <option value="medium">medium</option>
-            <option value="large-v3">large-v3 — précis</option>
-          </select>
-        </label>
+        {mode === 'audio' && (
+          <label>
+            Modèle Whisper
+            <select value={modelSize} onChange={(e) => setModelSize(e.target.value)} disabled={state === 'submitting'}>
+              <option value="tiny">tiny — rapide</option>
+              <option value="small">small</option>
+              <option value="medium">medium</option>
+              <option value="large-v3">large-v3 — précis</option>
+            </select>
+          </label>
+        )}
         <label>
           Template
           <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} disabled={state === 'submitting'}>
@@ -198,6 +320,17 @@ export function UploadPage() {
           </select>
         </label>
       </div>
+
+      {mode === 'text' && (
+        <button
+          type="button"
+          className="text-submit-button"
+          onClick={submitText}
+          disabled={state === 'submitting' || !hasTextInput}
+        >
+          {state === 'submitting' ? 'Envoi en cours…' : 'Générer la note'}
+        </button>
+      )}
 
       {templates.length === 0 && (
         <p className="upload-template-hint">

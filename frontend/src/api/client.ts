@@ -1,4 +1,4 @@
-import type { Note, NoteSummary, SubmitOptions, Template, TemplateInput } from '../types'
+import type { Note, NoteSummary, SubmitOptions, SubmitTextOptions, Template, TemplateInput } from '../types'
 
 const NOTES_URL = '/api/notes'
 const TEMPLATES_URL = '/api/templates'
@@ -26,6 +26,20 @@ export async function submitNote(audio: File | Blob, filename: string, options: 
   if (options.templateId) formData.append('templateId', options.templateId)
 
   const response = await fetch(NOTES_URL, { method: 'POST', body: formData })
+  return parseOrThrow<Note>(response)
+}
+
+export async function submitTextNote(
+  input: { text?: string; file?: File },
+  options: SubmitTextOptions = {},
+): Promise<Note> {
+  const formData = new FormData()
+  if (input.file) formData.append('file', input.file)
+  else if (input.text) formData.append('text', input.text)
+  if (options.provider) formData.append('provider', options.provider)
+  if (options.templateId) formData.append('templateId', options.templateId)
+
+  const response = await fetch(`${NOTES_URL}/from-text`, { method: 'POST', body: formData })
   return parseOrThrow<Note>(response)
 }
 
