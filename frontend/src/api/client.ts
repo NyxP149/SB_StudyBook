@@ -39,6 +39,15 @@ export async function getNote(id: string): Promise<Note> {
   return parseOrThrow<Note>(response)
 }
 
+export async function updateNote(id: string, noteMarkdown: string): Promise<Note> {
+  const response = await fetch(`${NOTES_URL}/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ noteMarkdown }),
+  })
+  return parseOrThrow<Note>(response)
+}
+
 export async function listTemplates(): Promise<Template[]> {
   const response = await fetch(TEMPLATES_URL)
   return parseOrThrow<Template[]>(response)

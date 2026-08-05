@@ -56,6 +56,15 @@ public class NoteService {
                 .orElseThrow(() -> new NoSuchElementException("Note introuvable : " + id));
     }
 
+    public Note updateMarkdown(UUID id, String noteMarkdown) {
+        Note note = getOrThrow(id);
+        if (note.getStatus() != NoteStatus.DONE) {
+            throw new IllegalArgumentException("Seule une note terminée peut être modifiée.");
+        }
+        note.editMarkdown(noteMarkdown);
+        return noteRepository.save(note);
+    }
+
     private Path storeUpload(MultipartFile audio) {
         try {
             Path uploadDir = pipelineProperties.uploadDirAsPath();

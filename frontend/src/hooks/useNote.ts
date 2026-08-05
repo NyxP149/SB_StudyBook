@@ -35,5 +35,5 @@ export function useNote(id: string | undefined) {
     }
   }, [id])
 
-  return { note, error }
+  return { note, error, setNote }
 }

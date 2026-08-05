@@ -69,4 +69,8 @@ public class Note {
         this.errorMessage = errorMessage;
         this.status = NoteStatus.FAILED;
     }
+
+    public void editMarkdown(String noteMarkdown) {
+        this.noteMarkdown = noteMarkdown;
+    }
 }

@@ -97,6 +97,79 @@
   margin-top: 10px;
 }
 
+/* --- Actions (édition / export) --- */
+
+.note-detail-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.note-action-button {
+  border: 1px solid var(--line);
+  background: var(--paper-card);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.note-action-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--gold);
+  color: var(--ink);
+}
+
+.note-action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.note-action-button.primary {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+}
+
+.note-edit-textarea {
+  margin-top: 20px;
+  width: 100%;
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: clamp(20px, 3vw, 32px);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink);
+  resize: vertical;
+}
+
+/* --- Impression --- */
+
+@media print {
+  .no-print,
+  .shell-header {
+    display: none !important;
+  }
+
+  .note-markdown {
+    box-shadow: none;
+    border: none;
+    padding: 0;
+  }
+
+  body,
+  .shell-main {
+    background: #fff;
+  }
+}
+
 /* --- Rendu du markdown généré --- */
 
 .note-markdown {

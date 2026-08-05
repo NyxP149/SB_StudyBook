@@ -67,3 +67,13 @@
 .note-card-meta .dot {
   opacity: 0.6;
 }
+
+.note-card-template {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gold);
+  font-weight: 600;
+}

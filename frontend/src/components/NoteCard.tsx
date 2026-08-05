@@ -12,7 +12,7 @@ function formatDate(iso: string) {
   })
 }
 
-export function NoteCard({ note }: { note: NoteSummary }) {
+export function NoteCard({ note, templateName }: { note: NoteSummary; templateName?: string }) {
   return (
     <Link to={`/notes/${note.id}`} className="note-card">
       <span className={`note-card-tape tape-${note.status.toLowerCase()}`} />
@@ -27,6 +27,7 @@ export function NoteCard({ note }: { note: NoteSummary }) {
         <span className="dot">·</span>
         <span>{note.modelSize}</span>
       </div>
+      {templateName && <span className="note-card-template">{templateName}</span>}
     </Link>
   )
 }

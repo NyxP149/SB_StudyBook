@@ -5,6 +5,7 @@ export interface NoteSummary {
   originalFilename: string
   provider: string
   modelSize: string
+  templateId: string | null
   status: NoteStatus
   createdAt: string
 }

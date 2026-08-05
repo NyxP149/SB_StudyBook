@@ -10,6 +10,7 @@ public record NoteSummaryResponse(
         String originalFilename,
         String provider,
         String modelSize,
+        UUID templateId,
         NoteStatus status,
         Instant createdAt) {
 
@@ -19,6 +20,7 @@ public record NoteSummaryResponse(
                 note.getOriginalFilename(),
                 note.getProvider(),
                 note.getModelSize(),
+                note.getTemplateId(),
                 note.getStatus(),
                 note.getCreatedAt());
     }
