@@ -1,5 +1,6 @@
 package com.jarvyx.studybook.note;
 
+import com.jarvyx.studybook.folder.FolderRepository;
 import com.jarvyx.studybook.pipeline.PipelineException;
 import com.jarvyx.studybook.pipeline.PipelineProperties;
 import java.io.IOException;
@@ -22,14 +23,17 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final NotePipelineRunner pipelineRunner;
     private final PipelineProperties pipelineProperties;
+    private final FolderRepository folderRepository;
 
     public NoteService(
             NoteRepository noteRepository,
             NotePipelineRunner pipelineRunner,
-            PipelineProperties pipelineProperties) {
+            PipelineProperties pipelineProperties,
+            FolderRepository folderRepository) {
         this.noteRepository = noteRepository;
         this.pipelineRunner = pipelineRunner;
         this.pipelineProperties = pipelineProperties;
+        this.folderRepository = folderRepository;
     }
 
     /**
@@ -86,6 +90,15 @@ public class NoteService {
     public Note getOrThrow(UUID id) {
         return noteRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Note introuvable : " + id));
+    }
+
+    public Note organize(UUID id, UUID folderId, NoteImportance importance) {
+        Note note = getOrThrow(id);
+        if (folderId != null && !folderRepository.existsById(folderId)) {
+            throw new NoSuchElementException("Dossier introuvable : " + folderId);
+        }
+        note.organize(folderId, importance);
+        return noteRepository.save(note);
     }
 
     public Note updateMarkdown(UUID id, String noteMarkdown) {

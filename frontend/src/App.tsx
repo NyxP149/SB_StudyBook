@@ -4,6 +4,7 @@ import { UploadPage } from './pages/UploadPage'
 import { NotesListPage } from './pages/NotesListPage'
 import { NoteDetailPage } from './pages/NoteDetailPage'
 import { TemplatesPage } from './pages/TemplatesPage'
+import { FoldersPage } from './pages/FoldersPage'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/notes" element={<NotesListPage />} />
         <Route path="/notes/:id" element={<NoteDetailPage />} />
         <Route path="/templates" element={<TemplatesPage />} />
+        <Route path="/folders" element={<FoldersPage />} />
       </Routes>
     </AppShell>
   )

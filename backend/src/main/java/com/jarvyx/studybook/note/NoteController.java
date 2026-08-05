@@ -2,6 +2,7 @@ package com.jarvyx.studybook.note;
 
 import com.jarvyx.studybook.note.dto.NoteResponse;
 import com.jarvyx.studybook.note.dto.NoteSummaryResponse;
+import com.jarvyx.studybook.note.dto.OrganizeNoteRequest;
 import com.jarvyx.studybook.note.dto.UpdateNoteRequest;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -61,5 +62,10 @@ public class NoteController {
     @PatchMapping("/{id}")
     public NoteResponse update(@PathVariable UUID id, @Valid @RequestBody UpdateNoteRequest request) {
         return NoteResponse.from(noteService.updateMarkdown(id, request.noteMarkdown()));
+    }
+
+    @PatchMapping("/{id}/organize")
+    public NoteResponse organize(@PathVariable UUID id, @Valid @RequestBody OrganizeNoteRequest request) {
+        return NoteResponse.from(noteService.organize(id, request.folderId(), request.importance()));
     }
 }

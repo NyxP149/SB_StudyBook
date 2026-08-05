@@ -97,6 +97,58 @@
   margin-top: 10px;
 }
 
+/* --- Organisation (dossier / importance) --- */
+
+.note-organize-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.importance-group {
+  display: flex;
+  gap: 4px;
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.importance-button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  padding: 6px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.importance-button:hover {
+  color: var(--ink);
+}
+
+.importance-button.active.imp-normale {
+  background: var(--paper-deep);
+  color: var(--ink);
+}
+
+.importance-button.active.imp-importante {
+  background: var(--gold-bright);
+  color: var(--ink);
+}
+
+.importance-button.active.imp-urgente {
+  background: var(--burgundy-bg);
+  color: var(--burgundy);
+}
+
 /* --- Actions (édition / export) --- */
 
 .note-detail-actions {

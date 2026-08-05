@@ -1,11 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useNote } from '../hooks/useNote'
-import { updateNote } from '../api/client'
+import { listFolders, organizeNote, updateNote } from '../api/client'
 import { NoteMarkdown } from '../components/NoteMarkdown'
 import { StatusBadge } from '../components/StatusBadge'
 import { extractTheme } from '../utils/noteExcerpt'
+import type { Folder, NoteImportance } from '../types'
 import './NoteDetailPage.css'
+
+const IMPORTANCE_OPTIONS: Array<{ value: NoteImportance; label: string; icon: string }> = [
+  { value: 'NORMALE', label: 'Normale', icon: '⚪' },
+  { value: 'IMPORTANTE', label: 'Importante', icon: '⭐' },
+  { value: 'URGENTE', label: 'Urgente', icon: '🔴' },
+]
 
 function downloadMarkdown(filename: string, content: string) {
   const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' })
@@ -25,6 +32,18 @@ export function NoteDetailPage() {
   const [draft, setDraft] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [folders, setFolders] = useState<Folder[]>([])
+  const [organizeError, setOrganizeError] = useState<string | null>(null)
+  type OrganizeTarget = { folderId: string | null; importance: NoteImportance }
+  const latestOrganizeTargetRef = useRef<OrganizeTarget | null>(null)
+  const queuedOrganizeRef = useRef<OrganizeTarget | null>(null)
+  const organizeInFlightRef = useRef(false)
+
+  useEffect(() => {
+    listFolders()
+      .then(setFolders)
+      .catch(() => setFolders([]))
+  }, [])
 
   if (error) {
     return (
@@ -69,6 +88,33 @@ export function NoteDetailPage() {
     }
   }
 
+  async function handleOrganize(folderId: string | null, importance: NoteImportance) {
+    const target = { folderId, importance }
+    latestOrganizeTargetRef.current = target
+    queuedOrganizeRef.current = target
+    setOrganizeError(null)
+
+    if (organizeInFlightRef.current) return
+    organizeInFlightRef.current = true
+    try {
+      // Sends one request at a time, in order: a still-in-flight PATCH could
+      // otherwise land after a newer one and silently revert it server-side.
+      while (queuedOrganizeRef.current) {
+        const toSend = queuedOrganizeRef.current
+        queuedOrganizeRef.current = null
+        try {
+          const updated = await organizeNote(note!.id, toSend.folderId, toSend.importance)
+          setNote(updated)
+        } catch (e) {
+          setOrganizeError(e instanceof Error ? e.message : "Échec de la mise à jour.")
+          break
+        }
+      }
+    } finally {
+      organizeInFlightRef.current = false
+    }
+  }
+
   return (
     <div className="note-detail-page">
       <Link to="/notes" className="back-link no-print">
@@ -94,6 +140,35 @@ export function NoteDetailPage() {
         <span className="dot">·</span>
         <span>{new Date(note.createdAt).toLocaleString('fr-FR')}</span>
       </div>
+
+      <div className="note-organize-bar no-print">
+        <div className="importance-group">
+          {IMPORTANCE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              className={`importance-button imp-${opt.value.toLowerCase()} ${note.importance === opt.value ? 'active' : ''}`}
+              onClick={() => handleOrganize(latestOrganizeTargetRef.current?.folderId ?? note.folderId, opt.value)}
+            >
+              {opt.icon} {opt.label}
+            </button>
+          ))}
+        </div>
+        <select
+          className="notes-template-select"
+          value={note.folderId ?? ''}
+          onChange={(e) => handleOrganize(e.target.value || null, latestOrganizeTargetRef.current?.importance ?? note.importance)}
+        >
+          <option value="">Sans dossier</option>
+          {folders.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {organizeError && <p className="upload-error no-print">{organizeError}</p>}
 
       {note.status === 'PENDING' && (
         <div className="note-pending">

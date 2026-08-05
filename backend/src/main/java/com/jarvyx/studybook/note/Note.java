@@ -33,6 +33,12 @@ public class Note {
 
     private UUID templateId;
 
+    private UUID folderId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'NORMALE'")
+    private NoteImportance importance;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NoteStatus status;
@@ -55,6 +61,7 @@ public class Note {
         this.modelSize = modelSize;
         this.templateId = templateId;
         this.status = NoteStatus.PENDING;
+        this.importance = NoteImportance.NORMALE;
         this.createdAt = Instant.now();
     }
 
@@ -71,5 +78,10 @@ public class Note {
 
     public void editMarkdown(String noteMarkdown) {
         this.noteMarkdown = noteMarkdown;
+    }
+
+    public void organize(UUID folderId, NoteImportance importance) {
+        this.folderId = folderId;
+        this.importance = importance;
     }
 }

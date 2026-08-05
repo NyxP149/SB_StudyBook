@@ -1,7 +1,18 @@
-import type { Note, NoteSummary, SubmitOptions, SubmitTextOptions, Template, TemplateInput } from '../types'
+import type {
+  Folder,
+  FolderInput,
+  Note,
+  NoteImportance,
+  NoteSummary,
+  SubmitOptions,
+  SubmitTextOptions,
+  Template,
+  TemplateInput,
+} from '../types'
 
 const NOTES_URL = '/api/notes'
 const TEMPLATES_URL = '/api/templates'
+const FOLDERS_URL = '/api/folders'
 
 async function parseOrThrow<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -60,6 +71,43 @@ export async function updateNote(id: string, noteMarkdown: string): Promise<Note
     body: JSON.stringify({ noteMarkdown }),
   })
   return parseOrThrow<Note>(response)
+}
+
+export async function organizeNote(id: string, folderId: string | null, importance: NoteImportance): Promise<Note> {
+  const response = await fetch(`${NOTES_URL}/${id}/organize`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ folderId, importance }),
+  })
+  return parseOrThrow<Note>(response)
+}
+
+export async function listFolders(): Promise<Folder[]> {
+  const response = await fetch(FOLDERS_URL)
+  return parseOrThrow<Folder[]>(response)
+}
+
+export async function createFolder(input: FolderInput): Promise<Folder> {
+  const response = await fetch(FOLDERS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  })
+  return parseOrThrow<Folder>(response)
+}
+
+export async function updateFolder(id: string, input: FolderInput): Promise<Folder> {
+  const response = await fetch(`${FOLDERS_URL}/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  })
+  return parseOrThrow<Folder>(response)
+}
+
+export async function deleteFolder(id: string): Promise<void> {
+  const response = await fetch(`${FOLDERS_URL}/${id}`, { method: 'DELETE' })
+  return parseOrThrow<void>(response)
 }
 
 export async function listTemplates(): Promise<Template[]> {

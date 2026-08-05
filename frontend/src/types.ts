@@ -1,4 +1,5 @@
 export type NoteStatus = 'PENDING' | 'DONE' | 'FAILED'
+export type NoteImportance = 'NORMALE' | 'IMPORTANTE' | 'URGENTE'
 
 export interface NoteSummary {
   id: string
@@ -6,6 +7,8 @@ export interface NoteSummary {
   provider: string
   modelSize: string | null
   templateId: string | null
+  folderId: string | null
+  importance: NoteImportance
   status: NoteStatus
   createdAt: string
 }
@@ -15,6 +18,18 @@ export interface Note extends NoteSummary {
   transcript: string | null
   noteMarkdown: string | null
   errorMessage: string | null
+}
+
+export interface Folder {
+  id: string
+  name: string
+  color: string
+  createdAt: string
+}
+
+export interface FolderInput {
+  name: string
+  color: string
 }
 
 export interface SubmitOptions {

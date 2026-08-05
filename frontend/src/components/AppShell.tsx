@@ -23,6 +23,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <NavLink to="/templates" className={({ isActive }) => (isActive ? 'active' : '')}>
             Modèles
           </NavLink>
+          <NavLink to="/folders" className={({ isActive }) => (isActive ? 'active' : '')}>
+            Dossiers
+          </NavLink>
         </nav>
       </header>
       <main className="shell-main">{children}</main>
