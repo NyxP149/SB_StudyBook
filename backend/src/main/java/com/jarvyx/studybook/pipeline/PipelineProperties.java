@@ -11,6 +11,7 @@ public record PipelineProperties(
         String outputDir,
         String provider,
         String modelSize,
+        String transcriptionEngine,
         int timeoutMinutes) {
 
     public Path pythonExecutableAsPath() {

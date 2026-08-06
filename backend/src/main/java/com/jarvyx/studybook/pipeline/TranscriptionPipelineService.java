@@ -35,6 +35,7 @@ public class TranscriptionPipelineService {
                 audioFile.toAbsolutePath().toString(),
                 "--provider", effectiveProvider(provider),
                 "--model-size", effectiveModelSize(modelSize),
+                "--transcription-engine", properties.transcriptionEngine(),
                 "--output-dir", properties.outputDirAsPath().toAbsolutePath().toString()));
         appendTemplateArg(command, templateFile);
         return execute(command, audioFile);

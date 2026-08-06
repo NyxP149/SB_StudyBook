@@ -33,6 +33,9 @@ services:
         value: gemini
       - key: STUDYBOOK_PIPELINE_MODEL_SIZE
         value: small
+      - key: STUDYBOOK_PIPELINE_TRANSCRIPTION_ENGINE
+        value: auto # gemini par defaut (Whisper local depasse les 512MB du plan free).
+                    # Repasser a "local" si tu upgrades vers un plan avec plus de RAM.
       - key: STUDYBOOK_CORS_ALLOWED_ORIGIN
         sync: false # e.g. https://studybook-frontend.onrender.com
 

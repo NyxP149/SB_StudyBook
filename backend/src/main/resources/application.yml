@@ -27,4 +27,5 @@ studybook:
     output-dir: ../prototype/output
     provider: ollama
     model-size: small
+    transcription-engine: auto
     timeout-minutes: 10

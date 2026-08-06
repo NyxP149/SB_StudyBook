@@ -1,9 +1,10 @@
-"""CLI : audio -> transcription (Whisper) -> note d'etude structuree (LLM).
+"""CLI : audio -> transcription (Whisper ou Gemini) -> note d'etude structuree (LLM).
 
 Usage:
     python main.py chemin/vers/audio.mp3
     python main.py chemin/vers/audio.mp3 --provider ollama
     python main.py chemin/vers/audio.mp3 --provider stub --model-size tiny
+    python main.py chemin/vers/audio.mp3 --provider gemini --transcription-engine gemini
 """
 
 from __future__ import annotations
@@ -18,9 +19,9 @@ from dotenv import load_dotenv
 
 from note_generator import DEFAULT_SECTIONS, Section, generate_note
 from providers import get_provider
-from transcriber import DEFAULT_MODEL_SIZE, transcribe
 
 DEFAULT_OUTPUT_DIR = Path(__file__).parent / "output"
+DEFAULT_MODEL_SIZE = "small"
 
 
 def parse_args() -> argparse.Namespace:
@@ -43,7 +44,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--model-size",
         default=DEFAULT_MODEL_SIZE,
-        help="Taille du modele Whisper : tiny, base, small, medium, large-v3 (defaut: small)",
+        help="Taille du modele Whisper local : tiny, base, small, medium, large-v3 (defaut: small)",
+    )
+    parser.add_argument(
+        "--transcription-engine",
+        default="auto",
+        choices=["auto", "local", "gemini"],
+        help="Moteur de transcription audio. 'auto' utilise Gemini si "
+        "--provider=gemini (evite de charger Whisper/PyTorch en memoire), "
+        "sinon Whisper local. 'local' force Whisper meme avec Gemini. "
+        "'gemini' force l'API Gemini (necessite GEMINI_API_KEY).",
     )
     parser.add_argument(
         "--language",
@@ -98,12 +108,27 @@ def main() -> int:
             return 1
         stem = args.name or audio_path.stem
 
-        print(f"[1/3] Transcription de {audio_path.name} (modele={args.model_size})...")
-        t0 = time.time()
-        result = transcribe(audio_path, model_size=args.model_size, language=args.language)
-        text = result.text
-        print(f"      -> {len(text)} caracteres, langue detectee={result.language} "
-              f"({time.time() - t0:.1f}s)")
+        engine = args.transcription_engine
+        if engine == "auto":
+            engine = "gemini" if args.provider == "gemini" else "local"
+
+        if engine == "gemini":
+            print(f"[1/3] Transcription de {audio_path.name} (moteur=Gemini)...")
+            t0 = time.time()
+            from providers.gemini_provider import GeminiProvider
+
+            text = GeminiProvider().transcribe_audio(audio_path, language=args.language)
+            print(f"      -> {len(text)} caracteres ({time.time() - t0:.1f}s)")
+        else:
+            print(f"[1/3] Transcription de {audio_path.name} (moteur=Whisper local, "
+                  f"modele={args.model_size})...")
+            t0 = time.time()
+            from transcriber import transcribe
+
+            result = transcribe(audio_path, model_size=args.model_size, language=args.language)
+            text = result.text
+            print(f"      -> {len(text)} caracteres, langue detectee={result.language} "
+                  f"({time.time() - t0:.1f}s)")
 
     output_dir = Path(args.output_dir) if args.output_dir else DEFAULT_OUTPUT_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
