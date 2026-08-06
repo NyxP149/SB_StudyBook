@@ -24,8 +24,12 @@ def get_provider(name: str) -> NoteProvider:
         from .anthropic_provider import AnthropicProvider
 
         return AnthropicProvider()
+    if name == "gemini":
+        from .gemini_provider import GeminiProvider
+
+        return GeminiProvider()
     if name == "stub":
         from .stub_provider import StubProvider
 
         return StubProvider()
-    raise ValueError(f"Provider inconnu : {name!r}. Choix possibles: ollama, anthropic, stub.")
+    raise ValueError(f"Provider inconnu : {name!r}. Choix possibles: ollama, anthropic, gemini, stub.")

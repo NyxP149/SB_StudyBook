@@ -5,7 +5,9 @@ Architecture retenue :
 - **Backend** (Spring Boot + pipeline Python) → Render, en Docker
 - **Frontend** (Vite/React) → Render, en site statique
 - **Base de données** → Neon (Postgres serverless, gratuit)
-- **LLM en production** → Anthropic (Claude), Ollama n'étant pas exécutable sur ce type d'hébergement
+- **LLM en production** → Gemini (gratuit), Ollama n'étant pas exécutable sur ce type d'hébergement.
+  Anthropic (Claude) reste utilisable en remplaçant `GEMINI_API_KEY`/`gemini`
+  par `ANTHROPIC_API_KEY`/`anthropic` si tu préfères payer pour la qualité.
 
 `render.yaml` à la racine du dépôt décrit les deux services. Le déploiement via
 Blueprint (`New > Blueprint` dans Render, en pointant sur ce repo GitHub) devrait
@@ -22,10 +24,12 @@ de connecter le repo, la syntaxe des blueprints évolue.
    - `SPRING_DATASOURCE_USERNAME` = `<user>`
    - `SPRING_DATASOURCE_PASSWORD` = `<password>`
 
-## 2. Créer une clé API Anthropic
+## 2. Créer une clé API Gemini (gratuite)
 
-1. https://console.anthropic.com → API Keys → New Key.
-2. Garde-la de côté pour l'étape 3 (`ANTHROPIC_API_KEY`).
+1. https://aistudio.google.com/apikey → Create API key. Pas de carte bancaire requise.
+2. Garde-la de côté pour l'étape 3 (`GEMINI_API_KEY`). Le tier gratuit a des
+   quotas par minute/jour (largement suffisants pour un usage perso) — si tu
+   les dépasses, l'appel échoue proprement et la note passe en statut `FAILED`.
 
 ## 3. Déployer le backend sur Render
 
@@ -39,8 +43,8 @@ de connecter le repo, la syntaxe des blueprints évolue.
    | `SPRING_DATASOURCE_URL` | depuis Neon (voir étape 1) |
    | `SPRING_DATASOURCE_USERNAME` | depuis Neon |
    | `SPRING_DATASOURCE_PASSWORD` | depuis Neon |
-   | `ANTHROPIC_API_KEY` | depuis Anthropic Console |
-   | `STUDYBOOK_PIPELINE_PROVIDER` | `anthropic` |
+   | `GEMINI_API_KEY` | depuis Google AI Studio |
+   | `STUDYBOOK_PIPELINE_PROVIDER` | `gemini` |
    | `STUDYBOOK_PIPELINE_MODEL_SIZE` | `small` (compromis vitesse/qualité en CPU) |
    | `STUDYBOOK_CORS_ALLOWED_ORIGIN` | l'URL du frontend (étape 4, à revenir remplir) |
 4. Déploie. Note l'URL attribuée par Render (ex. `https://studybook-backend.onrender.com`).

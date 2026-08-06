@@ -293,6 +293,7 @@ export function UploadPage() {
           Provider
           <select value={provider} onChange={(e) => setProvider(e.target.value)} disabled={state === 'submitting'}>
             <option value="ollama">Ollama (local)</option>
+            <option value="gemini">Gemini (gratuit)</option>
             <option value="anthropic">Claude</option>
             <option value="stub">Stub (sans IA)</option>
           </select>

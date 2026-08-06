@@ -37,7 +37,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--provider",
         default="stub",
-        choices=["ollama", "anthropic", "stub"],
+        choices=["ollama", "anthropic", "gemini", "stub"],
         help="Moteur de generation de note (defaut: stub, sans IA)",
     )
     parser.add_argument(
