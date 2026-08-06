@@ -18,7 +18,7 @@ services:
     env: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: .
-    plan: starter
+    plan: free
     healthCheckPath: /api/notes
     envVars:
       - key: SPRING_DATASOURCE_URL
