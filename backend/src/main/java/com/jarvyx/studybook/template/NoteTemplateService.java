@@ -16,16 +16,17 @@ public class NoteTemplateService {
         this.repository = repository;
     }
 
-    public NoteTemplate create(TemplateRequest request) {
+    public NoteTemplate create(UUID userId, TemplateRequest request) {
         NoteTemplate template = new NoteTemplate(
                 request.name(),
                 request.description(),
                 request.sections().stream().map(TemplateSectionDto::toEntity).toList());
+        template.setUserId(userId);
         return repository.save(template);
     }
 
-    public NoteTemplate update(UUID id, TemplateRequest request) {
-        NoteTemplate template = getOrThrow(id);
+    public NoteTemplate update(UUID userId, UUID id, TemplateRequest request) {
+        NoteTemplate template = getOrThrow(userId, id);
         template.setName(request.name());
         template.setDescription(request.description());
         template.getSections().clear();
@@ -33,19 +34,17 @@ public class NoteTemplateService {
         return repository.save(template);
     }
 
-    public void delete(UUID id) {
-        if (!repository.existsById(id)) {
-            throw new NoSuchElementException("Template introuvable : " + id);
-        }
+    public void delete(UUID userId, UUID id) {
+        getOrThrow(userId, id);
         repository.deleteById(id);
     }
 
-    public List<NoteTemplate> listAll() {
-        return repository.findAllByOrderByNameAsc();
+    public List<NoteTemplate> listAll(UUID userId) {
+        return repository.findAllByUserIdOrderByNameAsc(userId);
     }
 
-    public NoteTemplate getOrThrow(UUID id) {
-        return repository.findById(id)
+    public NoteTemplate getOrThrow(UUID userId, UUID id) {
+        return repository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new NoSuchElementException("Template introuvable : " + id));
     }
 }

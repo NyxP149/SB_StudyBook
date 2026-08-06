@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
+import { useAuth } from '../auth/AuthContext'
 import './AppShell.css'
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const { username, logout } = useAuth()
+
   return (
     <div className="shell">
       <header className="shell-header">
@@ -27,6 +30,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             Dossiers
           </NavLink>
         </nav>
+        <div className="shell-account">
+          <span className="shell-username">{username}</span>
+          <button type="button" className="shell-logout" onClick={logout}>
+            Déconnexion
+          </button>
+        </div>
       </header>
       <main className="shell-main">{children}</main>
     </div>

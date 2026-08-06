@@ -5,8 +5,20 @@ import { NotesListPage } from './pages/NotesListPage'
 import { NoteDetailPage } from './pages/NoteDetailPage'
 import { TemplatesPage } from './pages/TemplatesPage'
 import { FoldersPage } from './pages/FoldersPage'
+import { AuthPage } from './pages/AuthPage'
+import { useAuth } from './auth/AuthContext'
 
 function App() {
+  const { username, isLoading } = useAuth()
+
+  if (isLoading) {
+    return <div className="app-loading">Chargement…</div>
+  }
+
+  if (!username) {
+    return <AuthPage />
+  }
+
   return (
     <AppShell>
       <Routes>

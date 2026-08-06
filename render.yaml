@@ -19,7 +19,7 @@ services:
     dockerfilePath: ./backend/Dockerfile
     dockerContext: .
     plan: free
-    healthCheckPath: /api/notes
+    healthCheckPath: /api/health
     envVars:
       - key: SPRING_DATASOURCE_URL
         sync: false # jdbc:postgresql://<neon-host>/<db>?sslmode=require

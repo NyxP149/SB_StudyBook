@@ -77,6 +77,36 @@
   color: var(--paper);
 }
 
+.shell-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.shell-username {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.shell-logout {
+  border: 1px solid var(--line);
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  padding: 7px 14px;
+  border-radius: 999px;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.shell-logout:hover {
+  border-color: var(--burgundy);
+  color: var(--burgundy);
+}
+
 .shell-main {
   flex: 1;
   padding: clamp(24px, 5vw, 56px);

@@ -15,30 +15,30 @@ public class FolderService {
         this.repository = repository;
     }
 
-    public Folder create(FolderRequest request) {
-        return repository.save(new Folder(request.name(), request.color()));
+    public Folder create(UUID userId, FolderRequest request) {
+        Folder folder = new Folder(request.name(), request.color());
+        folder.setUserId(userId);
+        return repository.save(folder);
     }
 
-    public Folder update(UUID id, FolderRequest request) {
-        Folder folder = getOrThrow(id);
+    public Folder update(UUID userId, UUID id, FolderRequest request) {
+        Folder folder = getOrThrow(userId, id);
         folder.setName(request.name());
         folder.setColor(request.color());
         return repository.save(folder);
     }
 
-    public void delete(UUID id) {
-        if (!repository.existsById(id)) {
-            throw new NoSuchElementException("Dossier introuvable : " + id);
-        }
+    public void delete(UUID userId, UUID id) {
+        getOrThrow(userId, id);
         repository.deleteById(id);
     }
 
-    public List<Folder> listAll() {
-        return repository.findAllByOrderByNameAsc();
+    public List<Folder> listAll(UUID userId) {
+        return repository.findAllByUserIdOrderByNameAsc(userId);
     }
 
-    public Folder getOrThrow(UUID id) {
-        return repository.findById(id)
+    public Folder getOrThrow(UUID userId, UUID id) {
+        return repository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new NoSuchElementException("Dossier introuvable : " + id));
     }
 }

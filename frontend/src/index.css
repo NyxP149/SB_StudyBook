@@ -80,3 +80,12 @@ button {
 ::selection {
   background: rgba(185, 134, 59, 0.35);
 }
+
+.app-loading {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-faint);
+  font-size: 14px;
+}

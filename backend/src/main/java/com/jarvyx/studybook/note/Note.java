@@ -23,6 +23,8 @@ public class Note {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    private UUID userId;
+
     @Column(nullable = false)
     private String originalFilename;
 

@@ -11,11 +11,30 @@ import type {
 } from '../types'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
+const AUTH_URL = `${API_BASE}/api/auth`
 const NOTES_URL = `${API_BASE}/api/notes`
 const TEMPLATES_URL = `${API_BASE}/api/templates`
 const FOLDERS_URL = `${API_BASE}/api/folders`
 
+let authToken: string | null = null
+let onUnauthorized: (() => void) | null = null
+
+export function setAuthToken(token: string | null) {
+  authToken = token
+}
+
+export function setUnauthorizedHandler(handler: () => void) {
+  onUnauthorized = handler
+}
+
+function authHeaders(): HeadersInit {
+  return authToken ? { Authorization: `Bearer ${authToken}` } : {}
+}
+
 async function parseOrThrow<T>(response: Response): Promise<T> {
+  if (response.status === 401) {
+    onUnauthorized?.()
+  }
   if (!response.ok) {
     let message = `Erreur ${response.status}`
     try {
@@ -30,6 +49,42 @@ async function parseOrThrow<T>(response: Response): Promise<T> {
   return response.json() as Promise<T>
 }
 
+function authFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  return fetch(url, { ...init, headers: { ...init.headers, ...authHeaders() } })
+}
+
+export interface AuthResult {
+  token: string
+  username: string
+}
+
+export async function register(username: string, password: string): Promise<AuthResult> {
+  const response = await fetch(`${AUTH_URL}/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  })
+  return parseOrThrow<AuthResult>(response)
+}
+
+export async function login(username: string, password: string): Promise<AuthResult> {
+  const response = await fetch(`${AUTH_URL}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  })
+  return parseOrThrow<AuthResult>(response)
+}
+
+export async function logout(): Promise<void> {
+  await authFetch(`${AUTH_URL}/logout`, { method: 'POST' })
+}
+
+export async function getMe(): Promise<{ username: string }> {
+  const response = await authFetch(`${AUTH_URL}/me`)
+  return parseOrThrow<{ username: string }>(response)
+}
+
 export async function submitNote(audio: File | Blob, filename: string, options: SubmitOptions = {}): Promise<Note> {
   const formData = new FormData()
   formData.append('audio', audio, filename)
@@ -37,7 +92,7 @@ export async function submitNote(audio: File | Blob, filename: string, options: 
   if (options.modelSize) formData.append('modelSize', options.modelSize)
   if (options.templateId) formData.append('templateId', options.templateId)
 
-  const response = await fetch(NOTES_URL, { method: 'POST', body: formData })
+  const response = await authFetch(NOTES_URL, { method: 'POST', body: formData })
   return parseOrThrow<Note>(response)
 }
 
@@ -51,22 +106,22 @@ export async function submitTextNote(
   if (options.provider) formData.append('provider', options.provider)
   if (options.templateId) formData.append('templateId', options.templateId)
 
-  const response = await fetch(`${NOTES_URL}/from-text`, { method: 'POST', body: formData })
+  const response = await authFetch(`${NOTES_URL}/from-text`, { method: 'POST', body: formData })
   return parseOrThrow<Note>(response)
 }
 
 export async function listNotes(): Promise<NoteSummary[]> {
-  const response = await fetch(NOTES_URL)
+  const response = await authFetch(NOTES_URL)
   return parseOrThrow<NoteSummary[]>(response)
 }
 
 export async function getNote(id: string): Promise<Note> {
-  const response = await fetch(`${NOTES_URL}/${id}`)
+  const response = await authFetch(`${NOTES_URL}/${id}`)
   return parseOrThrow<Note>(response)
 }
 
 export async function updateNote(id: string, noteMarkdown: string): Promise<Note> {
-  const response = await fetch(`${NOTES_URL}/${id}`, {
+  const response = await authFetch(`${NOTES_URL}/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ noteMarkdown }),
@@ -75,7 +130,7 @@ export async function updateNote(id: string, noteMarkdown: string): Promise<Note
 }
 
 export async function organizeNote(id: string, folderId: string | null, importance: NoteImportance): Promise<Note> {
-  const response = await fetch(`${NOTES_URL}/${id}/organize`, {
+  const response = await authFetch(`${NOTES_URL}/${id}/organize`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ folderId, importance }),
@@ -84,12 +139,12 @@ export async function organizeNote(id: string, folderId: string | null, importan
 }
 
 export async function listFolders(): Promise<Folder[]> {
-  const response = await fetch(FOLDERS_URL)
+  const response = await authFetch(FOLDERS_URL)
   return parseOrThrow<Folder[]>(response)
 }
 
 export async function createFolder(input: FolderInput): Promise<Folder> {
-  const response = await fetch(FOLDERS_URL, {
+  const response = await authFetch(FOLDERS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
@@ -98,7 +153,7 @@ export async function createFolder(input: FolderInput): Promise<Folder> {
 }
 
 export async function updateFolder(id: string, input: FolderInput): Promise<Folder> {
-  const response = await fetch(`${FOLDERS_URL}/${id}`, {
+  const response = await authFetch(`${FOLDERS_URL}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
@@ -107,17 +162,17 @@ export async function updateFolder(id: string, input: FolderInput): Promise<Fold
 }
 
 export async function deleteFolder(id: string): Promise<void> {
-  const response = await fetch(`${FOLDERS_URL}/${id}`, { method: 'DELETE' })
+  const response = await authFetch(`${FOLDERS_URL}/${id}`, { method: 'DELETE' })
   return parseOrThrow<void>(response)
 }
 
 export async function listTemplates(): Promise<Template[]> {
-  const response = await fetch(TEMPLATES_URL)
+  const response = await authFetch(TEMPLATES_URL)
   return parseOrThrow<Template[]>(response)
 }
 
 export async function createTemplate(input: TemplateInput): Promise<Template> {
-  const response = await fetch(TEMPLATES_URL, {
+  const response = await authFetch(TEMPLATES_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
@@ -126,7 +181,7 @@ export async function createTemplate(input: TemplateInput): Promise<Template> {
 }
 
 export async function updateTemplate(id: string, input: TemplateInput): Promise<Template> {
-  const response = await fetch(`${TEMPLATES_URL}/${id}`, {
+  const response = await authFetch(`${TEMPLATES_URL}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
@@ -135,6 +190,6 @@ export async function updateTemplate(id: string, input: TemplateInput): Promise<
 }
 
 export async function deleteTemplate(id: string): Promise<void> {
-  const response = await fetch(`${TEMPLATES_URL}/${id}`, { method: 'DELETE' })
+  const response = await authFetch(`${TEMPLATES_URL}/${id}`, { method: 'DELETE' })
   return parseOrThrow<void>(response)
 }

@@ -1,5 +1,6 @@
 package com.jarvyx.studybook.folder;
 
+import com.jarvyx.studybook.auth.CurrentUser;
 import com.jarvyx.studybook.folder.dto.FolderRequest;
 import com.jarvyx.studybook.folder.dto.FolderResponse;
 import jakarta.validation.Valid;
@@ -21,30 +22,32 @@ import org.springframework.web.bind.annotation.RestController;
 public class FolderController {
 
     private final FolderService folderService;
+    private final CurrentUser currentUser;
 
-    public FolderController(FolderService folderService) {
+    public FolderController(FolderService folderService, CurrentUser currentUser) {
         this.folderService = folderService;
+        this.currentUser = currentUser;
     }
 
     @PostMapping
     public ResponseEntity<FolderResponse> create(@Valid @RequestBody FolderRequest request) {
-        Folder folder = folderService.create(request);
+        Folder folder = folderService.create(currentUser.getUserId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(FolderResponse.from(folder));
     }
 
     @GetMapping
     public List<FolderResponse> list() {
-        return folderService.listAll().stream().map(FolderResponse::from).toList();
+        return folderService.listAll(currentUser.getUserId()).stream().map(FolderResponse::from).toList();
     }
 
     @PutMapping("/{id}")
     public FolderResponse update(@PathVariable UUID id, @Valid @RequestBody FolderRequest request) {
-        return FolderResponse.from(folderService.update(id, request));
+        return FolderResponse.from(folderService.update(currentUser.getUserId(), id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        folderService.delete(id);
+        folderService.delete(currentUser.getUserId(), id);
         return ResponseEntity.noContent().build();
     }
 }

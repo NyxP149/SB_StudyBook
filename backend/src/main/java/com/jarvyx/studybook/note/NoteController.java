@@ -1,5 +1,6 @@
 package com.jarvyx.studybook.note;
 
+import com.jarvyx.studybook.auth.CurrentUser;
 import com.jarvyx.studybook.note.dto.NoteResponse;
 import com.jarvyx.studybook.note.dto.NoteSummaryResponse;
 import com.jarvyx.studybook.note.dto.OrganizeNoteRequest;
@@ -24,9 +25,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class NoteController {
 
     private final NoteService noteService;
+    private final CurrentUser currentUser;
 
-    public NoteController(NoteService noteService) {
+    public NoteController(NoteService noteService, CurrentUser currentUser) {
         this.noteService = noteService;
+        this.currentUser = currentUser;
     }
 
     @PostMapping(consumes = "multipart/form-data")
@@ -35,7 +38,7 @@ public class NoteController {
             @RequestParam(value = "provider", required = false) String provider,
             @RequestParam(value = "modelSize", required = false) String modelSize,
             @RequestParam(value = "templateId", required = false) UUID templateId) {
-        Note note = noteService.submitAudio(audio, provider, modelSize, templateId);
+        Note note = noteService.submitAudio(currentUser.getUserId(), audio, provider, modelSize, templateId);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(NoteResponse.from(note));
     }
 
@@ -45,27 +48,28 @@ public class NoteController {
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "provider", required = false) String provider,
             @RequestParam(value = "templateId", required = false) UUID templateId) {
-        Note note = noteService.submitText(text, file, provider, templateId);
+        Note note = noteService.submitText(currentUser.getUserId(), text, file, provider, templateId);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(NoteResponse.from(note));
     }
 
     @GetMapping
     public List<NoteSummaryResponse> list() {
-        return noteService.listAll().stream().map(NoteSummaryResponse::from).toList();
+        return noteService.listAll(currentUser.getUserId()).stream().map(NoteSummaryResponse::from).toList();
     }
 
     @GetMapping("/{id}")
     public NoteResponse get(@PathVariable UUID id) {
-        return NoteResponse.from(noteService.getOrThrow(id));
+        return NoteResponse.from(noteService.getOrThrow(currentUser.getUserId(), id));
     }
 
     @PatchMapping("/{id}")
     public NoteResponse update(@PathVariable UUID id, @Valid @RequestBody UpdateNoteRequest request) {
-        return NoteResponse.from(noteService.updateMarkdown(id, request.noteMarkdown()));
+        return NoteResponse.from(noteService.updateMarkdown(currentUser.getUserId(), id, request.noteMarkdown()));
     }
 
     @PatchMapping("/{id}/organize")
     public NoteResponse organize(@PathVariable UUID id, @Valid @RequestBody OrganizeNoteRequest request) {
-        return NoteResponse.from(noteService.organize(id, request.folderId(), request.importance()));
+        return NoteResponse.from(
+                noteService.organize(currentUser.getUserId(), id, request.folderId(), request.importance()));
     }
 }
