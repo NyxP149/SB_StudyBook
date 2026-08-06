@@ -10,7 +10,7 @@ import os
 
 import httpx
 
-DEFAULT_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+DEFAULT_MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
 API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
 

@@ -30,6 +30,11 @@ de connecter le repo, la syntaxe des blueprints évolue.
 2. Garde-la de côté pour l'étape 3 (`GEMINI_API_KEY`). Le tier gratuit a des
    quotas par minute/jour (largement suffisants pour un usage perso) — si tu
    les dépasses, l'appel échoue proprement et la note passe en statut `FAILED`.
+3. ⚠️ **Modèle** : `gemini-2.0-flash` n'a *plus* de quota gratuit (testé avec une
+   clé fraîche le 05/08/2026 → `429 RESOURCE_EXHAUSTED`, limite à 0). Le code
+   utilise désormais par défaut `gemini-flash-latest`, confirmé fonctionnel
+   avec une vraie clé. Si Google change encore ses modèles gratuits, ajuste
+   `GEMINI_MODEL` (`.env` en local, variable d'env sur Render).
 
 ## 3. Déployer le backend sur Render
 
