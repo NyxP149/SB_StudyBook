@@ -23,17 +23,26 @@ export function NoteCard({
   templateName,
   folderName,
   folderColor,
+  selectable,
+  selected,
+  onToggleSelect,
 }: {
   note: NoteSummary
   templateName?: string
   folderName?: string
   folderColor?: string
+  selectable?: boolean
+  selected?: boolean
+  onToggleSelect?: (id: string) => void
 }) {
   const importanceIcon = IMPORTANCE_ICON[note.importance]
 
-  return (
-    <Link to={`/notes/${note.id}`} className="note-card">
+  const body = (
+    <>
       <span className={`note-card-tape tape-${note.status.toLowerCase()}`} />
+      {selectable && (
+        <span className={`note-card-checkbox ${selected ? 'checked' : ''}`}>{selected ? '✓' : ''}</span>
+      )}
       <div className="note-card-head">
         <h3>
           {importanceIcon && <span className="note-card-importance">{importanceIcon}</span>}
@@ -61,6 +70,26 @@ export function NoteCard({
           </span>
         )}
       </div>
+    </>
+  )
+
+  if (selectable) {
+    return (
+      <div
+        className={`note-card note-card-selectable ${selected ? 'selected' : ''}`}
+        onClick={() => onToggleSelect?.(note.id)}
+        role="checkbox"
+        aria-checked={selected}
+        tabIndex={0}
+      >
+        {body}
+      </div>
+    )
+  }
+
+  return (
+    <Link to={`/notes/${note.id}`} className="note-card">
+      {body}
     </Link>
   )
 }

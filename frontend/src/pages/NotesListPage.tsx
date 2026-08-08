@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { listFolders, listNotes, listTemplates } from '../api/client'
+import { deleteNote, listFolders, listNotes, listTemplates } from '../api/client'
 import { NoteCard } from '../components/NoteCard'
 import type { Folder, NoteImportance, NoteStatus, NoteSummary, Template } from '../types'
 import './NotesListPage.css'
@@ -24,6 +24,10 @@ export function NotesListPage() {
   const [templateFilter, setTemplateFilter] = useState('ALL')
   const [folderFilter, setFolderFilter] = useState('ALL')
   const [sortByImportance, setSortByImportance] = useState(false)
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+  const [bulkError, setBulkError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -78,14 +82,82 @@ export function NotesListPage() {
 
   const hasNotes = notes && notes.length > 0
 
+  function toggleSelectMode() {
+    setSelectMode((v) => !v)
+    setSelectedIds(new Set())
+    setBulkError(null)
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function selectAllFiltered() {
+    setSelectedIds(new Set((filteredNotes ?? []).map((n) => n.id)))
+  }
+
+  async function handleBulkDelete() {
+    if (selectedIds.size === 0) return
+    if (!window.confirm(`Supprimer définitivement ${selectedIds.size} note(s) ?`)) return
+    setBulkDeleting(true)
+    setBulkError(null)
+    const ids = [...selectedIds]
+    const failed: string[] = []
+    for (const id of ids) {
+      try {
+        await deleteNote(id)
+      } catch {
+        failed.push(id)
+      }
+    }
+    setNotes((prev) => (prev ? prev.filter((n) => !ids.includes(n.id) || failed.includes(n.id)) : prev))
+    setSelectedIds(new Set(failed))
+    setBulkDeleting(false)
+    if (failed.length > 0) {
+      setBulkError(`${failed.length} suppression(s) ont échoué. Réessaie.`)
+    } else {
+      setSelectMode(false)
+    }
+  }
+
   return (
     <div className="notes-list-page">
       <header className="notes-list-header">
         <h1>Mes notes d'étude</h1>
-        <Link to="/" className="new-note-link">
-          + Nouvelle note
-        </Link>
+        <div className="notes-list-header-actions">
+          {hasNotes && (
+            <button type="button" className="notes-status-tab" onClick={toggleSelectMode}>
+              {selectMode ? 'Annuler la sélection' : '☑ Sélectionner'}
+            </button>
+          )}
+          <Link to="/" className="new-note-link">
+            + Nouvelle note
+          </Link>
+        </div>
       </header>
+
+      {selectMode && (
+        <div className="notes-bulk-bar">
+          <span>{selectedIds.size} sélectionnée(s)</span>
+          <button type="button" className="notes-status-tab" onClick={selectAllFiltered}>
+            Tout sélectionner
+          </button>
+          <button
+            type="button"
+            className="note-action-button danger"
+            onClick={handleBulkDelete}
+            disabled={selectedIds.size === 0 || bulkDeleting}
+          >
+            {bulkDeleting ? 'Suppression…' : `🗑 Supprimer (${selectedIds.size})`}
+          </button>
+          {bulkError && <span className="upload-error">{bulkError}</span>}
+        </div>
+      )}
 
       {error && <p className="upload-error">{error}</p>}
 
@@ -175,6 +247,9 @@ export function NotesListPage() {
                 templateName={note.templateId ? templateNames.get(note.templateId) : undefined}
                 folderName={folder?.name}
                 folderColor={folder?.color}
+                selectable={selectMode}
+                selected={selectedIds.has(note.id)}
+                onToggleSelect={toggleSelect}
               />
             )
           })}

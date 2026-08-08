@@ -17,6 +17,37 @@
   box-shadow: var(--shadow-lift);
 }
 
+.note-card-selectable {
+  cursor: pointer;
+}
+
+.note-card-selectable.selected {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold-bright);
+}
+
+.note-card-checkbox {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.note-card-checkbox.checked {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
 .note-card-tape {
   position: absolute;
   top: 0;
