@@ -312,6 +312,14 @@
   font-size: 14px;
 }
 
+.upload-info {
+  color: var(--teal);
+  background: var(--teal-bg);
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
 @media (max-width: 640px) {
   .upload-panel {
     flex-direction: column;

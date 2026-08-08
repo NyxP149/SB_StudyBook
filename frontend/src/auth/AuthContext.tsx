@@ -9,6 +9,14 @@ import {
 } from '../api/client'
 
 const STORAGE_KEY = 'studybook.auth'
+const API_CACHE_NAME = 'studybook-api-cache'
+
+function clearApiCache() {
+  if (typeof caches === 'undefined') return
+  caches.delete(API_CACHE_NAME).catch(() => {
+    // pas grave si le cache n'existe pas ou n'est pas accessible
+  })
+}
 
 interface StoredAuth {
   token: string
@@ -43,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem(STORAGE_KEY)
       setAuthToken(null)
       setUsername(null)
+      clearApiCache()
     })
 
     const stored = readStoredAuth()
@@ -82,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(STORAGE_KEY)
     setAuthToken(null)
     setUsername(null)
+    clearApiCache()
   }
 
   return (

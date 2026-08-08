@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { listTemplates, submitNote, submitTextNote } from '../api/client'
+import { PendingRecordings } from '../components/PendingRecordings'
+import { useOnlineStatus } from '../hooks/useOnlineStatus'
+import { savePendingRecording } from '../offline/pendingRecordings'
 import type { Template } from '../types'
 import './UploadPage.css'
 
@@ -15,9 +18,12 @@ function formatDuration(seconds: number) {
 
 export function UploadPage() {
   const navigate = useNavigate()
+  const isOnline = useOnlineStatus()
   const [mode, setMode] = useState<InputMode>('audio')
   const [state, setState] = useState<RecordingState>('idle')
   const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
+  const [pendingRefreshKey, setPendingRefreshKey] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [seconds, setSeconds] = useState(0)
   const [provider, setProvider] = useState('gemini')
@@ -46,6 +52,21 @@ export function UploadPage() {
     async (blob: Blob, filename: string) => {
       setState('submitting')
       setError(null)
+      setInfo(null)
+
+      if (!isOnline) {
+        try {
+          await savePendingRecording({ blob, filename, provider, modelSize, templateId: templateId || undefined })
+          setInfo('Pas de connexion : enregistrement sauvegardé localement. Envoie-le depuis la liste ci-dessous une fois en ligne.')
+          setPendingRefreshKey((k) => k + 1)
+        } catch {
+          setError("Impossible de sauvegarder l'enregistrement localement.")
+        } finally {
+          setState('idle')
+        }
+        return
+      }
+
       try {
         const note = await submitNote(blob, filename, {
           provider,
@@ -58,7 +79,7 @@ export function UploadPage() {
         setState('idle')
       }
     },
-    [navigate, provider, modelSize, templateId],
+    [navigate, provider, modelSize, templateId, isOnline],
   )
 
   const handleFile = useCallback(
@@ -340,6 +361,9 @@ export function UploadPage() {
       )}
 
       {error && <p className="upload-error">{error}</p>}
+      {info && <p className="upload-info">{info}</p>}
+
+      <PendingRecordings key={pendingRefreshKey} />
     </div>
   )
 }
