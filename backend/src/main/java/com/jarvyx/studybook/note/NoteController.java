@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,5 +72,11 @@ public class NoteController {
     public NoteResponse organize(@PathVariable UUID id, @Valid @RequestBody OrganizeNoteRequest request) {
         return NoteResponse.from(
                 noteService.organize(currentUser.getUserId(), id, request.folderId(), request.importance()));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        noteService.delete(currentUser.getUserId(), id);
+        return ResponseEntity.noContent().build();
     }
 }

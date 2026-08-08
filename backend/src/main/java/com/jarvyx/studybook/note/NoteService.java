@@ -110,6 +110,11 @@ public class NoteService {
         return noteRepository.save(note);
     }
 
+    public void delete(UUID userId, UUID id) {
+        Note note = getOrThrow(userId, id);
+        noteRepository.delete(note);
+    }
+
     public Note updateMarkdown(UUID userId, UUID id, String noteMarkdown) {
         Note note = getOrThrow(userId, id);
         if (note.getStatus() != NoteStatus.DONE) {

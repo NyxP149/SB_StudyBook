@@ -12,16 +12,20 @@ from __future__ import annotations
 
 import base64
 import os
+import time
 from pathlib import Path
 
 import httpx
 
 DEFAULT_MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
-API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
+API_ROOT = "https://generativelanguage.googleapis.com/v1beta"
+API_BASE = f"{API_ROOT}/models"
+UPLOAD_URL = "https://generativelanguage.googleapis.com/upload/v1beta/files"
 
 # generateContent accepte l'audio en inline_data (base64 dans le corps JSON),
-# limite a ~20 Mo au total cote API. Au-dela, il faudrait passer par la Files
-# API (upload + reference par URI) — hors scope pour l'instant.
+# mais c'est limite a ~20 Mo au total cote API. Au-dela, on passe par la Files
+# API (upload prealable, puis reference par URI) — jusqu'a 2 Go par fichier,
+# les fichiers uploades expirent automatiquement au bout de 48h cote Google.
 MAX_INLINE_AUDIO_BYTES = 15 * 1024 * 1024
 
 _AUDIO_MIME_TYPES = {
@@ -54,30 +58,73 @@ class GeminiProvider:
 
     def transcribe_audio(self, audio_path: str | Path, language: str = "fr") -> str:
         audio_path = Path(audio_path)
-        audio_bytes = audio_path.read_bytes()
-        if len(audio_bytes) > MAX_INLINE_AUDIO_BYTES:
-            raise RuntimeError(
-                f"Fichier audio trop volumineux pour la transcription Gemini "
-                f"({len(audio_bytes) / 1024 / 1024:.1f} Mo, max "
-                f"{MAX_INLINE_AUDIO_BYTES / 1024 / 1024:.0f} Mo). "
-                "Utilise un enregistrement plus court, ou le moteur Whisper local."
-            )
         mime_type = _AUDIO_MIME_TYPES.get(audio_path.suffix.lower(), "audio/webm")
-        encoded = base64.b64encode(audio_bytes).decode("ascii")
+        size = audio_path.stat().st_size
+
+        if size <= MAX_INLINE_AUDIO_BYTES:
+            audio_part = {
+                "inline_data": {
+                    "mime_type": mime_type,
+                    "data": base64.b64encode(audio_path.read_bytes()).decode("ascii"),
+                }
+            }
+        else:
+            file_info = self._upload_audio_file(audio_path, mime_type)
+            audio_part = {"file_data": {"mime_type": mime_type, "file_uri": file_info["uri"]}}
+
         prompt = (
             "Transcris integralement et fidelement l'audio suivant en texte brut, "
             f"dans la langue parlee (code langue attendu : {language}). Ne resume "
             "pas, ne reformule pas : renvoie uniquement la transcription mot a "
             "mot, sans commentaire ni introduction ni horodatage."
         )
-        return self._call_generate_content(
-            {
-                "parts": [
-                    {"text": prompt},
-                    {"inline_data": {"mime_type": mime_type, "data": encoded}},
-                ]
-            }
+        return self._call_generate_content({"parts": [{"text": prompt}, audio_part]})
+
+    def _upload_audio_file(self, audio_path: Path, mime_type: str) -> dict:
+        size = audio_path.stat().st_size
+        start = httpx.post(
+            UPLOAD_URL,
+            params={"key": self.api_key},
+            headers={
+                "X-Goog-Upload-Protocol": "resumable",
+                "X-Goog-Upload-Command": "start",
+                "X-Goog-Upload-Header-Content-Length": str(size),
+                "X-Goog-Upload-Header-Content-Type": mime_type,
+                "Content-Type": "application/json",
+            },
+            json={"file": {"display_name": audio_path.name}},
+            timeout=60,
         )
+        start.raise_for_status()
+        upload_url = start.headers.get("x-goog-upload-url")
+        if not upload_url:
+            raise RuntimeError("Gemini n'a pas renvoye d'URL d'upload pour le fichier audio.")
+
+        upload = httpx.post(
+            upload_url,
+            headers={
+                "Content-Length": str(size),
+                "X-Goog-Upload-Offset": "0",
+                "X-Goog-Upload-Command": "upload, finalize",
+            },
+            content=audio_path.read_bytes(),
+            timeout=300,
+        )
+        upload.raise_for_status()
+        file_info = upload.json()["file"]
+
+        deadline = time.time() + 120
+        while file_info.get("state") == "PROCESSING" and time.time() < deadline:
+            time.sleep(2)
+            check = httpx.get(f"{API_ROOT}/{file_info['name']}", params={"key": self.api_key}, timeout=30)
+            check.raise_for_status()
+            file_info = check.json()
+
+        if file_info.get("state") != "ACTIVE":
+            raise RuntimeError(
+                f"Le fichier audio n'a pas pu etre traite par Gemini (etat: {file_info.get('state')})."
+            )
+        return file_info
 
     def _call_generate_content(self, content: dict) -> str:
         response = httpx.post(

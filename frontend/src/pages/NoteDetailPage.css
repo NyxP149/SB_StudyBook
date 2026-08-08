@@ -24,6 +24,12 @@
   line-height: 1.2;
 }
 
+.note-detail-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .note-detail-theme {
   margin-top: 8px;
   color: var(--ink-soft);
@@ -186,6 +192,15 @@
   background: var(--teal);
   border-color: var(--teal);
   color: #fff;
+}
+
+.note-action-button.danger {
+  color: var(--burgundy);
+}
+
+.note-action-button.danger:hover:not(:disabled) {
+  border-color: var(--burgundy);
+  color: var(--burgundy);
 }
 
 .note-edit-textarea {

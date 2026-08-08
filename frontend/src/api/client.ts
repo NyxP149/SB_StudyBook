@@ -129,6 +129,11 @@ export async function updateNote(id: string, noteMarkdown: string): Promise<Note
   return parseOrThrow<Note>(response)
 }
 
+export async function deleteNote(id: string): Promise<void> {
+  const response = await authFetch(`${NOTES_URL}/${id}`, { method: 'DELETE' })
+  return parseOrThrow<void>(response)
+}
+
 export async function organizeNote(id: string, folderId: string | null, importance: NoteImportance): Promise<Note> {
   const response = await authFetch(`${NOTES_URL}/${id}/organize`, {
     method: 'PATCH',

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useNote } from '../hooks/useNote'
-import { listFolders, organizeNote, updateNote } from '../api/client'
+import { deleteNote, listFolders, organizeNote, updateNote } from '../api/client'
 import { NoteMarkdown } from '../components/NoteMarkdown'
 import { StatusBadge } from '../components/StatusBadge'
 import { extractTheme } from '../utils/noteExcerpt'
@@ -26,6 +26,7 @@ function downloadMarkdown(filename: string, content: string) {
 
 export function NoteDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const { note, error, setNote } = useNote(id)
   const [showTranscript, setShowTranscript] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -34,6 +35,8 @@ export function NoteDetailPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [folders, setFolders] = useState<Folder[]>([])
   const [organizeError, setOrganizeError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   type OrganizeTarget = { folderId: string | null; importance: NoteImportance }
   const latestOrganizeTargetRef = useRef<OrganizeTarget | null>(null)
   const queuedOrganizeRef = useRef<OrganizeTarget | null>(null)
@@ -115,6 +118,19 @@ export function NoteDetailPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!window.confirm('Supprimer définitivement cette note ?')) return
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      await deleteNote(note!.id)
+      navigate('/notes')
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : 'Échec de la suppression.')
+      setDeleting(false)
+    }
+  }
+
   return (
     <div className="note-detail-page">
       <Link to="/notes" className="back-link no-print">
@@ -126,8 +142,15 @@ export function NoteDetailPage() {
           <h1>{note.originalFilename}</h1>
           {theme && <p className="note-detail-theme">{theme}</p>}
         </div>
-        <StatusBadge status={note.status} />
+        <div className="note-detail-header-actions no-print">
+          <StatusBadge status={note.status} />
+          <button type="button" className="note-action-button danger" onClick={handleDelete} disabled={deleting}>
+            {deleting ? 'Suppression…' : '🗑 Supprimer'}
+          </button>
+        </div>
       </header>
+
+      {deleteError && <p className="upload-error no-print">{deleteError}</p>}
 
       <div className="note-detail-meta">
         <span>{note.provider}</span>
