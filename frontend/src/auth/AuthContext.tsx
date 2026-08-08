@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import {
+  ApiError,
   getMe,
   login as apiLogin,
   logout as apiLogout,
@@ -61,13 +62,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     setAuthToken(stored.token)
+    // Optimiste : on affiche tout de suite la session mise en cache plutôt
+    // que d'attendre la validation réseau — sinon un rechargement hors
+    // ligne bloque indéfiniment sur l'écran de chargement (ou pire, voir
+    // ci-dessous, se solde par une déconnexion sans moyen de se reconnecter).
+    setUsername(stored.username)
+    setIsLoading(false)
     getMe()
       .then((me) => setUsername(me.username))
-      .catch(() => {
-        localStorage.removeItem(STORAGE_KEY)
-        setAuthToken(null)
+      .catch((e) => {
+        // Ne déconnecte que sur un vrai rejet du serveur (token invalide/
+        // expiré). Une panne réseau (hors ligne) ne doit pas invalider la
+        // session locale, sinon il devient impossible de se reconnecter
+        // tant qu'on n'a pas retrouvé de connexion.
+        if (e instanceof ApiError && e.status === 401) {
+          localStorage.removeItem(STORAGE_KEY)
+          setAuthToken(null)
+          setUsername(null)
+        }
       })
-      .finally(() => setIsLoading(false))
   }, [])
 
   async function login(usernameInput: string, password: string) {

@@ -24,6 +24,10 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Sans ça, recharger la page hors ligne renvoie l'erreur réseau du
+        // navigateur au lieu de resservir l'app (React Router gère ensuite
+        // la route côté client une fois le JS chargé).
+        navigateFallback: '/index.html',
         // Notes/dossiers/templates restent lisibles hors ligne une fois
         // consultés une première fois. Tout le reste (auth, création de
         // note, etc.) n'est volontairement pas mis en cache : ça ne

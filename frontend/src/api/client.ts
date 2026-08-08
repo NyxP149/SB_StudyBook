@@ -15,6 +15,19 @@ const AUTH_URL = `${API_BASE}/api/auth`
 const NOTES_URL = `${API_BASE}/api/notes`
 const TEMPLATES_URL = `${API_BASE}/api/templates`
 const FOLDERS_URL = `${API_BASE}/api/folders`
+const HEALTH_URL = `${API_BASE}/api/health`
+
+// Distingue une vraie réponse du serveur (même en erreur) d'un échec réseau
+// (fetch() qui rejette avant d'obtenir une Response, ex: hors ligne) — les
+// deux ne doivent pas être traités pareil (voir AuthContext).
+export class ApiError extends Error {
+  status: number
+  constructor(status: number, message: string) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+  }
+}
 
 let authToken: string | null = null
 let onUnauthorized: (() => void) | null = null
@@ -43,7 +56,7 @@ async function parseOrThrow<T>(response: Response): Promise<T> {
     } catch {
       // pas de corps JSON, on garde le message par défaut
     }
-    throw new Error(message)
+    throw new ApiError(response.status, message)
   }
   if (response.status === 204) return undefined as T
   return response.json() as Promise<T>
@@ -51,6 +64,21 @@ async function parseOrThrow<T>(response: Response): Promise<T> {
 
 function authFetch(url: string, init: RequestInit = {}): Promise<Response> {
   return fetch(url, { ...init, headers: { ...init.headers, ...authHeaders() } })
+}
+
+/** Vérifie que le backend répond vraiment — navigator.onLine ne reflète que
+ * l'état de l'interface réseau, pas la joignabilité réelle du serveur. */
+export async function pingServer(timeoutMs = 4000): Promise<boolean> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const response = await fetch(HEALTH_URL, { signal: controller.signal, cache: 'no-store' })
+    return response.ok
+  } catch {
+    return false
+  } finally {
+    clearTimeout(timeout)
+  }
 }
 
 export interface AuthResult {
