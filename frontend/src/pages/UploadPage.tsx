@@ -4,6 +4,7 @@ import { listTemplates, submitNote, submitTextNote } from '../api/client'
 import { PendingRecordings } from '../components/PendingRecordings'
 import { useOnlineStatus } from '../hooks/useOnlineStatus'
 import { savePendingRecording } from '../offline/pendingRecordings'
+import { isSilentAudio } from '../utils/audioSilence'
 import type { Template } from '../types'
 import './UploadPage.css'
 
@@ -53,6 +54,12 @@ export function UploadPage() {
       setState('submitting')
       setError(null)
       setInfo(null)
+
+      if (await isSilentAudio(blob)) {
+        setError("Aucun son détecté dans cet enregistrement (silence). Vérifie ton micro et réessaie.")
+        setState('idle')
+        return
+      }
 
       if (!isOnline) {
         try {
