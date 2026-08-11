@@ -36,7 +36,10 @@ public class StudyImage {
     // un "large object" (OID), qui exige un accès en streaming dans une
     // transaction active et échoue sinon (500 hors contexte transactionnel).
     // columnDefinition="bytea" force le type binaire simple, sans ce piège.
-    @Column(nullable = false, columnDefinition = "bytea")
+    // Colonne nullable côté DB (même si toujours renseignée en pratique, via
+    // la validation du service) : ddl-auto=update ne peut pas ajouter une
+    // colonne NOT NULL sans défaut sur une table qui a déjà des lignes.
+    @Column(columnDefinition = "bytea")
     private byte[] imageBytes;
 
     @Column(nullable = false)
