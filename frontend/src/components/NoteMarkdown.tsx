@@ -1,10 +1,17 @@
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { defaultUrlTransform } from 'react-markdown'
 import type { Components } from 'react-markdown'
 import type { ReactNode } from 'react'
 import { fetchNoteImageObjectUrl } from '../api/client'
 import { AuthedImage } from './AuthedImage'
 
 const NOTE_IMAGE_PREFIX = 'note-image:'
+
+// react-markdown sanitise les URLs de schéma inconnu (protection XSS sur les
+// liens) et viderait sinon notre "note-image:{id}" avant qu'il n'atteigne le
+// composant img ci-dessous.
+function urlTransform(url: string): string {
+  return url.startsWith(NOTE_IMAGE_PREFIX) ? url : defaultUrlTransform(url)
+}
 
 const SECTION_ICONS: Array<[RegExp, string]> = [
   [/th[eè]me/i, '🎯'],
@@ -68,7 +75,9 @@ const components: Components = {
 export function NoteMarkdown({ content }: { content: string }) {
   return (
     <div className="note-markdown">
-      <ReactMarkdown components={components}>{content}</ReactMarkdown>
+      <ReactMarkdown components={components} urlTransform={urlTransform}>
+        {content}
+      </ReactMarkdown>
     </div>
   )
 }
