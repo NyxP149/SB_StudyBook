@@ -45,6 +45,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         </button>
       )}
 
+      {collapsed && (
+        <button type="button" className="quick-logout" onClick={logout} aria-label={t('shell.logout')} title={t('shell.logout')}>
+          ⏻
+        </button>
+      )}
+
       <aside className="shell-sidebar">
         <div className="shell-sidebar-top">
           <NavLink to="/" className="shell-brand" onClick={collapseOnMobile}>
