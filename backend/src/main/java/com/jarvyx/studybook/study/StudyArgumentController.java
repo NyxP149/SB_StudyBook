@@ -88,7 +88,7 @@ public class StudyArgumentController {
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(image.getContentType()))
                 .header(HttpHeaders.CACHE_CONTROL, "private, max-age=86400")
-                .body(image.getData());
+                .body(image.getImageBytes());
     }
 
     @DeleteMapping("/images/{id}")

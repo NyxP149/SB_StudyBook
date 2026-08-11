@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
@@ -33,18 +32,21 @@ public class StudyImage {
     @Column(nullable = false)
     private String contentType;
 
-    @Lob
-    @Column(nullable = false)
-    private byte[] data;
+    // Pas de @Lob : sur PostgreSQL, Hibernate mappe un byte[] annoté @Lob sur
+    // un "large object" (OID), qui exige un accès en streaming dans une
+    // transaction active et échoue sinon (500 hors contexte transactionnel).
+    // columnDefinition="bytea" force le type binaire simple, sans ce piège.
+    @Column(nullable = false, columnDefinition = "bytea")
+    private byte[] imageBytes;
 
     @Column(nullable = false)
     private Instant createdAt;
 
-    public StudyImage(UUID argumentId, String filename, String contentType, byte[] data) {
+    public StudyImage(UUID argumentId, String filename, String contentType, byte[] imageBytes) {
         this.argumentId = argumentId;
         this.filename = filename;
         this.contentType = contentType;
-        this.data = data;
+        this.imageBytes = imageBytes;
         this.createdAt = Instant.now();
     }
 }
