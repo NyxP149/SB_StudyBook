@@ -109,7 +109,7 @@
 .text-submit-button {
   border: none;
   cursor: pointer;
-  background: var(--teal);
+  background: var(--teal-solid);
   color: #fff;
   font-family: var(--font-body);
   font-weight: 600;

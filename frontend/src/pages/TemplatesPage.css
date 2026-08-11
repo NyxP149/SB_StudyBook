@@ -232,7 +232,7 @@
 }
 
 .save-button {
-  background: var(--teal);
+  background: var(--teal-solid);
   color: #fff;
 }
 

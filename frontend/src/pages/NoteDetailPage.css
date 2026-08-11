@@ -223,8 +223,8 @@
 }
 
 .note-action-button.primary {
-  background: var(--teal);
-  border-color: var(--teal);
+  background: var(--teal-solid);
+  border-color: var(--teal-solid);
   color: #fff;
 }
 

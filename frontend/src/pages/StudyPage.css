@@ -191,8 +191,8 @@
 }
 
 .study-status-toggle.done {
-  background: var(--teal);
-  border-color: var(--teal);
+  background: var(--teal-solid);
+  border-color: var(--teal-solid);
   color: #fff;
 }
 

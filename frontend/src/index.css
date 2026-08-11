@@ -9,6 +9,11 @@
   --gold-bright: #d9a44e;
   --teal: #3f6f4f;
   --teal-bg: rgba(63, 111, 79, 0.12);
+  /* Fond plein des boutons "primaire" (texte blanc dessus, cf. .auth-submit,
+     .save-button...) : distinct de --teal pour pouvoir garder --teal clair
+     et lisible en texte sur fond sombre, sans casser le contraste blanc
+     sur ce remplissage plein. */
+  --teal-solid: #3f6f4f;
   --burgundy: #8c3b3b;
   --burgundy-bg: rgba(140, 59, 59, 0.12);
   --amber: #96662a;
@@ -110,6 +115,7 @@
   --gold: var(--gold-bright);
   --teal: #55c07a;
   --teal-bg: rgba(85, 192, 122, 0.16);
+  --teal-solid: #2e7d4f;
   --burgundy: #e08a8a;
   --burgundy-bg: rgba(224, 138, 138, 0.16);
   --amber: #e3b45c;
