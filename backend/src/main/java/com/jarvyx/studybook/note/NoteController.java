@@ -40,7 +40,7 @@ public class NoteController {
             @RequestParam(value = "modelSize", required = false) String modelSize,
             @RequestParam(value = "templateId", required = false) UUID templateId) {
         Note note = noteService.submitAudio(currentUser.getUserId(), audio, provider, modelSize, templateId);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(NoteResponse.from(note));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(noteService.toResponse(note));
     }
 
     @PostMapping(value = "/from-text", consumes = "multipart/form-data")
@@ -50,7 +50,7 @@ public class NoteController {
             @RequestParam(value = "provider", required = false) String provider,
             @RequestParam(value = "templateId", required = false) UUID templateId) {
         Note note = noteService.submitText(currentUser.getUserId(), text, file, provider, templateId);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(NoteResponse.from(note));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(noteService.toResponse(note));
     }
 
     @GetMapping
@@ -60,18 +60,28 @@ public class NoteController {
 
     @GetMapping("/{id}")
     public NoteResponse get(@PathVariable UUID id) {
-        return NoteResponse.from(noteService.getOrThrow(currentUser.getUserId(), id));
+        return noteService.toResponse(noteService.getOrThrow(currentUser.getUserId(), id));
     }
 
     @PatchMapping("/{id}")
     public NoteResponse update(@PathVariable UUID id, @Valid @RequestBody UpdateNoteRequest request) {
-        return NoteResponse.from(noteService.updateMarkdown(currentUser.getUserId(), id, request.noteMarkdown()));
+        return noteService.toResponse(noteService.updateMarkdown(currentUser.getUserId(), id, request.noteMarkdown()));
     }
 
     @PatchMapping("/{id}/organize")
     public NoteResponse organize(@PathVariable UUID id, @Valid @RequestBody OrganizeNoteRequest request) {
-        return NoteResponse.from(
+        return noteService.toResponse(
                 noteService.organize(currentUser.getUserId(), id, request.folderId(), request.importance()));
+    }
+
+    @PatchMapping("/{id}/link/confirm")
+    public NoteResponse confirmLink(@PathVariable UUID id) {
+        return noteService.toResponse(noteService.confirmLink(currentUser.getUserId(), id));
+    }
+
+    @PatchMapping("/{id}/link/dismiss")
+    public NoteResponse dismissLink(@PathVariable UUID id) {
+        return noteService.toResponse(noteService.dismissLink(currentUser.getUserId(), id));
     }
 
     @DeleteMapping("/{id}")

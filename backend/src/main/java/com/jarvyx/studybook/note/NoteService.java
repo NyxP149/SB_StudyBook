@@ -1,8 +1,10 @@
 package com.jarvyx.studybook.note;
 
 import com.jarvyx.studybook.folder.FolderRepository;
+import com.jarvyx.studybook.note.dto.NoteResponse;
 import com.jarvyx.studybook.pipeline.PipelineException;
 import com.jarvyx.studybook.pipeline.PipelineProperties;
+import com.jarvyx.studybook.study.StudyArgumentRepository;
 import com.jarvyx.studybook.template.NoteTemplateRepository;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -26,18 +28,21 @@ public class NoteService {
     private final PipelineProperties pipelineProperties;
     private final FolderRepository folderRepository;
     private final NoteTemplateRepository templateRepository;
+    private final StudyArgumentRepository argumentRepository;
 
     public NoteService(
             NoteRepository noteRepository,
             NotePipelineRunner pipelineRunner,
             PipelineProperties pipelineProperties,
             FolderRepository folderRepository,
-            NoteTemplateRepository templateRepository) {
+            NoteTemplateRepository templateRepository,
+            StudyArgumentRepository argumentRepository) {
         this.noteRepository = noteRepository;
         this.pipelineRunner = pipelineRunner;
         this.pipelineProperties = pipelineProperties;
         this.folderRepository = folderRepository;
         this.templateRepository = templateRepository;
+        this.argumentRepository = argumentRepository;
     }
 
     /**
@@ -122,6 +127,34 @@ public class NoteService {
         }
         note.editMarkdown(noteMarkdown);
         return noteRepository.save(note);
+    }
+
+    public Note confirmLink(UUID userId, UUID id) {
+        Note note = getOrThrow(userId, id);
+        if (note.getSuggestedArgumentId() == null) {
+            throw new IllegalArgumentException("Cette note n'a pas de lien suggéré à confirmer.");
+        }
+        note.confirmLink();
+        return noteRepository.save(note);
+    }
+
+    public Note dismissLink(UUID userId, UUID id) {
+        Note note = getOrThrow(userId, id);
+        note.dismissLink();
+        return noteRepository.save(note);
+    }
+
+    public NoteResponse toResponse(Note note) {
+        String linkedTitle = argumentTitle(note.getLinkedArgumentId());
+        String suggestedTitle = argumentTitle(note.getSuggestedArgumentId());
+        return NoteResponse.from(note, linkedTitle, suggestedTitle);
+    }
+
+    private String argumentTitle(UUID argumentId) {
+        if (argumentId == null) {
+            return null;
+        }
+        return argumentRepository.findById(argumentId).map(a -> a.getTitle()).orElse(null);
     }
 
     private void requireOwnedTemplate(UUID userId, UUID templateId) {

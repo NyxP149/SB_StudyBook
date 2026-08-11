@@ -33,16 +33,19 @@ public class NotePipelineRunner {
     private final TranscriptionPipelineService pipelineService;
     private final NoteTemplateRepository templateRepository;
     private final ObjectMapper objectMapper;
+    private final NoteLinkingService linkingService;
 
     public NotePipelineRunner(
             NoteRepository noteRepository,
             TranscriptionPipelineService pipelineService,
             NoteTemplateRepository templateRepository,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            NoteLinkingService linkingService) {
         this.noteRepository = noteRepository;
         this.pipelineService = pipelineService;
         this.templateRepository = templateRepository;
         this.objectMapper = objectMapper;
+        this.linkingService = linkingService;
     }
 
     @Async("pipelineExecutor")
@@ -65,6 +68,7 @@ public class NotePipelineRunner {
             noteRepository.findById(noteId).ifPresent(note -> {
                 note.markDone(result.transcript(), result.noteMarkdown());
                 noteRepository.save(note);
+                linkingService.suggestLinkIfRelevant(note);
             });
         } catch (Exception e) {
             log.error("Pipeline en échec pour la note {}", noteId, e);

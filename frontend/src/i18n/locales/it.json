@@ -118,7 +118,11 @@
     "edit": "✎ Modifica",
     "download": "⬇ Scarica .md",
     "print": "🖨 Stampa / PDF",
-    "rawTranscript": "Trascrizione grezza"
+    "rawTranscript": "Trascrizione grezza",
+    "linkedTo": "🔗 Collegata al tuo studio «{{title}}»",
+    "suggestedLink": "Questa nota sembra collegata al tuo studio personale «{{title}}».",
+    "confirmLink": "Conferma il collegamento",
+    "dismissLink": "Ignora"
   },
   "importance": {
     "normal": "Normale",

@@ -54,6 +54,14 @@ public class Note {
     @Column(columnDefinition = "TEXT")
     private String errorMessage;
 
+    // Suggestion automatique (via Gemini, apres traitement) d'un lien avec un
+    // argument d'etude personnelle ; confirmee -> linkedArgumentId, ignoree ->
+    // effacee. Les deux sont nullable : la grande majorite des notes n'ont ni
+    // suggestion ni lien.
+    private UUID suggestedArgumentId;
+
+    private UUID linkedArgumentId;
+
     @Column(nullable = false)
     private Instant createdAt;
 
@@ -85,5 +93,18 @@ public class Note {
     public void organize(UUID folderId, NoteImportance importance) {
         this.folderId = folderId;
         this.importance = importance;
+    }
+
+    public void suggestLink(UUID argumentId) {
+        this.suggestedArgumentId = argumentId;
+    }
+
+    public void confirmLink() {
+        this.linkedArgumentId = this.suggestedArgumentId;
+        this.suggestedArgumentId = null;
+    }
+
+    public void dismissLink() {
+        this.suggestedArgumentId = null;
     }
 }

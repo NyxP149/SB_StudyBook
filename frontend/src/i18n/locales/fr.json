@@ -118,7 +118,11 @@
     "edit": "✎ Modifier",
     "download": "⬇ Télécharger .md",
     "print": "🖨 Imprimer / PDF",
-    "rawTranscript": "Transcription brute"
+    "rawTranscript": "Transcription brute",
+    "linkedTo": "🔗 Liée à ton étude « {{title}} »",
+    "suggestedLink": "Cette note semble liée à ton étude personnelle « {{title}} ».",
+    "confirmLink": "Confirmer le lien",
+    "dismissLink": "Ignorer"
   },
   "importance": {
     "normal": "Normale",

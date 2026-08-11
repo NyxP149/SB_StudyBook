@@ -18,9 +18,13 @@ public record NoteResponse(
         String transcript,
         String noteMarkdown,
         String errorMessage,
+        UUID linkedArgumentId,
+        String linkedArgumentTitle,
+        UUID suggestedArgumentId,
+        String suggestedArgumentTitle,
         Instant createdAt) {
 
-    public static NoteResponse from(Note note) {
+    public static NoteResponse from(Note note, String linkedArgumentTitle, String suggestedArgumentTitle) {
         return new NoteResponse(
                 note.getId(),
                 note.getOriginalFilename(),
@@ -33,6 +37,10 @@ public record NoteResponse(
                 note.getTranscript(),
                 note.getNoteMarkdown(),
                 note.getErrorMessage(),
+                note.getLinkedArgumentId(),
+                linkedArgumentTitle,
+                note.getSuggestedArgumentId(),
+                suggestedArgumentTitle,
                 note.getCreatedAt());
     }
 }

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useNote } from '../hooks/useNote'
-import { deleteNote, listFolders, organizeNote, updateNote } from '../api/client'
+import { confirmNoteLink, deleteNote, dismissNoteLink, listFolders, organizeNote, updateNote } from '../api/client'
 import { NoteMarkdown } from '../components/NoteMarkdown'
 import { StatusBadge } from '../components/StatusBadge'
 import { extractTheme } from '../utils/noteExcerpt'
@@ -40,6 +40,8 @@ export function NoteDetailPage() {
   const [organizeError, setOrganizeError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [linkActionPending, setLinkActionPending] = useState(false)
+  const [linkError, setLinkError] = useState<string | null>(null)
   type OrganizeTarget = { folderId: string | null; importance: NoteImportance }
   const latestOrganizeTargetRef = useRef<OrganizeTarget | null>(null)
   const queuedOrganizeRef = useRef<OrganizeTarget | null>(null)
@@ -121,6 +123,30 @@ export function NoteDetailPage() {
     }
   }
 
+  async function handleConfirmLink() {
+    setLinkActionPending(true)
+    setLinkError(null)
+    try {
+      setNote(await confirmNoteLink(note!.id))
+    } catch (e) {
+      setLinkError(e instanceof Error ? e.message : t('common.saveFailed'))
+    } finally {
+      setLinkActionPending(false)
+    }
+  }
+
+  async function handleDismissLink() {
+    setLinkActionPending(true)
+    setLinkError(null)
+    try {
+      setNote(await dismissNoteLink(note!.id))
+    } catch (e) {
+      setLinkError(e instanceof Error ? e.message : t('common.saveFailed'))
+    } finally {
+      setLinkActionPending(false)
+    }
+  }
+
   async function handleDelete() {
     if (!window.confirm(t('noteDetail.confirmDelete'))) return
     setDeleting(true)
@@ -166,6 +192,38 @@ export function NoteDetailPage() {
         <span className="dot">·</span>
         <span>{formatDateTime(note.createdAt, i18n.language)}</span>
       </div>
+
+      {linkError && <p className="upload-error no-print">{linkError}</p>}
+
+      {note.linkedArgumentTitle && (
+        <Link to={`/study/arguments/${note.linkedArgumentId}`} className="note-link-badge no-print">
+          {t('noteDetail.linkedTo', { title: note.linkedArgumentTitle })}
+        </Link>
+      )}
+
+      {note.suggestedArgumentTitle && (
+        <div className="note-link-suggestion no-print">
+          <p>{t('noteDetail.suggestedLink', { title: note.suggestedArgumentTitle })}</p>
+          <div className="note-link-suggestion-actions">
+            <button
+              type="button"
+              className="note-action-button primary"
+              onClick={handleConfirmLink}
+              disabled={linkActionPending}
+            >
+              {t('noteDetail.confirmLink')}
+            </button>
+            <button
+              type="button"
+              className="note-action-button"
+              onClick={handleDismissLink}
+              disabled={linkActionPending}
+            >
+              {t('noteDetail.dismissLink')}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="note-organize-bar no-print">
         <div className="importance-group">

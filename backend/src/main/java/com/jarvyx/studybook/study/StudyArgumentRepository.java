@@ -10,6 +10,8 @@ public interface StudyArgumentRepository extends JpaRepository<StudyArgument, UU
 
     List<StudyArgument> findAllByProgramIdOrderByScheduledDateAsc(UUID programId);
 
+    List<StudyArgument> findAllByUserId(UUID userId);
+
     Optional<StudyArgument> findByIdAndUserId(UUID id, UUID userId);
 
     List<StudyArgument> findAllByUserIdAndCompletedFalseAndScheduledDateLessThanEqualOrderByScheduledDateAsc(

@@ -51,6 +51,40 @@
   opacity: 0.6;
 }
 
+.note-link-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--teal-bg);
+  color: var(--teal);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.note-link-suggestion {
+  margin-top: 14px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: var(--gold-bright);
+  color: var(--ink);
+}
+
+.note-link-suggestion p {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.note-link-suggestion-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
 .note-pending,
 .note-failed {
   margin-top: 40px;

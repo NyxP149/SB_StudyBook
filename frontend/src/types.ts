@@ -18,6 +18,10 @@ export interface Note extends NoteSummary {
   transcript: string | null
   noteMarkdown: string | null
   errorMessage: string | null
+  linkedArgumentId: string | null
+  linkedArgumentTitle: string | null
+  suggestedArgumentId: string | null
+  suggestedArgumentTitle: string | null
 }
 
 export interface Folder {

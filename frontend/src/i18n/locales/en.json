@@ -118,7 +118,11 @@
     "edit": "✎ Edit",
     "download": "⬇ Download .md",
     "print": "🖨 Print / PDF",
-    "rawTranscript": "Raw transcript"
+    "rawTranscript": "Raw transcript",
+    "linkedTo": "🔗 Linked to your study \"{{title}}\"",
+    "suggestedLink": "This note seems related to your personal study \"{{title}}\".",
+    "confirmLink": "Confirm the link",
+    "dismissLink": "Dismiss"
   },
   "importance": {
     "normal": "Normal",

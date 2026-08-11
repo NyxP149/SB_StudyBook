@@ -178,6 +178,16 @@ export async function organizeNote(id: string, folderId: string | null, importan
   return parseOrThrow<Note>(response)
 }
 
+export async function confirmNoteLink(id: string): Promise<Note> {
+  const response = await authFetch(`${NOTES_URL}/${id}/link/confirm`, { method: 'PATCH' })
+  return parseOrThrow<Note>(response)
+}
+
+export async function dismissNoteLink(id: string): Promise<Note> {
+  const response = await authFetch(`${NOTES_URL}/${id}/link/dismiss`, { method: 'PATCH' })
+  return parseOrThrow<Note>(response)
+}
+
 export async function listFolders(): Promise<Folder[]> {
   const response = await authFetch(FOLDERS_URL)
   return parseOrThrow<Folder[]>(response)
