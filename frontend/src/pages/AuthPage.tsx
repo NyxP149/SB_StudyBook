@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth/AuthContext'
 import './AuthPage.css'
 
 type Mode = 'login' | 'register'
 
 export function AuthPage() {
+  const { t } = useTranslation()
   const { login, register } = useAuth()
   const [mode, setMode] = useState<Mode>('login')
   const [username, setUsername] = useState('')
@@ -20,7 +22,7 @@ export function AuthPage() {
       if (mode === 'login') await login(username, password)
       else await register(username, password)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Échec de la connexion.')
+      setError(err instanceof Error ? err.message : t('auth.loginFailed'))
     } finally {
       setSubmitting(false)
     }
@@ -33,7 +35,7 @@ export function AuthPage() {
           <span className="auth-brand-mark">📖</span>
           <div>
             <strong>StudyBook</strong>
-            <em>powered by JarVyX</em>
+            <em>{t('shell.brandTagline')}</em>
           </div>
         </div>
 
@@ -43,20 +45,20 @@ export function AuthPage() {
             className={`auth-mode-tab ${mode === 'login' ? 'active' : ''}`}
             onClick={() => setMode('login')}
           >
-            Se connecter
+            {t('auth.login')}
           </button>
           <button
             type="button"
             className={`auth-mode-tab ${mode === 'register' ? 'active' : ''}`}
             onClick={() => setMode('register')}
           >
-            Créer un compte
+            {t('auth.registerTab')}
           </button>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <label className="auth-field">
-            Nom d'utilisateur
+            {t('auth.username')}
             <input
               type="text"
               value={username}
@@ -66,7 +68,7 @@ export function AuthPage() {
             />
           </label>
           <label className="auth-field">
-            Mot de passe
+            {t('auth.password')}
             <input
               type="password"
               value={password}
@@ -80,7 +82,7 @@ export function AuthPage() {
           {error && <p className="auth-error">{error}</p>}
 
           <button type="submit" className="auth-submit" disabled={submitting}>
-            {submitting ? 'Un instant…' : mode === 'login' ? 'Se connecter' : 'Créer mon compte'}
+            {submitting ? t('auth.submitting') : mode === 'login' ? t('auth.login') : t('auth.registerSubmit')}
           </button>
         </form>
       </div>

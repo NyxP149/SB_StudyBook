@@ -1,60 +1,114 @@
 .shell {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  min-height: 100svh;
 }
 
-.shell-header {
+.shell-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-card);
+  border-right: 1px solid var(--line);
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 20;
+  transition: transform 0.2s ease;
+  overflow-y: auto;
+}
+
+.shell.sidebar-collapsed .shell-sidebar {
+  transform: translateX(-100%);
+}
+
+.shell-sidebar-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding: 20px clamp(20px, 5vw, 56px);
+  gap: 8px;
+  padding: 20px 16px;
   border-bottom: 1px solid var(--line);
-  background: rgba(251, 247, 238, 0.7);
-  backdrop-filter: blur(6px);
-  position: sticky;
-  top: 0;
-  z-index: 10;
 }
 
 .shell-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-decoration: none;
   color: var(--ink);
+  min-width: 0;
 }
 
 .shell-brand-mark {
-  font-size: 28px;
+  font-size: 26px;
   line-height: 1;
   filter: drop-shadow(0 2px 3px rgba(36, 29, 22, 0.15));
+  flex-shrink: 0;
 }
 
 .shell-brand-text {
   display: flex;
   flex-direction: column;
   line-height: 1.15;
+  min-width: 0;
 }
 
 .shell-brand-text strong {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 18px;
   letter-spacing: 0.01em;
 }
 
 .shell-brand-text em {
   font-style: normal;
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  font-size: 10px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.sidebar-collapse-button,
+.sidebar-toggle {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink-faint);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.sidebar-collapse-button:hover,
+.sidebar-toggle:hover {
+  border-color: var(--gold);
+  color: var(--ink);
+}
+
+.sidebar-toggle {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 30;
+  background: var(--paper-card);
+  box-shadow: var(--shadow);
 }
 
 .shell-nav {
   display: flex;
-  gap: 4px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 12px;
+  flex: 1;
 }
 
 .shell-nav a {
@@ -62,8 +116,8 @@
   color: var(--ink-soft);
   font-size: 14px;
   font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 999px;
+  padding: 10px 14px;
+  border-radius: 10px;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
@@ -77,16 +131,58 @@
   color: var(--paper);
 }
 
+.shell-sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shell-lang-switch {
+  display: flex;
+  gap: 4px;
+}
+
+.shell-lang-switch button {
+  flex: 1;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink-faint);
+  border-radius: 8px;
+  padding: 6px 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.shell-lang-switch button.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.shell-lang-switch button:hover:not(.active) {
+  border-color: var(--gold);
+  color: var(--ink);
+}
+
 .shell-account {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .shell-username {
   font-size: 13px;
   font-weight: 600;
   color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .shell-logout {
@@ -99,6 +195,7 @@
   color: var(--ink-faint);
   padding: 7px 14px;
   border-radius: 999px;
+  flex-shrink: 0;
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 
@@ -107,18 +204,46 @@
   color: var(--burgundy);
 }
 
-.shell-main {
+.shell-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(36, 29, 22, 0.4);
+  z-index: 15;
+}
+
+.shell-content-area {
   flex: 1;
+  min-width: 0;
+  margin-left: 240px;
+  transition: margin-left 0.2s ease;
+}
+
+.shell.sidebar-collapsed .shell-content-area {
+  margin-left: 0;
+}
+
+.shell-main {
   padding: clamp(24px, 5vw, 56px);
   max-width: 980px;
   width: 100%;
   margin: 0 auto;
 }
 
-@media (max-width: 640px) {
-  .shell-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+@media (max-width: 768px) {
+  .shell-content-area {
+    margin-left: 0 !important;
+  }
+
+  .shell-sidebar {
+    box-shadow: var(--shadow-lift);
+  }
+
+  .shell.sidebar-collapsed .shell-backdrop {
+    display: none;
+  }
+
+  .shell-backdrop {
+    display: block;
   }
 }

@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { createFolder, deleteFolder, listFolders, updateFolder } from '../api/client'
 import type { Folder, FolderInput } from '../types'
 import './FoldersPage.css'
 
 const COLOR_PRESETS = [
-  { name: 'Or', hex: '#b8863b' },
-  { name: 'Sauge', hex: '#3f6f4f' },
-  { name: 'Bordeaux', hex: '#8c3b3b' },
-  { name: 'Ardoise', hex: '#3f5f7f' },
-  { name: 'Prune', hex: '#6b4577' },
-  { name: 'Olive', hex: '#6b7a3f' },
+  { nameKey: 'folders.colorGold', hex: '#b8863b' },
+  { nameKey: 'folders.colorSage', hex: '#3f6f4f' },
+  { nameKey: 'folders.colorBurgundy', hex: '#8c3b3b' },
+  { nameKey: 'folders.colorSlate', hex: '#3f5f7f' },
+  { nameKey: 'folders.colorPlum', hex: '#6b4577' },
+  { nameKey: 'folders.colorOlive', hex: '#6b7a3f' },
 ]
 
 function emptyForm(): FolderInput {
@@ -17,6 +18,7 @@ function emptyForm(): FolderInput {
 }
 
 export function FoldersPage() {
+  const { t } = useTranslation()
   const [folders, setFolders] = useState<Folder[] | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<FolderInput>(emptyForm())
@@ -26,7 +28,7 @@ export function FoldersPage() {
   const refresh = () => {
     listFolders()
       .then(setFolders)
-      .catch((e) => setError(e instanceof Error ? e.message : 'Erreur inconnue'))
+      .catch((e) => setError(e instanceof Error ? e.message : t('common.unknownError')))
   }
 
   useEffect(refresh, [])
@@ -60,7 +62,7 @@ export function FoldersPage() {
       setEditingId(null)
       refresh()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Échec de la sauvegarde.')
+      setError(e instanceof Error ? e.message : t('common.saveFailed'))
     } finally {
       setSaving(false)
     }
@@ -72,7 +74,7 @@ export function FoldersPage() {
       if (editingId === id) setEditingId(null)
       refresh()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Échec de la suppression.')
+      setError(e instanceof Error ? e.message : t('common.deleteFailed'))
     }
   }
 
@@ -82,12 +84,12 @@ export function FoldersPage() {
     <div className="folders-page">
       <header className="templates-header">
         <div>
-          <h1>Mes dossiers</h1>
-          <p>Range tes notes par catégorie pour t'y retrouver.</p>
+          <h1>{t('folders.title')}</h1>
+          <p>{t('folders.subtitle')}</p>
         </div>
         {!isEditing && (
           <button type="button" className="new-template-button" onClick={startCreate}>
-            + Nouveau dossier
+            {t('folders.newFolder')}
           </button>
         )}
       </header>
@@ -96,11 +98,11 @@ export function FoldersPage() {
 
       {!isEditing && (
         <>
-          {!folders && <p className="notes-loading">Chargement…</p>}
+          {!folders && <p className="notes-loading">{t('common.loading')}</p>}
           {folders && folders.length === 0 && (
             <div className="notes-empty">
               <span>🗂️</span>
-              <p>Aucun dossier pour l'instant — toutes les notes apparaissent ensemble.</p>
+              <p>{t('folders.empty')}</p>
             </div>
           )}
           {folders && folders.length > 0 && (
@@ -119,17 +121,17 @@ export function FoldersPage() {
       {isEditing && (
         <div className="template-form">
           <label className="template-field">
-            Nom
+            {t('common.name')}
             <input
               type="text"
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="ex : Réunions de semaine"
+              placeholder={t('folders.namePlaceholder')}
             />
           </label>
 
           <div className="template-field">
-            Couleur
+            {t('folders.color')}
             <div className="folder-color-picker">
               {COLOR_PRESETS.map((preset) => (
                 <button
@@ -137,7 +139,7 @@ export function FoldersPage() {
                   type="button"
                   className={`folder-color-swatch ${form.color === preset.hex ? 'selected' : ''}`}
                   style={{ background: preset.hex }}
-                  aria-label={preset.name}
+                  aria-label={t(preset.nameKey)}
                   onClick={() => setForm((f) => ({ ...f, color: preset.hex }))}
                 />
               ))}
@@ -147,15 +149,15 @@ export function FoldersPage() {
           <div className="template-form-actions">
             {editingId !== 'new' && (
               <button type="button" className="delete-template-button" onClick={() => editingId && remove(editingId)}>
-                Supprimer
+                {t('common.delete')}
               </button>
             )}
             <div className="template-form-actions-right">
               <button type="button" className="cancel-button" onClick={cancelEdit}>
-                Annuler
+                {t('common.cancel')}
               </button>
               <button type="button" className="save-button" onClick={save} disabled={saving || !form.name.trim()}>
-                {saving ? 'Sauvegarde…' : 'Enregistrer'}
+                {saving ? t('common.saving') : t('common.save')}
               </button>
             </div>
           </div>

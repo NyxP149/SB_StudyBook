@@ -1,16 +1,9 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { NoteSummary } from '../types'
 import { StatusBadge } from './StatusBadge'
+import { formatDateShort } from '../utils/formatDate'
 import './NoteCard.css'
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('fr-FR', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
 
 const IMPORTANCE_ICON: Record<NoteSummary['importance'], string | null> = {
   NORMALE: null,
@@ -35,6 +28,7 @@ export function NoteCard({
   selected?: boolean
   onToggleSelect?: (id: string) => void
 }) {
+  const { i18n } = useTranslation()
   const importanceIcon = IMPORTANCE_ICON[note.importance]
 
   const body = (
@@ -51,7 +45,7 @@ export function NoteCard({
         <StatusBadge status={note.status} />
       </div>
       <div className="note-card-meta">
-        <span>{formatDate(note.createdAt)}</span>
+        <span>{formatDateShort(note.createdAt, i18n.language)}</span>
         <span className="dot">·</span>
         <span>{note.provider}</span>
         {note.modelSize && (

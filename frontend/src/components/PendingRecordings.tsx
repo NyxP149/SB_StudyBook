@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { submitNote } from '../api/client'
 import { deletePendingRecording, listPendingRecordings, type PendingRecording } from '../offline/pendingRecordings'
 import { useOnlineStatus } from '../hooks/useOnlineStatus'
+import { formatDateShort } from '../utils/formatDate'
 import './PendingRecordings.css'
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
-}
-
 export function PendingRecordings({ onSent }: { onSent?: () => void }) {
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const isOnline = useOnlineStatus()
   const [items, setItems] = useState<PendingRecording[]>([])
@@ -37,13 +36,13 @@ export function PendingRecordings({ onSent }: { onSent?: () => void }) {
       onSent?.()
       navigate(`/notes/${note.id}`)
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Échec de l'envoi.")
+      setError(e instanceof Error ? e.message : t('upload.errSendFailed'))
       setSendingId(null)
     }
   }
 
   async function handleDiscard(item: PendingRecording) {
-    if (!window.confirm('Supprimer cet enregistrement en attente ?')) return
+    if (!window.confirm(t('pending.confirmDiscard'))) return
     await deletePendingRecording(item.id)
     await refresh()
   }
@@ -53,16 +52,12 @@ export function PendingRecordings({ onSent }: { onSent?: () => void }) {
   return (
     <div className="pending-recordings">
       <div className="pending-recordings-head">
-        <strong>🎙️ Enregistrements en attente ({items.length})</strong>
+        <strong>{t('pending.title', { count: items.length })}</strong>
         <span className={`pending-status ${isOnline ? 'online' : 'offline'}`}>
-          {isOnline ? '● En ligne' : '○ Hors ligne'}
+          {isOnline ? t('pending.online') : t('pending.offline')}
         </span>
       </div>
-      <p className="pending-recordings-hint">
-        {isOnline
-          ? "Envoie-les manuellement quand tu veux : rien n'est envoyé automatiquement."
-          : 'Enregistrés localement — ils seront prêts à envoyer dès que tu retrouves une connexion.'}
-      </p>
+      <p className="pending-recordings-hint">{isOnline ? t('pending.hintOnline') : t('pending.hintOffline')}</p>
       {error && <p className="upload-error">{error}</p>}
       <ul className="pending-recordings-list">
         {items.map((item) => (
@@ -70,7 +65,7 @@ export function PendingRecordings({ onSent }: { onSent?: () => void }) {
             <div>
               <span className="pending-recording-name">{item.filename}</span>
               <span className="pending-recording-meta">
-                {formatDate(item.createdAt)} · {item.provider}
+                {formatDateShort(item.createdAt, i18n.language)} · {item.provider}
               </span>
             </div>
             <div className="pending-recording-actions">
@@ -80,7 +75,7 @@ export function PendingRecordings({ onSent }: { onSent?: () => void }) {
                 onClick={() => handleSend(item)}
                 disabled={!isOnline || sendingId === item.id}
               >
-                {sendingId === item.id ? 'Envoi…' : '📤 Envoyer'}
+                {sendingId === item.id ? t('pending.sending') : t('pending.send')}
               </button>
               <button
                 type="button"

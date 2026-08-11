@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useNote } from '../hooks/useNote'
 import { deleteNote, listFolders, organizeNote, updateNote } from '../api/client'
 import { NoteMarkdown } from '../components/NoteMarkdown'
 import { StatusBadge } from '../components/StatusBadge'
 import { extractTheme } from '../utils/noteExcerpt'
+import { formatDateTime } from '../utils/formatDate'
 import type { Folder, NoteImportance } from '../types'
 import './NoteDetailPage.css'
 
-const IMPORTANCE_OPTIONS: Array<{ value: NoteImportance; label: string; icon: string }> = [
-  { value: 'NORMALE', label: 'Normale', icon: '⚪' },
-  { value: 'IMPORTANTE', label: 'Importante', icon: '⭐' },
-  { value: 'URGENTE', label: 'Urgente', icon: '🔴' },
+const IMPORTANCE_OPTIONS: Array<{ value: NoteImportance; labelKey: string; icon: string }> = [
+  { value: 'NORMALE', labelKey: 'importance.normal', icon: '⚪' },
+  { value: 'IMPORTANTE', labelKey: 'importance.important', icon: '⭐' },
+  { value: 'URGENTE', labelKey: 'importance.urgent', icon: '🔴' },
 ]
 
 function downloadMarkdown(filename: string, content: string) {
@@ -25,6 +27,7 @@ function downloadMarkdown(filename: string, content: string) {
 }
 
 export function NoteDetailPage() {
+  const { t, i18n } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { note, error, setNote } = useNote(id)
@@ -59,7 +62,7 @@ export function NoteDetailPage() {
   if (!note) {
     return (
       <div className="note-detail-page">
-        <p className="notes-loading">Chargement…</p>
+        <p className="notes-loading">{t('common.loading')}</p>
       </div>
     )
   }
@@ -85,7 +88,7 @@ export function NoteDetailPage() {
       setNote(updated)
       setIsEditing(false)
     } catch (e) {
-      setSaveError(e instanceof Error ? e.message : 'Échec de la sauvegarde.')
+      setSaveError(e instanceof Error ? e.message : t('common.saveFailed'))
     } finally {
       setSaving(false)
     }
@@ -109,7 +112,7 @@ export function NoteDetailPage() {
           const updated = await organizeNote(note!.id, toSend.folderId, toSend.importance)
           setNote(updated)
         } catch (e) {
-          setOrganizeError(e instanceof Error ? e.message : "Échec de la mise à jour.")
+          setOrganizeError(e instanceof Error ? e.message : t('noteDetail.organizeFailed'))
           break
         }
       }
@@ -119,14 +122,14 @@ export function NoteDetailPage() {
   }
 
   async function handleDelete() {
-    if (!window.confirm('Supprimer définitivement cette note ?')) return
+    if (!window.confirm(t('noteDetail.confirmDelete'))) return
     setDeleting(true)
     setDeleteError(null)
     try {
       await deleteNote(note!.id)
       navigate('/notes')
     } catch (e) {
-      setDeleteError(e instanceof Error ? e.message : 'Échec de la suppression.')
+      setDeleteError(e instanceof Error ? e.message : t('common.deleteFailed'))
       setDeleting(false)
     }
   }
@@ -134,7 +137,7 @@ export function NoteDetailPage() {
   return (
     <div className="note-detail-page">
       <Link to="/notes" className="back-link no-print">
-        ← Toutes les notes
+        {t('noteDetail.backLink')}
       </Link>
 
       <header className="note-detail-header">
@@ -145,7 +148,7 @@ export function NoteDetailPage() {
         <div className="note-detail-header-actions no-print">
           <StatusBadge status={note.status} />
           <button type="button" className="note-action-button danger" onClick={handleDelete} disabled={deleting}>
-            {deleting ? 'Suppression…' : '🗑 Supprimer'}
+            {deleting ? t('notes.deleting') : t('noteDetail.delete')}
           </button>
         </div>
       </header>
@@ -161,7 +164,7 @@ export function NoteDetailPage() {
           </>
         )}
         <span className="dot">·</span>
-        <span>{new Date(note.createdAt).toLocaleString('fr-FR')}</span>
+        <span>{formatDateTime(note.createdAt, i18n.language)}</span>
       </div>
 
       <div className="note-organize-bar no-print">
@@ -173,7 +176,7 @@ export function NoteDetailPage() {
               className={`importance-button imp-${opt.value.toLowerCase()} ${note.importance === opt.value ? 'active' : ''}`}
               onClick={() => handleOrganize(latestOrganizeTargetRef.current?.folderId ?? note.folderId, opt.value)}
             >
-              {opt.icon} {opt.label}
+              {opt.icon} {t(opt.labelKey)}
             </button>
           ))}
         </div>
@@ -182,7 +185,7 @@ export function NoteDetailPage() {
           value={note.folderId ?? ''}
           onChange={(e) => handleOrganize(e.target.value || null, latestOrganizeTargetRef.current?.importance ?? note.importance)}
         >
-          <option value="">Sans dossier</option>
+          <option value="">{t('common.noFolder')}</option>
           {folders.map((f) => (
             <option key={f.id} value={f.id}>
               {f.name}
@@ -196,14 +199,14 @@ export function NoteDetailPage() {
       {note.status === 'PENDING' && (
         <div className="note-pending">
           <span className="brew-icon">☕</span>
-          <p>Transcription et rédaction en cours…</p>
-          <p className="note-pending-sub">Ça peut prendre quelques minutes selon le modèle choisi.</p>
+          <p>{t('noteDetail.processing')}</p>
+          <p className="note-pending-sub">{t('noteDetail.processingHint')}</p>
         </div>
       )}
 
       {note.status === 'FAILED' && (
         <div className="note-failed">
-          <strong>Le traitement a échoué</strong>
+          <strong>{t('noteDetail.failedTitle')}</strong>
           <pre>{note.errorMessage}</pre>
         </div>
       )}
@@ -214,26 +217,26 @@ export function NoteDetailPage() {
             {isEditing ? (
               <>
                 <button type="button" className="note-action-button primary" onClick={saveEditing} disabled={saving}>
-                  {saving ? 'Enregistrement…' : '✓ Enregistrer'}
+                  {saving ? t('noteDetail.saving') : t('noteDetail.save')}
                 </button>
                 <button type="button" className="note-action-button" onClick={cancelEditing} disabled={saving}>
-                  Annuler
+                  {t('common.cancel')}
                 </button>
               </>
             ) : (
               <>
                 <button type="button" className="note-action-button" onClick={startEditing}>
-                  ✎ Modifier
+                  {t('noteDetail.edit')}
                 </button>
                 <button
                   type="button"
                   className="note-action-button"
                   onClick={() => downloadMarkdown(note.originalFilename, note.noteMarkdown!)}
                 >
-                  ⬇ Télécharger .md
+                  {t('noteDetail.download')}
                 </button>
                 <button type="button" className="note-action-button" onClick={() => window.print()}>
-                  🖨 Imprimer / PDF
+                  {t('noteDetail.print')}
                 </button>
               </>
             )}
@@ -256,7 +259,7 @@ export function NoteDetailPage() {
           {note.transcript && (
             <div className="transcript-panel no-print">
               <button type="button" onClick={() => setShowTranscript((v) => !v)} className="transcript-toggle">
-                {showTranscript ? '▾' : '▸'} Transcription brute
+                {showTranscript ? '▾' : '▸'} {t('noteDetail.rawTranscript')}
               </button>
               {showTranscript && <p className="transcript-text">{note.transcript}</p>}
             </div>

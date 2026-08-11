@@ -1,20 +1,22 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { deleteNote, listFolders, listNotes, listTemplates } from '../api/client'
 import { NoteCard } from '../components/NoteCard'
 import type { Folder, NoteImportance, NoteStatus, NoteSummary, Template } from '../types'
 import './NotesListPage.css'
 
-const STATUS_FILTERS: Array<{ value: NoteStatus | 'ALL'; label: string }> = [
-  { value: 'ALL', label: 'Toutes' },
-  { value: 'PENDING', label: 'En cours' },
-  { value: 'DONE', label: 'Terminées' },
-  { value: 'FAILED', label: 'Échecs' },
+const STATUS_FILTERS: Array<{ value: NoteStatus | 'ALL'; labelKey: string }> = [
+  { value: 'ALL', labelKey: 'notes.filterAll' },
+  { value: 'PENDING', labelKey: 'notes.filterPending' },
+  { value: 'DONE', labelKey: 'notes.filterDone' },
+  { value: 'FAILED', labelKey: 'notes.filterFailed' },
 ]
 
 const IMPORTANCE_RANK: Record<NoteImportance, number> = { URGENTE: 0, IMPORTANTE: 1, NORMALE: 2 }
 
 export function NotesListPage() {
+  const { t } = useTranslation()
   const [notes, setNotes] = useState<NoteSummary[] | null>(null)
   const [templates, setTemplates] = useState<Template[]>([])
   const [folders, setFolders] = useState<Folder[]>([])
@@ -36,7 +38,7 @@ export function NotesListPage() {
         if (!cancelled) setNotes(result)
       })
       .catch((e) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Erreur inconnue')
+        if (!cancelled) setError(e instanceof Error ? e.message : t('common.unknownError'))
       })
     listTemplates()
       .then((result) => {
@@ -103,7 +105,7 @@ export function NotesListPage() {
 
   async function handleBulkDelete() {
     if (selectedIds.size === 0) return
-    if (!window.confirm(`Supprimer définitivement ${selectedIds.size} note(s) ?`)) return
+    if (!window.confirm(t('notes.confirmBulkDelete', { count: selectedIds.size }))) return
     setBulkDeleting(true)
     setBulkError(null)
     const ids = [...selectedIds]
@@ -119,7 +121,7 @@ export function NotesListPage() {
     setSelectedIds(new Set(failed))
     setBulkDeleting(false)
     if (failed.length > 0) {
-      setBulkError(`${failed.length} suppression(s) ont échoué. Réessaie.`)
+      setBulkError(t('notes.bulkDeleteFailed', { count: failed.length }))
     } else {
       setSelectMode(false)
     }
@@ -128,24 +130,24 @@ export function NotesListPage() {
   return (
     <div className="notes-list-page">
       <header className="notes-list-header">
-        <h1>Mes notes d'étude</h1>
+        <h1>{t('notes.title')}</h1>
         <div className="notes-list-header-actions">
           {hasNotes && (
             <button type="button" className="notes-status-tab" onClick={toggleSelectMode}>
-              {selectMode ? 'Annuler la sélection' : '☑ Sélectionner'}
+              {selectMode ? t('notes.cancelSelection') : t('notes.select')}
             </button>
           )}
           <Link to="/" className="new-note-link">
-            + Nouvelle note
+            {t('notes.newNote')}
           </Link>
         </div>
       </header>
 
       {selectMode && (
         <div className="notes-bulk-bar">
-          <span>{selectedIds.size} sélectionnée(s)</span>
+          <span>{t('notes.selectedCount', { count: selectedIds.size })}</span>
           <button type="button" className="notes-status-tab" onClick={selectAllFiltered}>
-            Tout sélectionner
+            {t('notes.selectAll')}
           </button>
           <button
             type="button"
@@ -153,7 +155,7 @@ export function NotesListPage() {
             onClick={handleBulkDelete}
             disabled={selectedIds.size === 0 || bulkDeleting}
           >
-            {bulkDeleting ? 'Suppression…' : `🗑 Supprimer (${selectedIds.size})`}
+            {bulkDeleting ? t('notes.deleting') : t('notes.deleteSelected', { count: selectedIds.size })}
           </button>
           {bulkError && <span className="upload-error">{bulkError}</span>}
         </div>
@@ -161,13 +163,13 @@ export function NotesListPage() {
 
       {error && <p className="upload-error">{error}</p>}
 
-      {!notes && !error && <p className="notes-loading">Chargement…</p>}
+      {!notes && !error && <p className="notes-loading">{t('common.loading')}</p>}
 
       {notes && notes.length === 0 && (
         <div className="notes-empty">
           <span>📖</span>
-          <p>Aucune note pour l'instant.</p>
-          <Link to="/">Commence par en créer une</Link>
+          <p>{t('notes.empty')}</p>
+          <Link to="/">{t('notes.emptyCta')}</Link>
         </div>
       )}
 
@@ -176,7 +178,7 @@ export function NotesListPage() {
           <input
             type="search"
             className="notes-search"
-            placeholder="Rechercher par nom de fichier…"
+            placeholder={t('notes.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -188,7 +190,7 @@ export function NotesListPage() {
                 className={`notes-status-tab ${statusFilter === f.value ? 'active' : ''}`}
                 onClick={() => setStatusFilter(f.value)}
               >
-                {f.label}
+                {t(f.labelKey)}
               </button>
             ))}
           </div>
@@ -198,11 +200,11 @@ export function NotesListPage() {
               value={templateFilter}
               onChange={(e) => setTemplateFilter(e.target.value)}
             >
-              <option value="ALL">Tous les templates</option>
-              <option value="DEFAULT">Structure par défaut</option>
-              {templates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
+              <option value="ALL">{t('notes.allTemplates')}</option>
+              <option value="DEFAULT">{t('common.defaultStructure')}</option>
+              {templates.map((tpl) => (
+                <option key={tpl.id} value={tpl.id}>
+                  {tpl.name}
                 </option>
               ))}
             </select>
@@ -213,8 +215,8 @@ export function NotesListPage() {
               value={folderFilter}
               onChange={(e) => setFolderFilter(e.target.value)}
             >
-              <option value="ALL">Tous les dossiers</option>
-              <option value="NONE">Sans dossier</option>
+              <option value="ALL">{t('notes.allFolders')}</option>
+              <option value="NONE">{t('common.noFolder')}</option>
               {folders.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.name}
@@ -227,13 +229,13 @@ export function NotesListPage() {
             className={`notes-status-tab importance-sort-toggle ${sortByImportance ? 'active' : ''}`}
             onClick={() => setSortByImportance((v) => !v)}
           >
-            🔴 Trier par importance
+            {t('notes.sortByImportance')}
           </button>
         </div>
       )}
 
       {hasNotes && filteredNotes && filteredNotes.length === 0 && (
-        <p className="notes-loading">Aucune note ne correspond à ces filtres.</p>
+        <p className="notes-loading">{t('notes.noMatch')}</p>
       )}
 
       {filteredNotes && filteredNotes.length > 0 && (

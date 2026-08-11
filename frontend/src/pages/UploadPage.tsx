@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { listTemplates, submitNote, submitTextNote } from '../api/client'
 import { PendingRecordings } from '../components/PendingRecordings'
 import { useOnlineStatus } from '../hooks/useOnlineStatus'
@@ -18,6 +19,7 @@ function formatDuration(seconds: number) {
 }
 
 export function UploadPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const isOnline = useOnlineStatus()
   const [mode, setMode] = useState<InputMode>('audio')
@@ -56,7 +58,7 @@ export function UploadPage() {
       setInfo(null)
 
       if (await isSilentAudio(blob)) {
-        setError("Aucun son détecté dans cet enregistrement (silence). Vérifie ton micro et réessaie.")
+        setError(t('upload.errSilence'))
         setState('idle')
         return
       }
@@ -64,10 +66,10 @@ export function UploadPage() {
       if (!isOnline) {
         try {
           await savePendingRecording({ blob, filename, provider, modelSize, templateId: templateId || undefined })
-          setInfo('Pas de connexion : enregistrement sauvegardé localement. Envoie-le depuis la liste ci-dessous une fois en ligne.')
+          setInfo(t('upload.infoSavedOffline'))
           setPendingRefreshKey((k) => k + 1)
         } catch {
-          setError("Impossible de sauvegarder l'enregistrement localement.")
+          setError(t('upload.errSaveOfflineFailed'))
         } finally {
           setState('idle')
         }
@@ -82,22 +84,22 @@ export function UploadPage() {
         })
         navigate(`/notes/${note.id}`)
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Échec de l\'envoi.')
+        setError(e instanceof Error ? e.message : t('upload.errSendFailed'))
         setState('idle')
       }
     },
-    [navigate, provider, modelSize, templateId, isOnline],
+    [navigate, provider, modelSize, templateId, isOnline, t],
   )
 
   const handleFile = useCallback(
     (file: File) => {
       if (!file.type.startsWith('audio/') && !file.type.startsWith('video/')) {
-        setError('Ce fichier ne ressemble pas à un audio.')
+        setError(t('upload.errNotAudio'))
         return
       }
       void submit(file, file.name)
     },
-    [submit],
+    [submit, t],
   )
 
   const onDrop = useCallback(
@@ -120,21 +122,21 @@ export function UploadPage() {
       )
       navigate(`/notes/${note.id}`)
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Échec de l'envoi.")
+      setError(e instanceof Error ? e.message : t('upload.errSendFailed'))
       setState('idle')
     }
-  }, [navigate, provider, templateId, pastedText, textFile])
+  }, [navigate, provider, templateId, pastedText, textFile, t])
 
   const handleTextFile = useCallback((file: File) => {
     const isTextLike = file.name.endsWith('.txt') || file.name.endsWith('.pdf') || file.type === 'application/pdf' || file.type.startsWith('text/')
     if (!isTextLike) {
-      setError('Dépose un fichier .txt ou .pdf.')
+      setError(t('upload.errNotText'))
       return
     }
     setError(null)
     setTextFile(file)
     setPastedText('')
-  }, [])
+  }, [t])
 
   const onTextDrop = useCallback(
     (e: DragEvent) => {
@@ -167,9 +169,9 @@ export function UploadPage() {
       timerRef.current = window.setInterval(() => setSeconds((s) => s + 1), 1000)
       setState('recording')
     } catch {
-      setError('Impossible d\'accéder au microphone. Vérifie les permissions du navigateur.')
+      setError(t('upload.errMicAccess'))
     }
-  }, [submit])
+  }, [submit, t])
 
   const stopRecording = useCallback(() => {
     mediaRecorderRef.current?.stop()
@@ -180,12 +182,8 @@ export function UploadPage() {
   return (
     <div className="upload-page">
       <header className="upload-intro">
-        <h1>Un discours à transformer en note ?</h1>
-        <p>
-          {mode === 'audio'
-            ? 'Enregistre-le en direct, ou dépose un fichier audio existant.'
-            : 'Colle une transcription, ou dépose un fichier .txt / .pdf déjà écrit.'}
-        </p>
+        <h1>{t('upload.title')}</h1>
+        <p>{mode === 'audio' ? t('upload.subtitleAudio') : t('upload.subtitleText')}</p>
       </header>
 
       <div className="mode-tabs">
@@ -195,7 +193,7 @@ export function UploadPage() {
           onClick={() => setMode('audio')}
           disabled={state === 'submitting'}
         >
-          🎙️ Audio
+          {t('upload.tabAudio')}
         </button>
         <button
           type="button"
@@ -203,7 +201,7 @@ export function UploadPage() {
           onClick={() => setMode('text')}
           disabled={state === 'submitting'}
         >
-          📝 Texte / PDF
+          {t('upload.tabText')}
         </button>
       </div>
 
@@ -215,7 +213,7 @@ export function UploadPage() {
               className={`record-button ${state === 'recording' ? 'is-recording' : ''}`}
               onClick={state === 'recording' ? stopRecording : startRecording}
               disabled={state === 'submitting'}
-              aria-label={state === 'recording' ? 'Arrêter l\'enregistrement' : 'Démarrer l\'enregistrement'}
+              aria-label={state === 'recording' ? t('upload.stopRecordingAria') : t('upload.startRecordingAria')}
             >
               {state === 'recording' && (
                 <>
@@ -226,12 +224,12 @@ export function UploadPage() {
               <span className="record-icon">{state === 'recording' ? '■' : '●'}</span>
             </button>
             <p className="record-caption">
-              {state === 'recording' ? formatDuration(seconds) : state === 'submitting' ? 'Envoi en cours…' : 'Enregistrer'}
+              {state === 'recording' ? formatDuration(seconds) : state === 'submitting' ? t('upload.sending') : t('upload.record')}
             </p>
           </div>
 
           <div className="upload-divider">
-            <span>ou</span>
+            <span>{t('common.or')}</span>
           </div>
 
           <label
@@ -256,9 +254,9 @@ export function UploadPage() {
             />
             <span className="dropzone-icon">📎</span>
             <span>
-              <strong>Dépose un fichier audio</strong>
+              <strong>{t('upload.dropAudioTitle')}</strong>
               <br />
-              ou clique pour en choisir un
+              {t('upload.dropChoose')}
             </span>
           </label>
         </div>
@@ -266,7 +264,7 @@ export function UploadPage() {
         <div className="text-panel">
           <textarea
             className="text-paste-area"
-            placeholder="Colle ici une transcription ou un texte déjà écrit…"
+            placeholder={t('upload.pastePlaceholder')}
             value={pastedText}
             disabled={state === 'submitting' || Boolean(textFile)}
             onChange={(e) => setPastedText(e.target.value)}
@@ -274,7 +272,7 @@ export function UploadPage() {
           />
 
           <div className="upload-divider">
-            <span>ou</span>
+            <span>{t('common.or')}</span>
           </div>
 
           {textFile ? (
@@ -307,9 +305,9 @@ export function UploadPage() {
               />
               <span className="dropzone-icon">📎</span>
               <span>
-                <strong>Dépose un fichier .txt ou .pdf</strong>
+                <strong>{t('upload.dropTextTitle')}</strong>
                 <br />
-                ou clique pour en choisir un
+                {t('upload.dropChoose')}
               </span>
             </label>
           )}
@@ -318,32 +316,32 @@ export function UploadPage() {
 
       <div className="upload-settings">
         <label>
-          Provider
+          {t('upload.provider')}
           <select value={provider} onChange={(e) => setProvider(e.target.value)} disabled={state === 'submitting'}>
-            <option value="ollama">Ollama (local)</option>
-            <option value="gemini">Gemini (gratuit)</option>
-            <option value="anthropic">Claude</option>
-            <option value="stub">Stub (sans IA)</option>
+            <option value="ollama">{t('upload.providerOllama')}</option>
+            <option value="gemini">{t('upload.providerGemini')}</option>
+            <option value="anthropic">{t('upload.providerClaude')}</option>
+            <option value="stub">{t('upload.providerStub')}</option>
           </select>
         </label>
         {mode === 'audio' && (
           <label>
-            Modèle Whisper
+            {t('upload.whisperModel')}
             <select value={modelSize} onChange={(e) => setModelSize(e.target.value)} disabled={state === 'submitting'}>
-              <option value="tiny">tiny — rapide</option>
-              <option value="small">small</option>
-              <option value="medium">medium</option>
-              <option value="large-v3">large-v3 — précis</option>
+              <option value="tiny">{t('upload.modelTiny')}</option>
+              <option value="small">{t('upload.modelSmall')}</option>
+              <option value="medium">{t('upload.modelMedium')}</option>
+              <option value="large-v3">{t('upload.modelLarge')}</option>
             </select>
           </label>
         )}
         <label>
-          Template
+          {t('upload.template')}
           <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} disabled={state === 'submitting'}>
-            <option value="">Structure par défaut</option>
-            {templates.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
+            <option value="">{t('common.defaultStructure')}</option>
+            {templates.map((tpl) => (
+              <option key={tpl.id} value={tpl.id}>
+                {tpl.name}
               </option>
             ))}
           </select>
@@ -357,13 +355,13 @@ export function UploadPage() {
           onClick={submitText}
           disabled={state === 'submitting' || !hasTextInput}
         >
-          {state === 'submitting' ? 'Envoi en cours…' : 'Générer la note'}
+          {state === 'submitting' ? t('upload.sending') : t('upload.generateButton')}
         </button>
       )}
 
       {templates.length === 0 && (
         <p className="upload-template-hint">
-          <Link to="/templates">Crée un template</Link> pour adapter la structure de la note à ce type de discours.
+          <Link to="/templates">{t('upload.createTemplateLink')}</Link> {t('upload.createTemplateHint')}
         </p>
       )}
 
