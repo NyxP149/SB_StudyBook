@@ -13,14 +13,17 @@ public class StudyProgramService {
     private final StudyProgramRepository programRepository;
     private final StudyArgumentRepository argumentRepository;
     private final StudyImageRepository imageRepository;
+    private final StudyArgumentNoteRepository argumentNoteRepository;
 
     public StudyProgramService(
             StudyProgramRepository programRepository,
             StudyArgumentRepository argumentRepository,
-            StudyImageRepository imageRepository) {
+            StudyImageRepository imageRepository,
+            StudyArgumentNoteRepository argumentNoteRepository) {
         this.programRepository = programRepository;
         this.argumentRepository = argumentRepository;
         this.imageRepository = imageRepository;
+        this.argumentNoteRepository = argumentNoteRepository;
     }
 
     public StudyProgram create(UUID userId, StudyProgramRequest request) {
@@ -41,6 +44,7 @@ public class StudyProgramService {
         getOrThrow(userId, id);
         for (StudyArgument argument : argumentRepository.findAllByProgramIdOrderByScheduledDateAsc(id)) {
             imageRepository.deleteAllByArgumentId(argument.getId());
+            argumentNoteRepository.deleteAllByArgumentId(argument.getId());
         }
         argumentRepository.deleteAllByProgramId(id);
         programRepository.deleteById(id);
