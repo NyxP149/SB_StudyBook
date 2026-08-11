@@ -8,7 +8,7 @@ import {
   listStudyPrograms,
   updateStudyArgument,
 } from '../api/client'
-import { formatDateShort } from '../utils/formatDate'
+import { formatDateOnly } from '../utils/formatDate'
 import type { StudyArgument, StudyArgumentInput, StudyProgram } from '../types'
 import './StudyPage.css'
 
@@ -130,7 +130,7 @@ export function StudyProgramDetailPage() {
               {args.map((argument) => (
                 <li key={argument.id} className={`study-argument-row ${argument.completed ? 'completed' : ''}`}>
                   <Link to={`/study/arguments/${argument.id}`} className="study-argument-link">
-                    <span className="study-argument-date">{formatDateShort(argument.scheduledDate, i18n.language)}</span>
+                    <span className="study-argument-date">{formatDateOnly(argument.scheduledDate, i18n.language)}</span>
                     <span className="study-argument-title">{argument.title}</span>
                     {argument.completed && <span className="study-argument-done">✓</span>}
                   </Link>

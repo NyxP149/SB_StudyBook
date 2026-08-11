@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { createStudyProgram, deleteStudyProgram, listStudyPrograms, listStudyUpcoming, updateStudyProgram } from '../api/client'
-import { formatDateShort } from '../utils/formatDate'
+import { formatDateOnly } from '../utils/formatDate'
 import type { StudyProgram, StudyProgramFrequency, StudyProgramInput, StudyUpcoming } from '../types'
 import './StudyPage.css'
 
@@ -103,7 +103,7 @@ export function StudyProgramsPage() {
             {upcoming.map((item) => (
               <li key={item.argumentId} className={item.overdue ? 'overdue' : ''}>
                 <Link to={`/study/arguments/${item.argumentId}`}>
-                  <span className="study-upcoming-date">{formatDateShort(item.scheduledDate, i18n.language)}</span>
+                  <span className="study-upcoming-date">{formatDateOnly(item.scheduledDate, i18n.language)}</span>
                   <span className="study-upcoming-title">{item.title}</span>
                   <span className="study-upcoming-program">{item.programName}</span>
                 </Link>

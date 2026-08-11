@@ -10,7 +10,7 @@ import {
   uploadStudyImage,
 } from '../api/client'
 import { AuthedImage } from '../components/AuthedImage'
-import { formatDateTime } from '../utils/formatDate'
+import { formatDateOnly } from '../utils/formatDate'
 import type { StudyArgument, StudyImage } from '../types'
 import './StudyPage.css'
 
@@ -139,7 +139,7 @@ export function StudyArgumentDetailPage() {
       <header className="note-detail-header">
         <div>
           <h1>{argument.title}</h1>
-          <p className="note-detail-theme">{formatDateTime(argument.scheduledDate, i18n.language)}</p>
+          <p className="note-detail-theme">{formatDateOnly(argument.scheduledDate, i18n.language)}</p>
         </div>
         <div className="note-detail-header-actions">
           <button
