@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useNote } from '../hooks/useNote'
 import { confirmNoteLink, deleteNote, dismissNoteLink, listFolders, organizeNote, updateNote } from '../api/client'
+import { InsertImageButton } from '../components/InsertImageButton'
 import { NoteMarkdown } from '../components/NoteMarkdown'
 import { StatusBadge } from '../components/StatusBadge'
 import { extractTheme } from '../utils/noteExcerpt'
@@ -34,6 +35,7 @@ export function NoteDetailPage() {
   const [showTranscript, setShowTranscript] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState('')
+  const editTextareaRef = useRef<HTMLTextAreaElement>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [folders, setFolders] = useState<Folder[]>([])
@@ -280,6 +282,13 @@ export function NoteDetailPage() {
                 <button type="button" className="note-action-button" onClick={cancelEditing} disabled={saving}>
                   {t('common.cancel')}
                 </button>
+                <InsertImageButton
+                  textareaRef={editTextareaRef}
+                  value={draft}
+                  onChange={setDraft}
+                  disabled={saving}
+                  onError={setSaveError}
+                />
               </>
             ) : (
               <>
@@ -304,6 +313,7 @@ export function NoteDetailPage() {
 
           {isEditing ? (
             <textarea
+              ref={editTextareaRef}
               className="note-edit-textarea"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}

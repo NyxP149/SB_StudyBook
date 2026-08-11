@@ -105,6 +105,14 @@ export interface StudyImage {
   createdAt: string
 }
 
+export interface StudyArgumentNote {
+  id: string
+  argumentId: string
+  content: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface StudyUpcoming {
   argumentId: string
   programId: string

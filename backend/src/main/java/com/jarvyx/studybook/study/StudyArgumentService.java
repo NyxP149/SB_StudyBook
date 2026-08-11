@@ -22,14 +22,17 @@ public class StudyArgumentService {
     private final StudyArgumentRepository argumentRepository;
     private final StudyProgramRepository programRepository;
     private final StudyImageRepository imageRepository;
+    private final StudyArgumentNoteRepository argumentNoteRepository;
 
     public StudyArgumentService(
             StudyArgumentRepository argumentRepository,
             StudyProgramRepository programRepository,
-            StudyImageRepository imageRepository) {
+            StudyImageRepository imageRepository,
+            StudyArgumentNoteRepository argumentNoteRepository) {
         this.argumentRepository = argumentRepository;
         this.programRepository = programRepository;
         this.imageRepository = imageRepository;
+        this.argumentNoteRepository = argumentNoteRepository;
     }
 
     public StudyArgument create(UUID userId, UUID programId, StudyArgumentRequest request) {
@@ -50,6 +53,7 @@ public class StudyArgumentService {
     public void delete(UUID userId, UUID id) {
         getOrThrow(userId, id);
         imageRepository.deleteAllByArgumentId(id);
+        argumentNoteRepository.deleteAllByArgumentId(id);
         argumentRepository.deleteById(id);
     }
 
@@ -120,6 +124,34 @@ public class StudyArgumentService {
     public void deleteImage(UUID userId, UUID imageId) {
         getImageOrThrow(userId, imageId);
         imageRepository.deleteById(imageId);
+    }
+
+    public StudyArgumentNote createNote(UUID userId, UUID argumentId, String content) {
+        StudyArgument argument = getOrThrow(userId, argumentId);
+        StudyArgumentNote note = new StudyArgumentNote(argument.getId(), content);
+        note.setUserId(userId);
+        return argumentNoteRepository.save(note);
+    }
+
+    public List<StudyArgumentNote> listNotes(UUID userId, UUID argumentId) {
+        getOrThrow(userId, argumentId);
+        return argumentNoteRepository.findAllByArgumentIdOrderByCreatedAtAsc(argumentId);
+    }
+
+    public StudyArgumentNote updateNote(UUID userId, UUID noteId, String content) {
+        StudyArgumentNote note = getNoteOrThrow(userId, noteId);
+        note.edit(content);
+        return argumentNoteRepository.save(note);
+    }
+
+    public StudyArgumentNote getNoteOrThrow(UUID userId, UUID noteId) {
+        return argumentNoteRepository.findByIdAndUserId(noteId, userId)
+                .orElseThrow(() -> new NoSuchElementException("Note introuvable : " + noteId));
+    }
+
+    public void deleteNote(UUID userId, UUID noteId) {
+        getNoteOrThrow(userId, noteId);
+        argumentNoteRepository.deleteById(noteId);
     }
 
     private void requireOwnedProgram(UUID userId, UUID programId) {

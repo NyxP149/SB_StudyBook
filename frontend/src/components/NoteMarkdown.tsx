@@ -1,6 +1,10 @@
 import ReactMarkdown from 'react-markdown'
 import type { Components } from 'react-markdown'
 import type { ReactNode } from 'react'
+import { fetchNoteImageObjectUrl } from '../api/client'
+import { AuthedImage } from './AuthedImage'
+
+const NOTE_IMAGE_PREFIX = 'note-image:'
 
 const SECTION_ICONS: Array<[RegExp, string]> = [
   [/th[eè]me/i, '🎯'],
@@ -45,6 +49,20 @@ const components: Components = {
     )
   },
   h3: ({ children }) => <h4 className="note-md-h3">{children}</h4>,
+  img: ({ src, alt }) => {
+    const url = typeof src === 'string' ? src : ''
+    if (url.startsWith(NOTE_IMAGE_PREFIX)) {
+      return (
+        <AuthedImage
+          imageId={url.slice(NOTE_IMAGE_PREFIX.length)}
+          alt={alt ?? ''}
+          className="note-md-image"
+          fetcher={fetchNoteImageObjectUrl}
+        />
+      )
+    }
+    return <img src={url} alt={alt ?? ''} className="note-md-image" />
+  },
 }
 
 export function NoteMarkdown({ content }: { content: string }) {

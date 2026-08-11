@@ -133,7 +133,8 @@
     "linkedTo": "🔗 Liée à ton étude « {{title}} »",
     "suggestedLink": "Cette note semble liée à ton étude personnelle « {{title}} ».",
     "confirmLink": "Confirmer le lien",
-    "dismissLink": "Ignorer"
+    "dismissLink": "Ignorer",
+    "insertImage": "🖼 Insérer une image"
   },
   "importance": {
     "normal": "Normale",
@@ -204,6 +205,13 @@
     "images": "Images",
     "addImage": "+ Ajouter une image",
     "noImages": "Aucune image pour l'instant.",
-    "errImageUpload": "Échec de l'envoi de l'image."
+    "errImageUpload": "Échec de l'envoi de l'image.",
+    "myNotes": "Mes notes",
+    "linkedNotes": "Notes liées",
+    "newNote": "+ Nouvelle note",
+    "noNotes": "Aucune note personnelle pour l'instant.",
+    "noLinkedNotes": "Aucune note transcrite liée pour l'instant.",
+    "notePlaceholder": "Écris ta note ici…",
+    "confirmDeleteNote": "Supprimer définitivement cette note ?"
   }
 }

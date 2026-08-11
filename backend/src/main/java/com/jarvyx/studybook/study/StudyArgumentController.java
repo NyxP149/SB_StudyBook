@@ -1,6 +1,8 @@
 package com.jarvyx.studybook.study;
 
 import com.jarvyx.studybook.auth.CurrentUser;
+import com.jarvyx.studybook.study.dto.StudyArgumentNoteRequest;
+import com.jarvyx.studybook.study.dto.StudyArgumentNoteResponse;
 import com.jarvyx.studybook.study.dto.StudyArgumentRequest;
 import com.jarvyx.studybook.study.dto.StudyArgumentResponse;
 import com.jarvyx.studybook.study.dto.StudyImageResponse;
@@ -94,6 +96,33 @@ public class StudyArgumentController {
     @DeleteMapping("/images/{id}")
     public ResponseEntity<Void> deleteImage(@PathVariable UUID id) {
         argumentService.deleteImage(currentUser.getUserId(), id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/arguments/{id}/notes")
+    public ResponseEntity<StudyArgumentNoteResponse> createNote(
+            @PathVariable UUID id, @Valid @RequestBody StudyArgumentNoteRequest request) {
+        StudyArgumentNote note = argumentService.createNote(currentUser.getUserId(), id, request.content());
+        return ResponseEntity.status(HttpStatus.CREATED).body(StudyArgumentNoteResponse.from(note));
+    }
+
+    @GetMapping("/arguments/{id}/notes")
+    public List<StudyArgumentNoteResponse> listNotes(@PathVariable UUID id) {
+        return argumentService.listNotes(currentUser.getUserId(), id).stream()
+                .map(StudyArgumentNoteResponse::from)
+                .toList();
+    }
+
+    @PutMapping("/notes/{id}")
+    public StudyArgumentNoteResponse updateNote(
+            @PathVariable UUID id, @Valid @RequestBody StudyArgumentNoteRequest request) {
+        return StudyArgumentNoteResponse.from(
+                argumentService.updateNote(currentUser.getUserId(), id, request.content()));
+    }
+
+    @DeleteMapping("/notes/{id}")
+    public ResponseEntity<Void> deleteNote(@PathVariable UUID id) {
+        argumentService.deleteNote(currentUser.getUserId(), id);
         return ResponseEntity.noContent().build();
     }
 }

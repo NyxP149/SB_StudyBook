@@ -101,6 +101,10 @@ public class NoteService {
         return noteRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
     }
 
+    public List<Note> listLinkedToArgument(UUID userId, UUID argumentId) {
+        return noteRepository.findAllByLinkedArgumentIdAndUserIdOrderByCreatedAtDesc(argumentId, userId);
+    }
+
     public Note getOrThrow(UUID userId, UUID id) {
         return noteRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new NoSuchElementException("Note introuvable : " + id));

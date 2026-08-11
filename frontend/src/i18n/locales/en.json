@@ -133,7 +133,8 @@
     "linkedTo": "🔗 Linked to your study \"{{title}}\"",
     "suggestedLink": "This note seems related to your personal study \"{{title}}\".",
     "confirmLink": "Confirm the link",
-    "dismissLink": "Dismiss"
+    "dismissLink": "Dismiss",
+    "insertImage": "🖼 Insert an image"
   },
   "importance": {
     "normal": "Normal",
@@ -204,6 +205,13 @@
     "images": "Images",
     "addImage": "+ Add an image",
     "noImages": "No images yet.",
-    "errImageUpload": "Failed to upload the image."
+    "errImageUpload": "Failed to upload the image.",
+    "myNotes": "My notes",
+    "linkedNotes": "Linked notes",
+    "newNote": "+ New note",
+    "noNotes": "No personal notes yet.",
+    "noLinkedNotes": "No linked transcribed notes yet.",
+    "notePlaceholder": "Write your note here…",
+    "confirmDeleteNote": "Permanently delete this note?"
   }
 }

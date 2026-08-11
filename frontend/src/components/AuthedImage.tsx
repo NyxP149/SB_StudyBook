@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react'
-import { fetchStudyImageObjectUrl } from '../api/client'
 
-export function AuthedImage({ imageId, alt, className }: { imageId: string; alt: string; className?: string }) {
+export function AuthedImage({
+  imageId,
+  alt,
+  className,
+  fetcher,
+}: {
+  imageId: string
+  alt: string
+  className?: string
+  fetcher: (id: string) => Promise<string>
+}) {
   const [url, setUrl] = useState<string | null>(null)
 
   useEffect(() => {
     let objectUrl: string | null = null
     let cancelled = false
-    fetchStudyImageObjectUrl(imageId).then((u) => {
+    fetcher(imageId).then((u) => {
       if (cancelled) {
         URL.revokeObjectURL(u)
         return
@@ -19,7 +28,7 @@ export function AuthedImage({ imageId, alt, className }: { imageId: string; alt:
       cancelled = true
       if (objectUrl) URL.revokeObjectURL(objectUrl)
     }
-  }, [imageId])
+  }, [imageId, fetcher])
 
   if (!url) return <div className={`authed-image-placeholder ${className ?? ''}`} />
   return <img src={url} alt={alt} className={className} />

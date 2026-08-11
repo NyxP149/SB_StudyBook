@@ -2,32 +2,131 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
+  createStudyArgumentNote,
   deleteStudyArgument,
+  deleteStudyArgumentNote,
   deleteStudyImage,
+  fetchStudyImageObjectUrl,
   getStudyArgument,
+  listNotesLinkedToArgument,
+  listStudyArgumentNotes,
   listStudyImages,
   updateStudyArgument,
+  updateStudyArgumentNote,
   uploadStudyImage,
 } from '../api/client'
 import { AuthedImage } from '../components/AuthedImage'
-import { formatDateOnly } from '../utils/formatDate'
-import type { StudyArgument, StudyImage } from '../types'
+import { InsertImageButton } from '../components/InsertImageButton'
+import { NoteMarkdown } from '../components/NoteMarkdown'
+import { StatusBadge } from '../components/StatusBadge'
+import { formatDateOnly, formatDateTime } from '../utils/formatDate'
+import type { NoteSummary, StudyArgument, StudyArgumentNote, StudyImage } from '../types'
 import './StudyPage.css'
+
+function ArgumentNoteItem({
+  note,
+  onSaved,
+  onDeleted,
+  onError,
+}: {
+  note: StudyArgumentNote
+  onSaved: (note: StudyArgumentNote) => void
+  onDeleted: (id: string) => void
+  onError: (message: string) => void
+}) {
+  const { t } = useTranslation()
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState(note.content)
+  const [saving, setSaving] = useState(false)
+
+  function startEditing() {
+    setDraft(note.content)
+    setIsEditing(true)
+  }
+
+  async function save() {
+    setSaving(true)
+    try {
+      onSaved(await updateStudyArgumentNote(note.id, draft))
+      setIsEditing(false)
+    } catch (e) {
+      onError(e instanceof Error ? e.message : t('common.saveFailed'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function remove() {
+    if (!window.confirm(t('study.confirmDeleteNote'))) return
+    try {
+      await deleteStudyArgumentNote(note.id)
+      onDeleted(note.id)
+    } catch (e) {
+      onError(e instanceof Error ? e.message : t('common.deleteFailed'))
+    }
+  }
+
+  return (
+    <div className="study-note-item">
+      <div className="note-detail-actions">
+        {isEditing ? (
+          <>
+            <button type="button" className="note-action-button primary" onClick={save} disabled={saving}>
+              {saving ? t('noteDetail.saving') : t('noteDetail.save')}
+            </button>
+            <button type="button" className="note-action-button" onClick={() => setIsEditing(false)} disabled={saving}>
+              {t('common.cancel')}
+            </button>
+            <InsertImageButton textareaRef={textareaRef} value={draft} onChange={setDraft} disabled={saving} onError={onError} />
+          </>
+        ) : (
+          <>
+            <button type="button" className="note-action-button" onClick={startEditing}>
+              {t('noteDetail.edit')}
+            </button>
+            <button type="button" className="note-action-button danger" onClick={remove}>
+              {t('common.delete')}
+            </button>
+          </>
+        )}
+      </div>
+
+      {isEditing ? (
+        <textarea
+          ref={textareaRef}
+          className="note-edit-textarea"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          disabled={saving}
+          rows={8}
+          placeholder={t('study.notePlaceholder')}
+        />
+      ) : (
+        <NoteMarkdown content={note.content} />
+      )}
+    </div>
+  )
+}
 
 export function StudyArgumentDetailPage() {
   const { t, i18n } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const newNoteTextareaRef = useRef<HTMLTextAreaElement>(null)
 
   const [argument, setArgument] = useState<StudyArgument | null>(null)
   const [images, setImages] = useState<StudyImage[]>([])
+  const [notes, setNotes] = useState<StudyArgumentNote[]>([])
+  const [linkedNotes, setLinkedNotes] = useState<NoteSummary[]>([])
+  const [activeTab, setActiveTab] = useState<'mine' | 'linked'>('mine')
   const [error, setError] = useState<string | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [draft, setDraft] = useState('')
-  const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [creatingNote, setCreatingNote] = useState(false)
+  const [newNoteDraft, setNewNoteDraft] = useState('')
+  const [savingNewNote, setSavingNewNote] = useState(false)
 
   const refresh = () => {
     if (!id) return
@@ -37,6 +136,12 @@ export function StudyArgumentDetailPage() {
     listStudyImages(id)
       .then(setImages)
       .catch(() => setImages([]))
+    listStudyArgumentNotes(id)
+      .then(setNotes)
+      .catch(() => setNotes([]))
+    listNotesLinkedToArgument(id)
+      .then(setLinkedNotes)
+      .catch(() => setLinkedNotes([]))
   }
 
   useEffect(refresh, [id])
@@ -55,30 +160,6 @@ export function StudyArgumentDetailPage() {
         <p className="notes-loading">{t('common.loading')}</p>
       </div>
     )
-  }
-
-  function startEditing() {
-    setDraft(argument!.content ?? '')
-    setIsEditing(true)
-  }
-
-  async function saveContent() {
-    setSaving(true)
-    setError(null)
-    try {
-      const updated = await updateStudyArgument(argument!.id, {
-        title: argument!.title,
-        scheduledDate: argument!.scheduledDate,
-        content: draft,
-        completed: argument!.completed,
-      })
-      setArgument(updated)
-      setIsEditing(false)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : t('common.saveFailed'))
-    } finally {
-      setSaving(false)
-    }
   }
 
   async function toggleCompleted() {
@@ -130,6 +211,26 @@ export function StudyArgumentDetailPage() {
     }
   }
 
+  function startCreatingNote() {
+    setNewNoteDraft('')
+    setCreatingNote(true)
+  }
+
+  async function saveNewNote() {
+    if (!newNoteDraft.trim()) return
+    setSavingNewNote(true)
+    try {
+      const created = await createStudyArgumentNote(argument!.id, newNoteDraft)
+      setNotes((prev) => [...prev, created])
+      setCreatingNote(false)
+      setNewNoteDraft('')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t('common.saveFailed'))
+    } finally {
+      setSavingNewNote(false)
+    }
+  }
+
   return (
     <div className="study-page">
       <Link to={`/study/programs/${argument.programId}`} className="back-link">
@@ -156,38 +257,6 @@ export function StudyArgumentDetailPage() {
       </header>
 
       {error && <p className="upload-error">{error}</p>}
-
-      <div className="note-detail-actions">
-        {isEditing ? (
-          <>
-            <button type="button" className="note-action-button primary" onClick={saveContent} disabled={saving}>
-              {saving ? t('noteDetail.saving') : t('noteDetail.save')}
-            </button>
-            <button type="button" className="note-action-button" onClick={() => setIsEditing(false)} disabled={saving}>
-              {t('common.cancel')}
-            </button>
-          </>
-        ) : (
-          <button type="button" className="note-action-button" onClick={startEditing}>
-            {t('noteDetail.edit')}
-          </button>
-        )}
-      </div>
-
-      {isEditing ? (
-        <textarea
-          className="note-edit-textarea"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          disabled={saving}
-          rows={14}
-          placeholder={t('study.contentPlaceholder')}
-        />
-      ) : argument.content ? (
-        <p className="study-argument-content">{argument.content}</p>
-      ) : (
-        <p className="notes-loading">{t('study.noContent')}</p>
-      )}
 
       <div className="study-images-section">
         <div className="study-images-header">
@@ -219,7 +288,12 @@ export function StudyArgumentDetailPage() {
           <div className="study-images-grid">
             {images.map((image) => (
               <div key={image.id} className="study-image-tile">
-                <AuthedImage imageId={image.id} alt={image.filename} className="study-image-thumb" />
+                <AuthedImage
+                  imageId={image.id}
+                  alt={image.filename}
+                  className="study-image-thumb"
+                  fetcher={fetchStudyImageObjectUrl}
+                />
                 <button
                   type="button"
                   className="study-image-remove"
@@ -233,6 +307,108 @@ export function StudyArgumentDetailPage() {
           </div>
         )}
       </div>
+
+      <div className="mode-tabs">
+        <button
+          type="button"
+          className={`mode-tab ${activeTab === 'mine' ? 'active' : ''}`}
+          onClick={() => setActiveTab('mine')}
+        >
+          {t('study.myNotes')}
+        </button>
+        <button
+          type="button"
+          className={`mode-tab ${activeTab === 'linked' ? 'active' : ''}`}
+          onClick={() => setActiveTab('linked')}
+        >
+          {t('study.linkedNotes')} {linkedNotes.length > 0 && `(${linkedNotes.length})`}
+        </button>
+      </div>
+
+      {activeTab === 'mine' && (
+        <div className="study-notes-section">
+          {!creatingNote && (
+            <button type="button" className="note-action-button" onClick={startCreatingNote}>
+              {t('study.newNote')}
+            </button>
+          )}
+
+          {creatingNote && (
+            <div className="study-note-item">
+              <textarea
+                ref={newNoteTextareaRef}
+                className="note-edit-textarea"
+                value={newNoteDraft}
+                onChange={(e) => setNewNoteDraft(e.target.value)}
+                disabled={savingNewNote}
+                rows={8}
+                placeholder={t('study.notePlaceholder')}
+              />
+              <div className="note-detail-actions">
+                <button
+                  type="button"
+                  className="note-action-button primary"
+                  onClick={saveNewNote}
+                  disabled={savingNewNote || !newNoteDraft.trim()}
+                >
+                  {savingNewNote ? t('noteDetail.saving') : t('noteDetail.save')}
+                </button>
+                <button
+                  type="button"
+                  className="note-action-button"
+                  onClick={() => setCreatingNote(false)}
+                  disabled={savingNewNote}
+                >
+                  {t('common.cancel')}
+                </button>
+                <InsertImageButton
+                  textareaRef={newNoteTextareaRef}
+                  value={newNoteDraft}
+                  onChange={setNewNoteDraft}
+                  disabled={savingNewNote}
+                  onError={setError}
+                />
+              </div>
+            </div>
+          )}
+
+          {notes.length === 0 && !creatingNote ? (
+            <p className="notes-loading">{t('study.noNotes')}</p>
+          ) : (
+            <div className="study-notes-list">
+              {notes.map((note) => (
+                <ArgumentNoteItem
+                  key={note.id}
+                  note={note}
+                  onSaved={(updated) => setNotes((prev) => prev.map((n) => (n.id === updated.id ? updated : n)))}
+                  onDeleted={(noteId) => setNotes((prev) => prev.filter((n) => n.id !== noteId))}
+                  onError={setError}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'linked' && (
+        <div className="study-notes-section">
+          {linkedNotes.length === 0 ? (
+            <p className="notes-loading">{t('study.noLinkedNotes')}</p>
+          ) : (
+            <ul className="study-linked-notes-list">
+              {linkedNotes.map((note) => (
+                <li key={note.id}>
+                  <Link to={`/notes/${note.id}`} className="study-linked-note-row">
+                    <span className="study-linked-note-title">{note.originalFilename}</span>
+                    <StatusBadge status={note.status} />
+                    <span className="study-linked-note-date">{formatDateTime(note.createdAt, i18n.language)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   )
 }

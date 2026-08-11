@@ -6,6 +6,7 @@ import type {
   NoteSummary,
   StudyArgument,
   StudyArgumentInput,
+  StudyArgumentNote,
   StudyImage,
   StudyProgram,
   StudyProgramInput,
@@ -23,6 +24,7 @@ const TEMPLATES_URL = `${API_BASE}/api/templates`
 const FOLDERS_URL = `${API_BASE}/api/folders`
 const HEALTH_URL = `${API_BASE}/api/health`
 const STUDY_URL = `${API_BASE}/api/study`
+const NOTE_IMAGES_URL = `${API_BASE}/api/note-images`
 
 // Distingue une vraie réponse du serveur (même en erreur) d'un échec réseau
 // (fetch() qui rejette avant d'obtenir une Response, ex: hors ligne) — les
@@ -334,4 +336,51 @@ export async function fetchStudyImageObjectUrl(id: string): Promise<string> {
   if (!response.ok) throw new ApiError(response.status, `Erreur ${response.status}`)
   const blob = await response.blob()
   return URL.createObjectURL(blob)
+}
+
+export async function uploadNoteImage(file: File): Promise<{ id: string }> {
+  const formData = new FormData()
+  formData.append('image', file)
+  const response = await authFetch(NOTE_IMAGES_URL, { method: 'POST', body: formData })
+  return parseOrThrow<{ id: string }>(response)
+}
+
+export async function fetchNoteImageObjectUrl(id: string): Promise<string> {
+  const response = await authFetch(`${NOTE_IMAGES_URL}/${id}`)
+  if (!response.ok) throw new ApiError(response.status, `Erreur ${response.status}`)
+  const blob = await response.blob()
+  return URL.createObjectURL(blob)
+}
+
+export async function listStudyArgumentNotes(argumentId: string): Promise<StudyArgumentNote[]> {
+  const response = await authFetch(`${STUDY_URL}/arguments/${argumentId}/notes`)
+  return parseOrThrow<StudyArgumentNote[]>(response)
+}
+
+export async function createStudyArgumentNote(argumentId: string, content: string): Promise<StudyArgumentNote> {
+  const response = await authFetch(`${STUDY_URL}/arguments/${argumentId}/notes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content }),
+  })
+  return parseOrThrow<StudyArgumentNote>(response)
+}
+
+export async function updateStudyArgumentNote(id: string, content: string): Promise<StudyArgumentNote> {
+  const response = await authFetch(`${STUDY_URL}/notes/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content }),
+  })
+  return parseOrThrow<StudyArgumentNote>(response)
+}
+
+export async function deleteStudyArgumentNote(id: string): Promise<void> {
+  const response = await authFetch(`${STUDY_URL}/notes/${id}`, { method: 'DELETE' })
+  return parseOrThrow<void>(response)
+}
+
+export async function listNotesLinkedToArgument(argumentId: string): Promise<NoteSummary[]> {
+  const response = await authFetch(`${NOTES_URL}/linked-to/${argumentId}`)
+  return parseOrThrow<NoteSummary[]>(response)
 }

@@ -58,6 +58,13 @@ public class NoteController {
         return noteService.listAll(currentUser.getUserId()).stream().map(NoteSummaryResponse::from).toList();
     }
 
+    @GetMapping("/linked-to/{argumentId}")
+    public List<NoteSummaryResponse> listLinkedTo(@PathVariable UUID argumentId) {
+        return noteService.listLinkedToArgument(currentUser.getUserId(), argumentId).stream()
+                .map(NoteSummaryResponse::from)
+                .toList();
+    }
+
     @GetMapping("/{id}")
     public NoteResponse get(@PathVariable UUID id) {
         return noteService.toResponse(noteService.getOrThrow(currentUser.getUserId(), id));

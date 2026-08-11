@@ -196,11 +196,6 @@
   color: #fff;
 }
 
-.study-argument-content {
-  white-space: pre-wrap;
-  line-height: 1.7;
-}
-
 .study-images-section {
   margin-top: 12px;
   padding-top: 20px;
@@ -258,4 +253,61 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.study-notes-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.study-notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.study-note-item {
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.study-linked-notes-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.study-linked-note-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--ink);
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+}
+
+.study-linked-note-title {
+  flex: 1;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.study-linked-note-date {
+  font-size: 12px;
+  color: var(--ink-faint);
+  flex-shrink: 0;
 }

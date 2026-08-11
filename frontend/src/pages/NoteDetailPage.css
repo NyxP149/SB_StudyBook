@@ -324,6 +324,20 @@
   font-size: 0.95em;
 }
 
+.note-md-image {
+  display: block;
+  max-width: 100%;
+  border-radius: 10px;
+  margin: 14px 0;
+  box-shadow: var(--shadow);
+}
+
+div.note-md-image.authed-image-placeholder {
+  width: 100%;
+  min-height: 120px;
+  background: var(--paper-deep);
+}
+
 .note-markdown p {
   margin: 10px 0;
   color: var(--ink-soft);
