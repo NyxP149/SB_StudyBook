@@ -230,6 +230,10 @@
   margin: 0 auto;
 }
 
+.shell.sidebar-collapsed .shell-main {
+  padding-top: 76px;
+}
+
 @media (max-width: 768px) {
   .shell-content-area {
     margin-left: 0 !important;
