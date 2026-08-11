@@ -27,6 +27,39 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Thèmes d'accent : ne remplacent que --gold/--gold-bright (boutons, états
+   actifs, mises en avant) — le fond "papier" et les couleurs sémantiques
+   (--teal = terminé, --burgundy = erreur) restent identiques dans tous les
+   thèmes pour ne pas brouiller leur sens. */
+:root[data-theme='black'] {
+  --gold: #52525b;
+  --gold-bright: #8b8b94;
+}
+:root[data-theme='green'] {
+  --gold: #3f7d3f;
+  --gold-bright: #7cb87c;
+}
+:root[data-theme='purple'] {
+  --gold: #7d4f9e;
+  --gold-bright: #b98bd6;
+}
+:root[data-theme='orange'] {
+  --gold: #c96a2e;
+  --gold-bright: #eba36c;
+}
+:root[data-theme='cyan'] {
+  --gold: #2f8f96;
+  --gold-bright: #6fc9cf;
+}
+:root[data-theme='blue'] {
+  --gold: #3f6fa8;
+  --gold-bright: #85aee0;
+}
+:root[data-theme='fuchsia'] {
+  --gold: #b83f8c;
+  --gold-bright: #e488c4;
+}
+
 * {
   box-sizing: border-box;
 }

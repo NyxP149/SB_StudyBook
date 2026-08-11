@@ -25,7 +25,18 @@
       "study": "Personal study"
     },
     "logout": "Log out",
-    "language": "Language"
+    "language": "Language",
+    "theme": "Theme",
+    "themeName": {
+      "gold": "Gold (default)",
+      "black": "Black",
+      "green": "Green",
+      "purple": "Purple",
+      "orange": "Orange",
+      "cyan": "Cyan",
+      "blue": "Blue",
+      "fuchsia": "Fuchsia"
+    }
   },
   "auth": {
     "login": "Log in",

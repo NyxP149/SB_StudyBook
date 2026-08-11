@@ -25,7 +25,18 @@
       "study": "Studio personale"
     },
     "logout": "Disconnetti",
-    "language": "Lingua"
+    "language": "Lingua",
+    "theme": "Tema",
+    "themeName": {
+      "gold": "Oro (predefinito)",
+      "black": "Nero",
+      "green": "Verde",
+      "purple": "Viola",
+      "orange": "Arancione",
+      "cyan": "Ciano",
+      "blue": "Blu",
+      "fuchsia": "Fucsia"
+    }
   },
   "auth": {
     "login": "Accedi",

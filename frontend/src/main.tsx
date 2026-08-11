@@ -5,6 +5,9 @@ import './index.css'
 import './i18n'
 import App from './App.tsx'
 import { AuthProvider } from './auth/AuthContext'
+import { applyTheme, readStoredTheme } from './theme'
+
+applyTheme(readStoredTheme())
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

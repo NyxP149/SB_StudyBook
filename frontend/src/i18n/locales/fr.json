@@ -25,7 +25,18 @@
       "study": "Étude personnelle"
     },
     "logout": "Déconnexion",
-    "language": "Langue"
+    "language": "Langue",
+    "theme": "Thème",
+    "themeName": {
+      "gold": "Or (défaut)",
+      "black": "Noir",
+      "green": "Vert",
+      "purple": "Violet",
+      "orange": "Orange",
+      "cyan": "Cyan",
+      "blue": "Bleu",
+      "fuchsia": "Fuchsia"
+    }
   },
   "auth": {
     "login": "Se connecter",

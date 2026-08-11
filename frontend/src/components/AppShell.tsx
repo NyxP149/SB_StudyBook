@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth/AuthContext'
+import { applyTheme, readStoredTheme, THEMES, type ThemeName } from '../theme'
 import './AppShell.css'
 
 const SIDEBAR_KEY = 'studybook.sidebarCollapsed'
@@ -13,6 +14,17 @@ const LANGUAGES: Array<{ code: string; label: string }> = [
   { code: 'it', label: 'IT' },
 ]
 
+const THEME_SWATCH_COLOR: Record<ThemeName, string> = {
+  gold: '#d9a44e',
+  black: '#8b8b94',
+  green: '#7cb87c',
+  purple: '#b98bd6',
+  orange: '#eba36c',
+  cyan: '#6fc9cf',
+  blue: '#85aee0',
+  fuchsia: '#e488c4',
+}
+
 function readInitialCollapsed(): boolean {
   const stored = localStorage.getItem(SIDEBAR_KEY)
   if (stored !== null) return stored === 'true'
@@ -23,10 +35,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { t, i18n } = useTranslation()
   const { username, logout } = useAuth()
   const [collapsed, setCollapsed] = useState(readInitialCollapsed)
+  const [theme, setTheme] = useState<ThemeName>(readStoredTheme)
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_KEY, String(collapsed))
   }, [collapsed])
+
+  function selectTheme(next: ThemeName) {
+    setTheme(next)
+    applyTheme(next)
+  }
 
   function collapseOnMobile() {
     if (window.innerWidth < MOBILE_BREAKPOINT) setCollapsed(true)
@@ -57,7 +75,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="shell-brand-mark">📖</span>
             <span className="shell-brand-text">
               <strong>StudyBook</strong>
-              <em>{t('shell.brandTagline')}</em>
             </span>
           </NavLink>
           <button
@@ -105,12 +122,26 @@ export function AppShell({ children }: { children: ReactNode }) {
               </button>
             ))}
           </div>
+          <div className="shell-theme-switch" role="group" aria-label={t('shell.theme')}>
+            {THEMES.map((name) => (
+              <button
+                key={name}
+                type="button"
+                className={`shell-theme-swatch ${theme === name ? 'active' : ''}`}
+                style={{ background: THEME_SWATCH_COLOR[name] }}
+                onClick={() => selectTheme(name)}
+                aria-label={t(`shell.themeName.${name}`)}
+                title={t(`shell.themeName.${name}`)}
+              />
+            ))}
+          </div>
           <div className="shell-account">
             <span className="shell-username">{username}</span>
             <button type="button" className="shell-logout" onClick={logout}>
               {t('shell.logout')}
             </button>
           </div>
+          <em className="shell-tagline">{t('shell.brandTagline')}</em>
         </div>
       </aside>
 
