@@ -180,6 +180,15 @@ export async function organizeNote(id: string, folderId: string | null, importan
   return parseOrThrow<Note>(response)
 }
 
+export async function updateNoteBackground(id: string, background: string | null): Promise<Note> {
+  const response = await authFetch(`${NOTES_URL}/${id}/background`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ background }),
+  })
+  return parseOrThrow<Note>(response)
+}
+
 export async function confirmNoteLink(id: string): Promise<Note> {
   const response = await authFetch(`${NOTES_URL}/${id}/link/confirm`, { method: 'PATCH' })
   return parseOrThrow<Note>(response)

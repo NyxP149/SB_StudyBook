@@ -2,10 +2,20 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useNote } from '../hooks/useNote'
-import { confirmNoteLink, deleteNote, dismissNoteLink, listFolders, organizeNote, updateNote } from '../api/client'
+import {
+  confirmNoteLink,
+  deleteNote,
+  dismissNoteLink,
+  listFolders,
+  organizeNote,
+  updateNote,
+  updateNoteBackground,
+} from '../api/client'
 import { InsertImageButton } from '../components/InsertImageButton'
+import { NoteBackgroundPicker } from '../components/NoteBackgroundPicker'
 import { NoteMarkdown } from '../components/NoteMarkdown'
 import { StatusBadge } from '../components/StatusBadge'
+import { backgroundClassName } from '../noteBackgrounds'
 import { extractTheme } from '../utils/noteExcerpt'
 import { formatDateTime } from '../utils/formatDate'
 import type { Folder, NoteImportance } from '../types'
@@ -44,6 +54,7 @@ export function NoteDetailPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [linkActionPending, setLinkActionPending] = useState(false)
   const [linkError, setLinkError] = useState<string | null>(null)
+  const [backgroundError, setBackgroundError] = useState<string | null>(null)
   type OrganizeTarget = { folderId: string | null; importance: NoteImportance }
   const latestOrganizeTargetRef = useRef<OrganizeTarget | null>(null)
   const queuedOrganizeRef = useRef<OrganizeTarget | null>(null)
@@ -146,6 +157,15 @@ export function NoteDetailPage() {
       setLinkError(e instanceof Error ? e.message : t('common.saveFailed'))
     } finally {
       setLinkActionPending(false)
+    }
+  }
+
+  async function handleBackgroundChange(next: string | null) {
+    setBackgroundError(null)
+    try {
+      setNote(await updateNoteBackground(note!.id, next))
+    } catch (e) {
+      setBackgroundError(e instanceof Error ? e.message : t('common.saveFailed'))
     }
   }
 
@@ -305,11 +325,13 @@ export function NoteDetailPage() {
                 <button type="button" className="note-action-button" onClick={() => window.print()}>
                   {t('noteDetail.print')}
                 </button>
+                <NoteBackgroundPicker value={note.background} onSelect={handleBackgroundChange} />
               </>
             )}
           </div>
 
           {saveError && <p className="upload-error no-print">{saveError}</p>}
+          {backgroundError && <p className="upload-error no-print">{backgroundError}</p>}
 
           {isEditing ? (
             <textarea
@@ -321,7 +343,7 @@ export function NoteDetailPage() {
               rows={20}
             />
           ) : (
-            <NoteMarkdown content={note.noteMarkdown} />
+            <NoteMarkdown content={note.noteMarkdown} backgroundClass={backgroundClassName(note.background)} />
           )}
 
           {note.transcript && (

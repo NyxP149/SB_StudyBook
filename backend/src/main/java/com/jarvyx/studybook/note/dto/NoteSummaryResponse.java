@@ -15,6 +15,7 @@ public record NoteSummaryResponse(
         UUID folderId,
         NoteImportance importance,
         NoteStatus status,
+        String background,
         Instant createdAt) {
 
     public static NoteSummaryResponse from(Note note) {
@@ -27,6 +28,7 @@ public record NoteSummaryResponse(
                 note.getFolderId(),
                 note.getImportance(),
                 note.getStatus(),
+                note.getBackground(),
                 note.getCreatedAt());
     }
 }

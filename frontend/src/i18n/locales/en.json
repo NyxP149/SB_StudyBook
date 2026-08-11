@@ -140,7 +140,24 @@
     "suggestedLink": "This note seems related to your personal study \"{{title}}\".",
     "confirmLink": "Confirm the link",
     "dismissLink": "Dismiss",
-    "insertImage": "🖼 Insert an image"
+    "insertImage": "🖼 Insert an image",
+    "changeBackground": "🎨 Change background",
+    "backgroundDefault": "Paper (default)",
+    "background": {
+      "or": "Gold",
+      "sauge": "Sage",
+      "bordeaux": "Burgundy",
+      "ardoise": "Slate",
+      "prune": "Plum",
+      "olive": "Olive",
+      "corail": "Coral",
+      "parchemin": "Old parchment",
+      "nuit-etoilee": "Starry night",
+      "lin-naturel": "Natural linen",
+      "feuille-olivier": "Olive leaf",
+      "aquarelle-poudree": "Powder watercolor",
+      "ardoise-minerale": "Mineral slate"
+    }
   },
   "importance": {
     "normal": "Normal",

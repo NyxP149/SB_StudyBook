@@ -22,6 +22,7 @@ public record NoteResponse(
         String linkedArgumentTitle,
         UUID suggestedArgumentId,
         String suggestedArgumentTitle,
+        String background,
         Instant createdAt) {
 
     public static NoteResponse from(Note note, String linkedArgumentTitle, String suggestedArgumentTitle) {
@@ -41,6 +42,7 @@ public record NoteResponse(
                 linkedArgumentTitle,
                 note.getSuggestedArgumentId(),
                 suggestedArgumentTitle,
+                note.getBackground(),
                 note.getCreatedAt());
     }
 }

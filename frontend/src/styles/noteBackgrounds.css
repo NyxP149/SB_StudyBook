@@ -1,0 +1,100 @@
+/* Présets de fond de note : chaque classe redéfinit localement les variables
+   --paper-card, --ink, --ink-soft, --ink-faint, --gold et --line utilisées
+   par .note-card et .note-markdown (et tout ce qui est dessous, via la
+   cascade des custom properties CSS) — pas besoin de retoucher chaque
+   sous-élément un par un. Les couleurs sémantiques (--teal, --burgundy,
+   statut) ne sont jamais touchées, pour rester lisibles quel que soit le
+   fond choisi. */
+
+/* --- 7 couleurs unies --- */
+
+.note-bg-or {
+  --paper-card: #f9edd3;
+  --line: rgba(138, 106, 53, 0.18);
+}
+.note-bg-sauge {
+  --paper-card: #e7efe0;
+  --line: rgba(63, 111, 79, 0.18);
+}
+.note-bg-bordeaux {
+  --paper-card: #f6e5e5;
+  --line: rgba(140, 59, 59, 0.18);
+}
+.note-bg-ardoise {
+  --paper-card: #e6ebf1;
+  --line: rgba(63, 84, 110, 0.18);
+}
+.note-bg-prune {
+  --paper-card: #f0e3f0;
+  --line: rgba(110, 63, 110, 0.18);
+}
+.note-bg-olive {
+  --paper-card: #eef0dd;
+  --line: rgba(94, 102, 42, 0.18);
+}
+.note-bg-corail {
+  --paper-card: #fbe6dd;
+  --line: rgba(179, 90, 51, 0.18);
+}
+
+/* --- 6 "chemises" décorées : fond illustré + police assortie --- */
+
+.note-bg-parchemin {
+  --paper-card: radial-gradient(ellipse at center, #f6ecd4 0%, #e6d3a8 100%);
+  --ink: #4a3520;
+  --ink-soft: #6b5439;
+  --ink-faint: #8a7355;
+  --gold: #8a6a35;
+  --line: rgba(74, 53, 32, 0.2);
+}
+
+.note-bg-nuit-etoilee {
+  --paper-card: radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.55) 0 2px, transparent 3px),
+    radial-gradient(circle at 68% 55%, rgba(255, 255, 255, 0.4) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 42% 78%, rgba(255, 255, 255, 0.35) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 85% 18%, rgba(255, 255, 255, 0.45) 0 2px, transparent 3px),
+    radial-gradient(circle at 30% 45%, rgba(255, 255, 255, 0.3) 0 1px, transparent 2px),
+    radial-gradient(circle at 92% 70%, rgba(255, 255, 255, 0.3) 0 1px, transparent 2px),
+    linear-gradient(160deg, #1b2340 0%, #10152b 100%);
+  --ink: #ede4c8;
+  --ink-soft: #cfc4a0;
+  --ink-faint: #a89c7c;
+  --gold: #f0d98c;
+  --line: rgba(237, 228, 200, 0.2);
+}
+
+.note-bg-lin-naturel {
+  --paper-card: repeating-linear-gradient(45deg, #efe7d8, #efe7d8 3px, #e9dfcb 3px, #e9dfcb 6px);
+  --ink: #4a4030;
+  --ink-soft: #6b6048;
+  --ink-faint: #8f8468;
+  --gold: #a08a4f;
+  --line: rgba(74, 64, 48, 0.18);
+}
+
+.note-bg-feuille-olivier {
+  --paper-card: radial-gradient(ellipse at top right, #dbe6cd 0%, #c9d9b8 100%);
+  --ink: #2f3d24;
+  --ink-soft: #4d5c3d;
+  --ink-faint: #71805e;
+  --gold: #5c7a3f;
+  --line: rgba(47, 61, 36, 0.18);
+}
+
+.note-bg-aquarelle-poudree {
+  --paper-card: radial-gradient(ellipse at 30% 20%, #fbe6ea 0%, #f3d6de 60%, #ecc9d6 100%);
+  --ink: #5c2f3f;
+  --ink-soft: #7a4b5c;
+  --ink-faint: #9c7382;
+  --gold: #b06a86;
+  --line: rgba(92, 47, 63, 0.18);
+}
+
+.note-bg-ardoise-minerale {
+  --paper-card: linear-gradient(135deg, #2b2d33 0%, #1e2024 50%, #303339 100%);
+  --ink: #ece9e2;
+  --ink-soft: #c2beb4;
+  --ink-faint: #948f84;
+  --gold: #b8b0a0;
+  --line: rgba(236, 233, 226, 0.18);
+}

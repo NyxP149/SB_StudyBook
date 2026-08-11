@@ -72,9 +72,9 @@ const components: Components = {
   },
 }
 
-export function NoteMarkdown({ content }: { content: string }) {
+export function NoteMarkdown({ content, backgroundClass }: { content: string; backgroundClass?: string }) {
   return (
-    <div className="note-markdown">
+    <div className={`note-markdown ${backgroundClass ?? ''}`}>
       <ReactMarkdown components={components} urlTransform={urlTransform}>
         {content}
       </ReactMarkdown>

@@ -140,7 +140,24 @@
     "suggestedLink": "Cette note semble liée à ton étude personnelle « {{title}} ».",
     "confirmLink": "Confirmer le lien",
     "dismissLink": "Ignorer",
-    "insertImage": "🖼 Insérer une image"
+    "insertImage": "🖼 Insérer une image",
+    "changeBackground": "🎨 Changer le fond",
+    "backgroundDefault": "Papier (défaut)",
+    "background": {
+      "or": "Or",
+      "sauge": "Sauge",
+      "bordeaux": "Bordeaux",
+      "ardoise": "Ardoise",
+      "prune": "Prune",
+      "olive": "Olive",
+      "corail": "Corail",
+      "parchemin": "Parchemin ancien",
+      "nuit-etoilee": "Nuit étoilée",
+      "lin-naturel": "Lin naturel",
+      "feuille-olivier": "Feuille d'olivier",
+      "aquarelle-poudree": "Aquarelle poudrée",
+      "ardoise-minerale": "Ardoise minérale"
+    }
   },
   "importance": {
     "normal": "Normale",

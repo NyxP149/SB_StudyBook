@@ -4,6 +4,7 @@ import com.jarvyx.studybook.auth.CurrentUser;
 import com.jarvyx.studybook.note.dto.NoteResponse;
 import com.jarvyx.studybook.note.dto.NoteSummaryResponse;
 import com.jarvyx.studybook.note.dto.OrganizeNoteRequest;
+import com.jarvyx.studybook.note.dto.UpdateNoteBackgroundRequest;
 import com.jarvyx.studybook.note.dto.UpdateNoteRequest;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -73,6 +74,11 @@ public class NoteController {
     @PatchMapping("/{id}")
     public NoteResponse update(@PathVariable UUID id, @Valid @RequestBody UpdateNoteRequest request) {
         return noteService.toResponse(noteService.updateMarkdown(currentUser.getUserId(), id, request.noteMarkdown()));
+    }
+
+    @PatchMapping("/{id}/background")
+    public NoteResponse updateBackground(@PathVariable UUID id, @Valid @RequestBody UpdateNoteBackgroundRequest request) {
+        return noteService.toResponse(noteService.updateBackground(currentUser.getUserId(), id, request.background()));
     }
 
     @PatchMapping("/{id}/organize")

@@ -62,6 +62,10 @@ public class Note {
 
     private UUID linkedArgumentId;
 
+    // Clé d'un des présets de fond (7 couleurs unies + 6 "chemises"
+    // décorées) définis côté frontend ; null = fond papier par défaut.
+    private String background;
+
     @Column(nullable = false)
     private Instant createdAt;
 
@@ -106,5 +110,9 @@ public class Note {
 
     public void dismissLink() {
         this.suggestedArgumentId = null;
+    }
+
+    public void changeBackground(String background) {
+        this.background = background;
     }
 }

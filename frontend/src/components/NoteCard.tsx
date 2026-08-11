@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import type { NoteSummary } from '../types'
 import { StatusBadge } from './StatusBadge'
 import { formatDateShort } from '../utils/formatDate'
+import { backgroundClassName } from '../noteBackgrounds'
+import '../styles/noteBackgrounds.css'
 import './NoteCard.css'
 
 const IMPORTANCE_ICON: Record<NoteSummary['importance'], string | null> = {
@@ -30,6 +32,7 @@ export function NoteCard({
 }) {
   const { i18n } = useTranslation()
   const importanceIcon = IMPORTANCE_ICON[note.importance]
+  const bgClass = backgroundClassName(note.background)
 
   const body = (
     <>
@@ -70,7 +73,7 @@ export function NoteCard({
   if (selectable) {
     return (
       <div
-        className={`note-card note-card-selectable ${selected ? 'selected' : ''}`}
+        className={`note-card note-card-selectable ${bgClass} ${selected ? 'selected' : ''}`}
         onClick={() => onToggleSelect?.(note.id)}
         role="checkbox"
         aria-checked={selected}
@@ -82,7 +85,7 @@ export function NoteCard({
   }
 
   return (
-    <Link to={`/notes/${note.id}`} className="note-card">
+    <Link to={`/notes/${note.id}`} className={`note-card ${bgClass}`}>
       {body}
     </Link>
   )

@@ -140,7 +140,24 @@
     "suggestedLink": "Questa nota sembra collegata al tuo studio personale «{{title}}».",
     "confirmLink": "Conferma il collegamento",
     "dismissLink": "Ignora",
-    "insertImage": "🖼 Inserisci un'immagine"
+    "insertImage": "🖼 Inserisci un'immagine",
+    "changeBackground": "🎨 Cambia sfondo",
+    "backgroundDefault": "Carta (predefinito)",
+    "background": {
+      "or": "Oro",
+      "sauge": "Salvia",
+      "bordeaux": "Bordeaux",
+      "ardoise": "Ardesia",
+      "prune": "Prugna",
+      "olive": "Oliva",
+      "corail": "Corallo",
+      "parchemin": "Pergamena antica",
+      "nuit-etoilee": "Notte stellata",
+      "lin-naturel": "Lino naturale",
+      "feuille-olivier": "Foglia d'ulivo",
+      "aquarelle-poudree": "Acquerello cipria",
+      "ardoise-minerale": "Ardesia minerale"
+    }
   },
   "importance": {
     "normal": "Normale",

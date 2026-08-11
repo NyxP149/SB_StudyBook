@@ -10,6 +10,7 @@ export interface NoteSummary {
   folderId: string | null
   importance: NoteImportance
   status: NoteStatus
+  background: string | null
   createdAt: string
 }
 
