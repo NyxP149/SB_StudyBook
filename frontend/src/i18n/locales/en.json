@@ -21,7 +21,8 @@
       "newNote": "New note",
       "myNotes": "My notes",
       "templates": "Templates",
-      "folders": "Folders"
+      "folders": "Folders",
+      "study": "Personal study"
     },
     "logout": "Log out",
     "language": "Language"
@@ -158,5 +159,36 @@
     "sectionInstructionsPlaceholder": "Instructions for the AI (what it should write in this section)",
     "removeSectionAria": "Remove this section",
     "addSection": "+ Add a section"
+  },
+  "study": {
+    "title": "Personal study",
+    "subtitle": "Organize your study programs and find what's next to study.",
+    "newProgram": "+ New program",
+    "upcomingTitle": "Coming up",
+    "empty": "No programs yet.",
+    "namePlaceholder": "e.g. Sunday study",
+    "frequencyLabel": "Frequency",
+    "frequency": {
+      "WEEKLY": "Weekly",
+      "MONTHLY": "Monthly",
+      "YEARLY": "Yearly"
+    },
+    "confirmDeleteProgram": "Permanently delete this program and all its arguments?",
+    "backLink": "← My programs",
+    "newArgument": "+ New argument",
+    "emptyArguments": "No arguments yet.",
+    "argumentTitle": "Title",
+    "argumentTitlePlaceholder": "e.g. Week 1 — Topic",
+    "argumentDate": "Date",
+    "markCompleted": "Mark as done",
+    "completed": "✓ Done",
+    "confirmDeleteArgument": "Permanently delete this argument?",
+    "backToProgram": "← Back to program",
+    "contentPlaceholder": "Write your personal notes for this argument…",
+    "noContent": "No notes yet.",
+    "images": "Images",
+    "addImage": "+ Add an image",
+    "noImages": "No images yet.",
+    "errImageUpload": "Failed to upload the image."
   }
 }

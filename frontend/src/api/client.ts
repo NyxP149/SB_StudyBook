@@ -4,6 +4,12 @@ import type {
   Note,
   NoteImportance,
   NoteSummary,
+  StudyArgument,
+  StudyArgumentInput,
+  StudyImage,
+  StudyProgram,
+  StudyProgramInput,
+  StudyUpcoming,
   SubmitOptions,
   SubmitTextOptions,
   Template,
@@ -16,6 +22,7 @@ const NOTES_URL = `${API_BASE}/api/notes`
 const TEMPLATES_URL = `${API_BASE}/api/templates`
 const FOLDERS_URL = `${API_BASE}/api/folders`
 const HEALTH_URL = `${API_BASE}/api/health`
+const STUDY_URL = `${API_BASE}/api/study`
 
 // Distingue une vraie réponse du serveur (même en erreur) d'un échec réseau
 // (fetch() qui rejette avant d'obtenir une Response, ex: hors ligne) — les
@@ -225,4 +232,96 @@ export async function updateTemplate(id: string, input: TemplateInput): Promise<
 export async function deleteTemplate(id: string): Promise<void> {
   const response = await authFetch(`${TEMPLATES_URL}/${id}`, { method: 'DELETE' })
   return parseOrThrow<void>(response)
+}
+
+export async function listStudyPrograms(): Promise<StudyProgram[]> {
+  const response = await authFetch(`${STUDY_URL}/programs`)
+  return parseOrThrow<StudyProgram[]>(response)
+}
+
+export async function createStudyProgram(input: StudyProgramInput): Promise<StudyProgram> {
+  const response = await authFetch(`${STUDY_URL}/programs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  })
+  return parseOrThrow<StudyProgram>(response)
+}
+
+export async function updateStudyProgram(id: string, input: StudyProgramInput): Promise<StudyProgram> {
+  const response = await authFetch(`${STUDY_URL}/programs/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  })
+  return parseOrThrow<StudyProgram>(response)
+}
+
+export async function deleteStudyProgram(id: string): Promise<void> {
+  const response = await authFetch(`${STUDY_URL}/programs/${id}`, { method: 'DELETE' })
+  return parseOrThrow<void>(response)
+}
+
+export async function listStudyArguments(programId: string): Promise<StudyArgument[]> {
+  const response = await authFetch(`${STUDY_URL}/programs/${programId}/arguments`)
+  return parseOrThrow<StudyArgument[]>(response)
+}
+
+export async function getStudyArgument(id: string): Promise<StudyArgument> {
+  const response = await authFetch(`${STUDY_URL}/arguments/${id}`)
+  return parseOrThrow<StudyArgument>(response)
+}
+
+export async function createStudyArgument(programId: string, input: StudyArgumentInput): Promise<StudyArgument> {
+  const response = await authFetch(`${STUDY_URL}/programs/${programId}/arguments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  })
+  return parseOrThrow<StudyArgument>(response)
+}
+
+export async function updateStudyArgument(id: string, input: StudyArgumentInput): Promise<StudyArgument> {
+  const response = await authFetch(`${STUDY_URL}/arguments/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  })
+  return parseOrThrow<StudyArgument>(response)
+}
+
+export async function deleteStudyArgument(id: string): Promise<void> {
+  const response = await authFetch(`${STUDY_URL}/arguments/${id}`, { method: 'DELETE' })
+  return parseOrThrow<void>(response)
+}
+
+export async function listStudyUpcoming(): Promise<StudyUpcoming[]> {
+  const response = await authFetch(`${STUDY_URL}/upcoming`)
+  return parseOrThrow<StudyUpcoming[]>(response)
+}
+
+export async function uploadStudyImage(argumentId: string, file: File): Promise<StudyImage> {
+  const formData = new FormData()
+  formData.append('image', file)
+  const response = await authFetch(`${STUDY_URL}/arguments/${argumentId}/images`, { method: 'POST', body: formData })
+  return parseOrThrow<StudyImage>(response)
+}
+
+export async function listStudyImages(argumentId: string): Promise<StudyImage[]> {
+  const response = await authFetch(`${STUDY_URL}/arguments/${argumentId}/images`)
+  return parseOrThrow<StudyImage[]>(response)
+}
+
+export async function deleteStudyImage(id: string): Promise<void> {
+  const response = await authFetch(`${STUDY_URL}/images/${id}`, { method: 'DELETE' })
+  return parseOrThrow<void>(response)
+}
+
+/** Renvoie une blob: URL locale — l'image est servie derrière l'auth, donc
+ * impossible d'utiliser directement son URL dans un <img src>. */
+export async function fetchStudyImageObjectUrl(id: string): Promise<string> {
+  const response = await authFetch(`${STUDY_URL}/images/${id}`)
+  if (!response.ok) throw new ApiError(response.status, `Erreur ${response.status}`)
+  const blob = await response.blob()
+  return URL.createObjectURL(blob)
 }

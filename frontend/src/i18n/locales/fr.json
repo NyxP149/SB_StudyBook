@@ -21,7 +21,8 @@
       "newNote": "Nouvelle note",
       "myNotes": "Mes notes",
       "templates": "Modèles",
-      "folders": "Dossiers"
+      "folders": "Dossiers",
+      "study": "Étude personnelle"
     },
     "logout": "Déconnexion",
     "language": "Langue"
@@ -158,5 +159,36 @@
     "sectionInstructionsPlaceholder": "Instructions pour l'IA (ce qu'elle doit écrire dans cette section)",
     "removeSectionAria": "Supprimer cette section",
     "addSection": "+ Ajouter une section"
+  },
+  "study": {
+    "title": "Étude personnelle",
+    "subtitle": "Organise tes programmes d'étude et retrouve ce que tu as à étudier.",
+    "newProgram": "+ Nouveau programme",
+    "upcomingTitle": "À venir",
+    "empty": "Aucun programme pour l'instant.",
+    "namePlaceholder": "ex : Étude du dimanche",
+    "frequencyLabel": "Rythme",
+    "frequency": {
+      "WEEKLY": "Hebdomadaire",
+      "MONTHLY": "Mensuel",
+      "YEARLY": "Annuel"
+    },
+    "confirmDeleteProgram": "Supprimer définitivement ce programme et tous ses arguments ?",
+    "backLink": "← Mes programmes",
+    "newArgument": "+ Nouvel argument",
+    "emptyArguments": "Aucun argument pour l'instant.",
+    "argumentTitle": "Titre",
+    "argumentTitlePlaceholder": "ex : Semaine 1 — Sujet",
+    "argumentDate": "Date",
+    "markCompleted": "Marquer comme fait",
+    "completed": "✓ Terminé",
+    "confirmDeleteArgument": "Supprimer définitivement cet argument ?",
+    "backToProgram": "← Retour au programme",
+    "contentPlaceholder": "Écris tes notes personnelles pour cet argument…",
+    "noContent": "Aucune note pour l'instant.",
+    "images": "Images",
+    "addImage": "+ Ajouter une image",
+    "noImages": "Aucune image pour l'instant.",
+    "errImageUpload": "Échec de l'envoi de l'image."
   }
 }

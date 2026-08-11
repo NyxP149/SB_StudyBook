@@ -83,6 +83,13 @@ export function AppShell({ children }: { children: ReactNode }) {
           <NavLink to="/folders" className={({ isActive }) => (isActive ? 'active' : '')} onClick={collapseOnMobile}>
             {t('shell.nav.folders')}
           </NavLink>
+          <NavLink
+            to="/study"
+            className={({ isActive }) => (isActive ? 'active' : '')}
+            onClick={collapseOnMobile}
+          >
+            {t('shell.nav.study')}
+          </NavLink>
         </nav>
 
         <div className="shell-sidebar-footer">

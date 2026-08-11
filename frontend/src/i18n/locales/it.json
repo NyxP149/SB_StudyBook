@@ -21,7 +21,8 @@
       "newNote": "Nuova nota",
       "myNotes": "Le mie note",
       "templates": "Modelli",
-      "folders": "Cartelle"
+      "folders": "Cartelle",
+      "study": "Studio personale"
     },
     "logout": "Disconnetti",
     "language": "Lingua"
@@ -158,5 +159,36 @@
     "sectionInstructionsPlaceholder": "Istruzioni per l'IA (cosa deve scrivere in questa sezione)",
     "removeSectionAria": "Rimuovi questa sezione",
     "addSection": "+ Aggiungi una sezione"
+  },
+  "study": {
+    "title": "Studio personale",
+    "subtitle": "Organizza i tuoi programmi di studio e trova cosa studiare.",
+    "newProgram": "+ Nuovo programma",
+    "upcomingTitle": "In arrivo",
+    "empty": "Ancora nessun programma.",
+    "namePlaceholder": "es: Studio della domenica",
+    "frequencyLabel": "Ritmo",
+    "frequency": {
+      "WEEKLY": "Settimanale",
+      "MONTHLY": "Mensile",
+      "YEARLY": "Annuale"
+    },
+    "confirmDeleteProgram": "Eliminare definitivamente questo programma e tutti i suoi argomenti?",
+    "backLink": "← I miei programmi",
+    "newArgument": "+ Nuovo argomento",
+    "emptyArguments": "Ancora nessun argomento.",
+    "argumentTitle": "Titolo",
+    "argumentTitlePlaceholder": "es: Settimana 1 — Argomento",
+    "argumentDate": "Data",
+    "markCompleted": "Segna come fatto",
+    "completed": "✓ Fatto",
+    "confirmDeleteArgument": "Eliminare definitivamente questo argomento?",
+    "backToProgram": "← Torna al programma",
+    "contentPlaceholder": "Scrivi le tue note personali per questo argomento…",
+    "noContent": "Ancora nessuna nota.",
+    "images": "Immagini",
+    "addImage": "+ Aggiungi un'immagine",
+    "noImages": "Ancora nessuna immagine.",
+    "errImageUpload": "Invio dell'immagine non riuscito."
   }
 }

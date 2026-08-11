@@ -61,3 +61,51 @@ export interface TemplateInput {
   description: string
   sections: TemplateSection[]
 }
+
+export type StudyProgramFrequency = 'WEEKLY' | 'MONTHLY' | 'YEARLY'
+
+export interface StudyProgram {
+  id: string
+  name: string
+  frequency: StudyProgramFrequency
+  createdAt: string
+}
+
+export interface StudyProgramInput {
+  name: string
+  frequency: StudyProgramFrequency
+}
+
+export interface StudyArgument {
+  id: string
+  programId: string
+  title: string
+  scheduledDate: string
+  content: string | null
+  completed: boolean
+  createdAt: string
+}
+
+export interface StudyArgumentInput {
+  title: string
+  scheduledDate: string
+  content: string
+  completed: boolean
+}
+
+export interface StudyImage {
+  id: string
+  argumentId: string
+  filename: string
+  contentType: string
+  createdAt: string
+}
+
+export interface StudyUpcoming {
+  argumentId: string
+  programId: string
+  programName: string
+  title: string
+  scheduledDate: string
+  overdue: boolean
+}
