@@ -48,7 +48,7 @@
 
 .mode-tab.active {
   background: var(--gold-bright);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 
 .mode-tab:disabled {

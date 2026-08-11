@@ -44,8 +44,9 @@
 }
 
 .note-card-checkbox.checked {
-  background: var(--gold);
-  border-color: var(--gold);
+  background: var(--gold-bright);
+  border-color: var(--gold-bright);
+  color: var(--on-accent);
 }
 
 .note-card-tape {

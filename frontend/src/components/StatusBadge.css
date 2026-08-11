@@ -16,11 +16,11 @@
 }
 
 .status-pending {
-  background: rgba(185, 134, 59, 0.14);
-  color: #96662a;
+  background: var(--amber-bg);
+  color: var(--amber);
 }
 .status-pending .status-dot {
-  background: var(--gold);
+  background: var(--amber);
   animation: pulse 1.4s ease-in-out infinite;
 }
 

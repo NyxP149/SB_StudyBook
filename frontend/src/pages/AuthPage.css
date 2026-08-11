@@ -67,7 +67,7 @@
 
 .auth-mode-tab.active {
   background: var(--gold-bright);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 
 .auth-form {

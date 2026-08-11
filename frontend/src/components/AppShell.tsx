@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth/AuthContext'
-import { applyTheme, readStoredTheme, THEMES, type ThemeName } from '../theme'
+import { applyMode, applyTheme, readStoredMode, readStoredTheme, MODES, THEMES, type ModeName, type ThemeName } from '../theme'
 import './AppShell.css'
 
 const SIDEBAR_KEY = 'studybook.sidebarCollapsed'
@@ -25,6 +25,12 @@ const THEME_SWATCH_COLOR: Record<ThemeName, string> = {
   fuchsia: '#e488c4',
 }
 
+const MODE_ICON: Record<ModeName, string> = {
+  default: '📜',
+  light: '☀️',
+  dark: '🌙',
+}
+
 function readInitialCollapsed(): boolean {
   const stored = localStorage.getItem(SIDEBAR_KEY)
   if (stored !== null) return stored === 'true'
@@ -36,6 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { username, logout } = useAuth()
   const [collapsed, setCollapsed] = useState(readInitialCollapsed)
   const [theme, setTheme] = useState<ThemeName>(readStoredTheme)
+  const [mode, setMode] = useState<ModeName>(readStoredMode)
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_KEY, String(collapsed))
@@ -44,6 +51,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   function selectTheme(next: ThemeName) {
     setTheme(next)
     applyTheme(next)
+  }
+
+  function selectMode(next: ModeName) {
+    setMode(next)
+    applyMode(next)
   }
 
   function collapseOnMobile() {
@@ -119,6 +131,19 @@ export function AppShell({ children }: { children: ReactNode }) {
                 onClick={() => i18n.changeLanguage(lng.code)}
               >
                 {lng.label}
+              </button>
+            ))}
+          </div>
+          <div className="shell-mode-switch" role="group" aria-label={t('shell.mode')}>
+            {MODES.map((name) => (
+              <button
+                key={name}
+                type="button"
+                className={mode === name ? 'active' : ''}
+                onClick={() => selectMode(name)}
+                title={t(`shell.modeName.${name}`)}
+              >
+                {MODE_ICON[name]} {t(`shell.modeName.${name}`)}
               </button>
             ))}
           </div>

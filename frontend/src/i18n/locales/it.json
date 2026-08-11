@@ -26,6 +26,12 @@
     },
     "logout": "Disconnetti",
     "language": "Lingua",
+    "mode": "Modalità",
+    "modeName": {
+      "default": "Predefinita",
+      "light": "Chiara",
+      "dark": "Scura"
+    },
     "theme": "Tema",
     "themeName": {
       "gold": "Oro (predefinito)",

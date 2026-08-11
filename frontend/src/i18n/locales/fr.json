@@ -26,6 +26,12 @@
     },
     "logout": "Déconnexion",
     "language": "Langue",
+    "mode": "Mode",
+    "modeName": {
+      "default": "Défaut",
+      "light": "Clair",
+      "dark": "Sombre"
+    },
     "theme": "Thème",
     "themeName": {
       "gold": "Or (défaut)",

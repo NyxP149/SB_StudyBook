@@ -11,9 +11,19 @@
   --teal-bg: rgba(63, 111, 79, 0.12);
   --burgundy: #8c3b3b;
   --burgundy-bg: rgba(140, 59, 59, 0.12);
+  --amber: #96662a;
+  --amber-bg: rgba(185, 134, 59, 0.14);
   --line: rgba(36, 29, 22, 0.14);
   --shadow: 0 1px 2px rgba(36, 29, 22, 0.06), 0 8px 24px rgba(36, 29, 22, 0.08);
   --shadow-lift: 0 4px 8px rgba(36, 29, 22, 0.08), 0 16px 32px rgba(36, 29, 22, 0.12);
+  --bg-wash-1: rgba(185, 134, 59, 0.08);
+  --bg-wash-2: rgba(63, 111, 79, 0.06);
+
+  /* Couleur de texte fixe pour ce qui s'affiche SUR un fond d'accent plein
+     (boutons/onglets/badges en --gold-bright) : --ink change selon le mode
+     clair/sombre, mais ces fonds d'accent restent toujours clairs/moyens
+     dans les 3 modes, donc le texte dessus reste toujours sombre. */
+  --on-accent: #241d16;
 
   --font-display: 'Fraunces', Georgia, 'Iowan Old Style', serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -60,6 +70,53 @@
   --gold-bright: #e488c4;
 }
 
+/* Modes clair/sombre/défaut : axe indépendant des couleurs d'accent
+   ci-dessus (un utilisateur peut combiner n'importe quel accent avec
+   n'importe quel mode). Le mode "défaut" est le look papier chaud actuel,
+   sans attribut. */
+:root[data-mode='light'] {
+  --paper: #f7f7f8;
+  --paper-deep: #ebebee;
+  --paper-card: #ffffff;
+  --ink: #1c1c1f;
+  --ink-soft: #55555c;
+  --ink-faint: #8a8a92;
+  --line: rgba(20, 20, 24, 0.12);
+  --shadow: 0 1px 2px rgba(20, 20, 24, 0.05), 0 8px 24px rgba(20, 20, 24, 0.07);
+  --shadow-lift: 0 4px 8px rgba(20, 20, 24, 0.07), 0 16px 32px rgba(20, 20, 24, 0.1);
+  --bg-wash-1: transparent;
+  --bg-wash-2: transparent;
+  color-scheme: light;
+}
+
+:root[data-mode='dark'] {
+  --paper: #17171b;
+  --paper-deep: #0f0f12;
+  --paper-card: #1f1f24;
+  --ink: #f0ede6;
+  --ink-soft: #c7c2b8;
+  --ink-faint: #8f8a80;
+  --line: rgba(255, 255, 255, 0.12);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lift: 0 4px 8px rgba(0, 0, 0, 0.35), 0 16px 40px rgba(0, 0, 0, 0.45);
+  --bg-wash-1: transparent;
+  --bg-wash-2: transparent;
+  /* --gold sert de couleur de TEXTE/bordure directement sur le fond de page
+     (liens, titres, icônes) : sur fond sombre, la teinte "sombre" choisie
+     pour lire sur papier clair devient illisible, donc on reprend la
+     variante --gold-bright de l'accent actif à sa place. --gold-bright
+     lui-même ne change pas : il sert de fond plein sous un texte
+     --on-accent fixe, donc sa lisibilité ne dépend pas du mode. */
+  --gold: var(--gold-bright);
+  --teal: #55c07a;
+  --teal-bg: rgba(85, 192, 122, 0.16);
+  --burgundy: #e08a8a;
+  --burgundy-bg: rgba(224, 138, 138, 0.16);
+  --amber: #e3b45c;
+  --amber-bg: rgba(227, 180, 92, 0.16);
+  color-scheme: dark;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -77,8 +134,8 @@ body {
   color: var(--ink);
   background: var(--paper);
   background-image:
-    radial-gradient(circle at 10% 0%, rgba(185, 134, 59, 0.08), transparent 45%),
-    radial-gradient(circle at 100% 30%, rgba(63, 111, 79, 0.06), transparent 40%);
+    radial-gradient(circle at 10% 0%, var(--bg-wash-1), transparent 45%),
+    radial-gradient(circle at 100% 30%, var(--bg-wash-2), transparent 40%);
   background-attachment: fixed;
 }
 

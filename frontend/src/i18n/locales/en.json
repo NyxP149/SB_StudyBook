@@ -26,6 +26,12 @@
     },
     "logout": "Log out",
     "language": "Language",
+    "mode": "Mode",
+    "modeName": {
+      "default": "Default",
+      "light": "Light",
+      "dark": "Dark"
+    },
     "theme": "Theme",
     "themeName": {
       "gold": "Gold (default)",

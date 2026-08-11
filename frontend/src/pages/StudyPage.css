@@ -113,7 +113,7 @@
   padding: 4px 10px;
   border-radius: 999px;
   background: var(--gold-bright);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 
 .study-argument-list {

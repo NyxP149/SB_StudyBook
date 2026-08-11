@@ -35,7 +35,7 @@
   text-decoration: none;
   font-size: 13px;
   font-weight: 600;
-  color: var(--ink);
+  color: var(--on-accent);
   background: var(--gold-bright);
   padding: 8px 16px;
   border-radius: 999px;
@@ -125,7 +125,7 @@
 
 .notes-status-tab.active {
   background: var(--gold-bright);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 
 .notes-template-select {
