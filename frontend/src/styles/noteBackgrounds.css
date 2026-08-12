@@ -6,34 +6,65 @@
    statut) ne sont jamais touchées, pour rester lisibles quel que soit le
    fond choisi. */
 
-/* --- 7 couleurs unies --- */
+/* --- 7 couleurs unies ---
+   Le papier reste toujours clair, donc l'encre est fixée à des tons foncés
+   ici (indépendants du mode clair/sombre de l'appli) pour rester lisible
+   même quand le mode sombre a éclairci --ink par défaut. */
 
 .note-bg-or {
   --paper-card: #f9edd3;
+  --ink: #4a3520;
+  --ink-soft: #6b5439;
+  --ink-faint: #8a7355;
+  --gold: #8a6a35;
   --line: rgba(138, 106, 53, 0.18);
 }
 .note-bg-sauge {
   --paper-card: #e7efe0;
+  --ink: #2f3d24;
+  --ink-soft: #4d5c3d;
+  --ink-faint: #71805e;
+  --gold: #5c7a3f;
   --line: rgba(63, 111, 79, 0.18);
 }
 .note-bg-bordeaux {
   --paper-card: #f6e5e5;
+  --ink: #5c2020;
+  --ink-soft: #7a4040;
+  --ink-faint: #9c7070;
+  --gold: #b35a5a;
   --line: rgba(140, 59, 59, 0.18);
 }
 .note-bg-ardoise {
   --paper-card: #e6ebf1;
+  --ink: #26333f;
+  --ink-soft: #445566;
+  --ink-faint: #6b7d8f;
+  --gold: #3f546e;
   --line: rgba(63, 84, 110, 0.18);
 }
 .note-bg-prune {
   --paper-card: #f0e3f0;
+  --ink: #4a204a;
+  --ink-soft: #6b426b;
+  --ink-faint: #8f6b8f;
+  --gold: #6e3f6e;
   --line: rgba(110, 63, 110, 0.18);
 }
 .note-bg-olive {
   --paper-card: #eef0dd;
+  --ink: #3a3d18;
+  --ink-soft: #5c5f30;
+  --ink-faint: #7d7f52;
+  --gold: #5e662a;
   --line: rgba(94, 102, 42, 0.18);
 }
 .note-bg-corail {
   --paper-card: #fbe6dd;
+  --ink: #5c2f14;
+  --ink-soft: #7a4b2c;
+  --ink-faint: #9c7355;
+  --gold: #b35a33;
   --line: rgba(179, 90, 51, 0.18);
 }
 
