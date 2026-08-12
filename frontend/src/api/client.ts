@@ -379,6 +379,13 @@ export async function fetchNoteImageObjectUrl(id: string): Promise<string> {
   return URL.createObjectURL(blob)
 }
 
+export async function fetchNoteImageBytes(id: string): Promise<{ data: ArrayBuffer; contentType: string }> {
+  const response = await authFetch(`${NOTE_IMAGES_URL}/${id}`)
+  if (!response.ok) throw new ApiError(response.status, `Erreur ${response.status}`)
+  const data = await response.arrayBuffer()
+  return { data, contentType: response.headers.get('Content-Type') ?? 'image/png' }
+}
+
 export async function listStudyArgumentNotes(argumentId: string): Promise<StudyArgumentNote[]> {
   const response = await authFetch(`${STUDY_URL}/arguments/${argumentId}/notes`)
   return parseOrThrow<StudyArgumentNote[]>(response)

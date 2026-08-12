@@ -128,7 +128,13 @@ export function UploadPage() {
   }, [navigate, provider, templateId, pastedText, textFile, t])
 
   const handleTextFile = useCallback((file: File) => {
-    const isTextLike = file.name.endsWith('.txt') || file.name.endsWith('.pdf') || file.type === 'application/pdf' || file.type.startsWith('text/')
+    const isTextLike =
+      file.name.endsWith('.txt') ||
+      file.name.endsWith('.pdf') ||
+      file.name.endsWith('.docx') ||
+      file.type === 'application/pdf' ||
+      file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      file.type.startsWith('text/')
     if (!isTextLike) {
       setError(t('upload.errNotText'))
       return
@@ -294,7 +300,7 @@ export function UploadPage() {
             >
               <input
                 type="file"
-                accept=".txt,.pdf,text/plain,application/pdf"
+                accept=".txt,.pdf,.docx,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 hidden
                 disabled={state === 'submitting'}
                 onChange={(e) => {

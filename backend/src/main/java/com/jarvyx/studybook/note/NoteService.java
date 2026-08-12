@@ -17,6 +17,8 @@ import java.util.UUID;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -83,7 +85,7 @@ public class NoteService {
             originalFilename = "texte-colle-" + Instant.now().toEpochMilli() + ".txt";
             extractedText = text;
         } else {
-            throw new IllegalArgumentException("Fournis soit un texte, soit un fichier .txt ou .pdf.");
+            throw new IllegalArgumentException("Fournis soit un texte, soit un fichier .txt, .pdf ou .docx.");
         }
 
         String effectiveProvider = provider != null ? provider : pipelineProperties.provider();
@@ -205,6 +207,12 @@ public class NoteService {
             if (".pdf".equals(extension)) {
                 try (PDDocument document = Loader.loadPDF(file.getBytes())) {
                     return new PDFTextStripper().getText(document);
+                }
+            }
+            if (".docx".equals(extension)) {
+                try (XWPFDocument document = new XWPFDocument(file.getInputStream());
+                        XWPFWordExtractor extractor = new XWPFWordExtractor(document)) {
+                    return extractor.getText();
                 }
             }
             return new String(file.getBytes(), StandardCharsets.UTF_8);
