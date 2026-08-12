@@ -260,5 +260,24 @@
     "confirmDeleteNote": "Eliminare definitivamente questa nota?",
     "progressLabel": "{{completed}}/{{total}} argomenti completati ({{percent}}%)",
     "dismissEncouragement": "Chiudi"
+  },
+  "formatting": {
+    "bold": "Grassetto",
+    "italic": "Corsivo",
+    "underline": "Sottolinea",
+    "uppercase": "MAIUSCOLO",
+    "heading": "Titolo grande",
+    "bulletList": "Elenco puntato",
+    "highlight": "Evidenzia",
+    "highlightColor": {
+      "yellow": "Giallo",
+      "green": "Verde",
+      "pink": "Rosa",
+      "blue": "Blu"
+    },
+    "boldPlaceholder": "testo in grassetto",
+    "italicPlaceholder": "testo in corsivo",
+    "underlinePlaceholder": "testo sottolineato",
+    "highlightPlaceholder": "testo evidenziato"
   }
 }

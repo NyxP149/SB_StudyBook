@@ -1,0 +1,67 @@
+.formatting-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.fmt-button {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  background: var(--paper-card);
+  color: var(--ink-soft);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.fmt-button:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--ink);
+}
+
+.fmt-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fmt-underline {
+  text-decoration: underline;
+}
+
+.fmt-highlight-picker {
+  position: relative;
+  display: inline-block;
+}
+
+.fmt-highlight-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 10;
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lift);
+}
+
+.fmt-highlight-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s ease;
+}
+
+.fmt-highlight-swatch:hover {
+  transform: scale(1.12);
+}

@@ -11,6 +11,7 @@ import {
   updateNote,
   updateNoteBackground,
 } from '../api/client'
+import { FormattingToolbar } from '../components/FormattingToolbar'
 import { InsertImageButton } from '../components/InsertImageButton'
 import { NoteBackgroundPicker } from '../components/NoteBackgroundPicker'
 import { NoteMarkdown } from '../components/NoteMarkdown'
@@ -20,6 +21,7 @@ import { downloadNoteDocx } from '../utils/docx'
 import { downloadNotePdf } from '../utils/pdf'
 import { extractTheme } from '../utils/noteExcerpt'
 import { formatDateTime } from '../utils/formatDate'
+import { normalizeLineEndings } from '../utils/text'
 import type { Folder, NoteImportance } from '../types'
 import './NoteDetailPage.css'
 
@@ -91,7 +93,7 @@ export function NoteDetailPage() {
   const theme = extractTheme(note.noteMarkdown)
 
   function startEditing() {
-    setDraft(note!.noteMarkdown ?? '')
+    setDraft(normalizeLineEndings(note!.noteMarkdown ?? ''))
     setSaveError(null)
     setIsEditing(true)
   }
@@ -372,14 +374,17 @@ export function NoteDetailPage() {
           {pdfError && <p className="upload-error no-print">{pdfError}</p>}
 
           {isEditing ? (
-            <textarea
-              ref={editTextareaRef}
-              className="note-edit-textarea"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              disabled={saving}
-              rows={20}
-            />
+            <>
+              <FormattingToolbar textareaRef={editTextareaRef} value={draft} onChange={setDraft} disabled={saving} />
+              <textarea
+                ref={editTextareaRef}
+                className="note-edit-textarea"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                disabled={saving}
+                rows={20}
+              />
+            </>
           ) : (
             <NoteMarkdown content={note.noteMarkdown} backgroundClass={backgroundClassName(note.background)} />
           )}

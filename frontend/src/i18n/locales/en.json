@@ -260,5 +260,24 @@
     "confirmDeleteNote": "Permanently delete this note?",
     "progressLabel": "{{completed}}/{{total}} arguments done ({{percent}}%)",
     "dismissEncouragement": "Close"
+  },
+  "formatting": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "uppercase": "UPPERCASE",
+    "heading": "Big heading",
+    "bulletList": "Bullet list",
+    "highlight": "Highlight",
+    "highlightColor": {
+      "yellow": "Yellow",
+      "green": "Green",
+      "pink": "Pink",
+      "blue": "Blue"
+    },
+    "boldPlaceholder": "bold text",
+    "italicPlaceholder": "italic text",
+    "underlinePlaceholder": "underlined text",
+    "highlightPlaceholder": "highlighted text"
   }
 }

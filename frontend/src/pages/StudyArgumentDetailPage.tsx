@@ -17,10 +17,12 @@ import {
   uploadStudyImage,
 } from '../api/client'
 import { AuthedImage } from '../components/AuthedImage'
+import { FormattingToolbar } from '../components/FormattingToolbar'
 import { InsertImageButton } from '../components/InsertImageButton'
 import { NoteMarkdown } from '../components/NoteMarkdown'
 import { StatusBadge } from '../components/StatusBadge'
 import { formatDateOnly, formatDateTime } from '../utils/formatDate'
+import { normalizeLineEndings } from '../utils/text'
 import type { NoteSummary, StudyArgument, StudyArgumentNote, StudyImage } from '../types'
 import './StudyPage.css'
 
@@ -38,11 +40,11 @@ function ArgumentNoteItem({
   const { t } = useTranslation()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isEditing, setIsEditing] = useState(false)
-  const [draft, setDraft] = useState(note.content)
+  const [draft, setDraft] = useState(normalizeLineEndings(note.content))
   const [saving, setSaving] = useState(false)
 
   function startEditing() {
-    setDraft(note.content)
+    setDraft(normalizeLineEndings(note.content))
     setIsEditing(true)
   }
 
@@ -94,15 +96,18 @@ function ArgumentNoteItem({
       </div>
 
       {isEditing ? (
-        <textarea
-          ref={textareaRef}
-          className="note-edit-textarea"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          disabled={saving}
-          rows={8}
-          placeholder={t('study.notePlaceholder')}
-        />
+        <>
+          <FormattingToolbar textareaRef={textareaRef} value={draft} onChange={setDraft} disabled={saving} />
+          <textarea
+            ref={textareaRef}
+            className="note-edit-textarea"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            disabled={saving}
+            rows={8}
+            placeholder={t('study.notePlaceholder')}
+          />
+        </>
       ) : (
         <NoteMarkdown content={note.content} />
       )}
@@ -352,6 +357,7 @@ export function StudyArgumentDetailPage() {
 
           {creatingNote && (
             <div className="study-note-item">
+              <FormattingToolbar textareaRef={newNoteTextareaRef} value={newNoteDraft} onChange={setNewNoteDraft} disabled={savingNewNote} />
               <textarea
                 ref={newNoteTextareaRef}
                 className="note-edit-textarea"

@@ -260,5 +260,24 @@
     "confirmDeleteNote": "Supprimer définitivement cette note ?",
     "progressLabel": "{{completed}}/{{total}} arguments terminés ({{percent}}%)",
     "dismissEncouragement": "Fermer"
+  },
+  "formatting": {
+    "bold": "Gras",
+    "italic": "Italique",
+    "underline": "Souligner",
+    "uppercase": "MAJUSCULES",
+    "heading": "Gros titre",
+    "bulletList": "Liste à puces",
+    "highlight": "Surligner",
+    "highlightColor": {
+      "yellow": "Jaune",
+      "green": "Vert",
+      "pink": "Rose",
+      "blue": "Bleu"
+    },
+    "boldPlaceholder": "texte en gras",
+    "italicPlaceholder": "texte en italique",
+    "underlinePlaceholder": "texte souligné",
+    "highlightPlaceholder": "texte surligné"
   }
 }

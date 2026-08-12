@@ -1,0 +1,26 @@
+/* Couleurs de surlignage : fond pastel fixe (comme les fonds de note), pas
+   lié au mode clair/sombre — la lisibilité doit rester garantie partout où
+   le tag est réutilisé (rendu markdown, pastille de la barre d'outils). */
+
+.hl-yellow {
+  background: #f5e08c;
+}
+.hl-green {
+  background: #b8dfb0;
+}
+.hl-pink {
+  background: #f3c6d9;
+}
+.hl-blue {
+  background: #bcd9f0;
+}
+
+.note-markdown mark {
+  padding: 0.05em 0.2em;
+  border-radius: 4px;
+  color: #241d16;
+}
+
+.note-markdown u {
+  text-decoration-color: var(--gold);
+}
