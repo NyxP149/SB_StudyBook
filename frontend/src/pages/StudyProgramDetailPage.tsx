@@ -9,6 +9,7 @@ import {
   updateStudyArgument,
 } from '../api/client'
 import { formatDateOnly } from '../utils/formatDate'
+import { downloadProgramIcs } from '../utils/ics'
 import type { StudyArgument, StudyArgumentInput, StudyProgram } from '../types'
 import './StudyPage.css'
 
@@ -109,6 +110,14 @@ export function StudyProgramDetailPage() {
         </div>
         {!isEditing && (
           <div className="study-detail-header-actions">
+            <button
+              type="button"
+              className="new-template-button"
+              onClick={() => program && args && downloadProgramIcs(program, args)}
+              disabled={!program || !args || args.length === 0}
+            >
+              {t('study.exportIcs')}
+            </button>
             <Link to={`/study/programs/${id}/grid`} className="save-button">
               {t('study.addBatch')}
             </Link>

@@ -214,6 +214,7 @@
       "YEARLY": "Annuale"
     },
     "addBatch": "+ Aggiungi un lotto",
+    "exportIcs": "📅 Esporta .ics",
     "grid": {
       "newTitle": "Nuovo programma",
       "addTitle": "Aggiungi un lotto a «{{name}}»",

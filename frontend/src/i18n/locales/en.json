@@ -214,6 +214,7 @@
       "YEARLY": "Yearly"
     },
     "addBatch": "+ Add a batch",
+    "exportIcs": "📅 Export .ics",
     "grid": {
       "newTitle": "New program",
       "addTitle": "Add a batch to \"{{name}}\"",
