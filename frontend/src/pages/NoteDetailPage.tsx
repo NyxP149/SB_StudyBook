@@ -17,6 +17,7 @@ import { NoteMarkdown } from '../components/NoteMarkdown'
 import { StatusBadge } from '../components/StatusBadge'
 import { backgroundClassName } from '../noteBackgrounds'
 import { downloadNoteDocx } from '../utils/docx'
+import { downloadNotePdf } from '../utils/pdf'
 import { extractTheme } from '../utils/noteExcerpt'
 import { formatDateTime } from '../utils/formatDate'
 import type { Folder, NoteImportance } from '../types'
@@ -58,6 +59,8 @@ export function NoteDetailPage() {
   const [backgroundError, setBackgroundError] = useState<string | null>(null)
   const [exportingDocx, setExportingDocx] = useState(false)
   const [docxError, setDocxError] = useState<string | null>(null)
+  const [exportingPdf, setExportingPdf] = useState(false)
+  const [pdfError, setPdfError] = useState<string | null>(null)
   type OrganizeTarget = { folderId: string | null; importance: NoteImportance }
   const latestOrganizeTargetRef = useRef<OrganizeTarget | null>(null)
   const queuedOrganizeRef = useRef<OrganizeTarget | null>(null)
@@ -181,6 +184,18 @@ export function NoteDetailPage() {
       setDocxError(e instanceof Error ? e.message : t('common.saveFailed'))
     } finally {
       setExportingDocx(false)
+    }
+  }
+
+  async function handleExportPdf() {
+    setPdfError(null)
+    setExportingPdf(true)
+    try {
+      await downloadNotePdf(note!)
+    } catch (e) {
+      setPdfError(e instanceof Error ? e.message : t('common.saveFailed'))
+    } finally {
+      setExportingPdf(false)
     }
   }
 
@@ -343,6 +358,9 @@ export function NoteDetailPage() {
                 <button type="button" className="note-action-button" onClick={handleExportDocx} disabled={exportingDocx}>
                   {exportingDocx ? t('noteDetail.saving') : t('noteDetail.downloadDocx')}
                 </button>
+                <button type="button" className="note-action-button" onClick={handleExportPdf} disabled={exportingPdf}>
+                  {exportingPdf ? t('noteDetail.saving') : t('noteDetail.downloadPdf')}
+                </button>
                 <NoteBackgroundPicker value={note.background} onSelect={handleBackgroundChange} />
               </>
             )}
@@ -351,6 +369,7 @@ export function NoteDetailPage() {
           {saveError && <p className="upload-error no-print">{saveError}</p>}
           {backgroundError && <p className="upload-error no-print">{backgroundError}</p>}
           {docxError && <p className="upload-error no-print">{docxError}</p>}
+          {pdfError && <p className="upload-error no-print">{pdfError}</p>}
 
           {isEditing ? (
             <textarea

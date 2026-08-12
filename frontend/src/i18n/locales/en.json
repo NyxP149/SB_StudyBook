@@ -135,6 +135,7 @@
     "edit": "✎ Edit",
     "download": "⬇ Download .md",
     "downloadDocx": "⬇ Export .docx",
+    "downloadPdf": "⬇ Export .pdf",
     "print": "🖨 Print / PDF",
     "rawTranscript": "Raw transcript",
     "linkedTo": "🔗 Linked to your study \"{{title}}\"",
