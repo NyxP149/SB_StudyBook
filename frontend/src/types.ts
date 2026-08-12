@@ -98,6 +98,13 @@ export interface StudyArgumentInput {
   completed: boolean
 }
 
+export interface StudyArgumentCompletionResult {
+  argument: StudyArgument
+  encouragementMessage: string
+  completedCount: number
+  totalCount: number
+}
+
 export interface StudyImage {
   id: string
   argumentId: string

@@ -2,6 +2,7 @@ package com.jarvyx.studybook.study;
 
 import com.jarvyx.studybook.auth.CurrentUser;
 import com.jarvyx.studybook.study.dto.BulkStudyArgumentRequest;
+import com.jarvyx.studybook.study.dto.StudyArgumentCompletionResponse;
 import com.jarvyx.studybook.study.dto.StudyArgumentNoteRequest;
 import com.jarvyx.studybook.study.dto.StudyArgumentNoteResponse;
 import com.jarvyx.studybook.study.dto.StudyArgumentRequest;
@@ -70,6 +71,11 @@ public class StudyArgumentController {
     @PutMapping("/arguments/{id}")
     public StudyArgumentResponse update(@PathVariable UUID id, @Valid @RequestBody StudyArgumentRequest request) {
         return StudyArgumentResponse.from(argumentService.update(currentUser.getUserId(), id, request));
+    }
+
+    @PostMapping("/arguments/{id}/complete")
+    public StudyArgumentCompletionResponse complete(@PathVariable UUID id) {
+        return argumentService.complete(currentUser.getUserId(), id);
     }
 
     @DeleteMapping("/arguments/{id}")

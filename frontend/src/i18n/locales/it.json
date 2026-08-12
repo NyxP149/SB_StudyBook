@@ -255,6 +255,8 @@
     "noNotes": "Ancora nessuna nota personale.",
     "noLinkedNotes": "Ancora nessuna nota trascritta collegata.",
     "notePlaceholder": "Scrivi qui la tua nota…",
-    "confirmDeleteNote": "Eliminare definitivamente questa nota?"
+    "confirmDeleteNote": "Eliminare definitivamente questa nota?",
+    "progressLabel": "{{completed}}/{{total}} argomenti completati ({{percent}}%)",
+    "dismissEncouragement": "Chiudi"
   }
 }

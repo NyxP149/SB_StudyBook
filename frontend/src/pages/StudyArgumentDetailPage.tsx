@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
+  completeStudyArgument,
   createStudyArgumentNote,
   deleteStudyArgument,
   deleteStudyArgumentNote,
@@ -127,6 +128,7 @@ export function StudyArgumentDetailPage() {
   const [creatingNote, setCreatingNote] = useState(false)
   const [newNoteDraft, setNewNoteDraft] = useState('')
   const [savingNewNote, setSavingNewNote] = useState(false)
+  const [encouragement, setEncouragement] = useState<string | null>(null)
 
   const refresh = () => {
     if (!id) return
@@ -164,13 +166,19 @@ export function StudyArgumentDetailPage() {
 
   async function toggleCompleted() {
     try {
-      const updated = await updateStudyArgument(argument!.id, {
-        title: argument!.title,
-        scheduledDate: argument!.scheduledDate,
-        content: argument!.content ?? '',
-        completed: !argument!.completed,
-      })
-      setArgument(updated)
+      if (!argument!.completed) {
+        const result = await completeStudyArgument(argument!.id)
+        setArgument(result.argument)
+        setEncouragement(result.encouragementMessage)
+      } else {
+        const updated = await updateStudyArgument(argument!.id, {
+          title: argument!.title,
+          scheduledDate: argument!.scheduledDate,
+          content: argument!.content ?? '',
+          completed: false,
+        })
+        setArgument(updated)
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : t('common.saveFailed'))
     }
@@ -257,6 +265,15 @@ export function StudyArgumentDetailPage() {
       </header>
 
       {error && <p className="upload-error">{error}</p>}
+
+      {encouragement && (
+        <div className="study-encouragement-banner">
+          <span>🌱 {encouragement}</span>
+          <button type="button" onClick={() => setEncouragement(null)} aria-label={t('study.dismissEncouragement')}>
+            ✕
+          </button>
+        </div>
+      )}
 
       <div className="study-images-section">
         <div className="study-images-header">

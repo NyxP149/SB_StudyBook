@@ -130,6 +130,24 @@ export function StudyProgramDetailPage() {
 
       {error && <p className="upload-error">{error}</p>}
 
+      {!isEditing && args && args.length > 0 && (
+        <div>
+          <p className="study-progress-label">
+            {t('study.progressLabel', {
+              completed: args.filter((a) => a.completed).length,
+              total: args.length,
+              percent: Math.round((args.filter((a) => a.completed).length / args.length) * 100),
+            })}
+          </p>
+          <div className="study-progress-bar">
+            <div
+              className="study-progress-bar-fill"
+              style={{ width: `${Math.round((args.filter((a) => a.completed).length / args.length) * 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       {!isEditing && (
         <>
           {!args && <p className="notes-loading">{t('common.loading')}</p>}

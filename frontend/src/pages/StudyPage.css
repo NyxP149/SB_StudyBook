@@ -399,3 +399,50 @@
   font-family: var(--font-display);
   font-size: 17px;
 }
+
+.study-encouragement-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--teal-bg);
+  border: 1px solid var(--teal);
+  border-radius: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.study-encouragement-banner button {
+  border: none;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.study-encouragement-banner button:hover {
+  color: var(--ink);
+}
+
+.study-progress-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--paper-deep);
+  overflow: hidden;
+}
+
+.study-progress-bar-fill {
+  height: 100%;
+  background: var(--teal-solid);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.study-progress-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}

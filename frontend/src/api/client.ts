@@ -5,6 +5,7 @@ import type {
   NoteImportance,
   NoteSummary,
   StudyArgument,
+  StudyArgumentCompletionResult,
   StudyArgumentInput,
   StudyArgumentNote,
   StudyImage,
@@ -312,6 +313,11 @@ export async function createStudyArgumentsBulk(
     body: JSON.stringify({ arguments: inputs }),
   })
   return parseOrThrow<StudyArgument[]>(response)
+}
+
+export async function completeStudyArgument(id: string): Promise<StudyArgumentCompletionResult> {
+  const response = await authFetch(`${STUDY_URL}/arguments/${id}/complete`, { method: 'POST' })
+  return parseOrThrow<StudyArgumentCompletionResult>(response)
 }
 
 export async function updateStudyArgument(id: string, input: StudyArgumentInput): Promise<StudyArgument> {

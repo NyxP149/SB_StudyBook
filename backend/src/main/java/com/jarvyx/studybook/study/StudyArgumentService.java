@@ -1,6 +1,8 @@
 package com.jarvyx.studybook.study;
 
+import com.jarvyx.studybook.study.dto.StudyArgumentCompletionResponse;
 import com.jarvyx.studybook.study.dto.StudyArgumentRequest;
+import com.jarvyx.studybook.study.dto.StudyArgumentResponse;
 import com.jarvyx.studybook.study.dto.StudyUpcomingResponse;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -23,16 +25,19 @@ public class StudyArgumentService {
     private final StudyProgramRepository programRepository;
     private final StudyImageRepository imageRepository;
     private final StudyArgumentNoteRepository argumentNoteRepository;
+    private final EncouragementService encouragementService;
 
     public StudyArgumentService(
             StudyArgumentRepository argumentRepository,
             StudyProgramRepository programRepository,
             StudyImageRepository imageRepository,
-            StudyArgumentNoteRepository argumentNoteRepository) {
+            StudyArgumentNoteRepository argumentNoteRepository,
+            EncouragementService encouragementService) {
         this.argumentRepository = argumentRepository;
         this.programRepository = programRepository;
         this.imageRepository = imageRepository;
         this.argumentNoteRepository = argumentNoteRepository;
+        this.encouragementService = encouragementService;
     }
 
     public StudyArgument create(UUID userId, UUID programId, StudyArgumentRequest request) {
@@ -54,6 +59,21 @@ public class StudyArgumentService {
                 })
                 .toList();
         return argumentRepository.saveAll(arguments);
+    }
+
+    public StudyArgumentCompletionResponse complete(UUID userId, UUID id) {
+        StudyArgument argument = getOrThrow(userId, id);
+        argument.setCompleted(true);
+        argumentRepository.save(argument);
+
+        List<StudyArgument> siblings = argumentRepository.findAllByProgramIdOrderByScheduledDateAsc(argument.getProgramId());
+        int totalCount = siblings.size();
+        int completedCount = (int) siblings.stream().filter(StudyArgument::isCompleted).count();
+        String message = encouragementService.generate(
+                argument.getTitle(), programName(argument.getProgramId()), completedCount, totalCount);
+
+        return new StudyArgumentCompletionResponse(
+                StudyArgumentResponse.from(argument), message, completedCount, totalCount);
     }
 
     public StudyArgument update(UUID userId, UUID id, StudyArgumentRequest request) {

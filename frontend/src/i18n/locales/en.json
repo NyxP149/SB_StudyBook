@@ -255,6 +255,8 @@
     "noNotes": "No personal notes yet.",
     "noLinkedNotes": "No linked transcribed notes yet.",
     "notePlaceholder": "Write your note here…",
-    "confirmDeleteNote": "Permanently delete this note?"
+    "confirmDeleteNote": "Permanently delete this note?",
+    "progressLabel": "{{completed}}/{{total}} arguments done ({{percent}}%)",
+    "dismissEncouragement": "Close"
   }
 }
