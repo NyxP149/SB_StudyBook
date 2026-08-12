@@ -208,9 +208,28 @@
     "namePlaceholder": "e.g. Sunday study",
     "frequencyLabel": "Frequency",
     "frequency": {
+      "DAILY": "Daily",
       "WEEKLY": "Weekly",
       "MONTHLY": "Monthly",
       "YEARLY": "Yearly"
+    },
+    "addBatch": "+ Add a batch",
+    "grid": {
+      "newTitle": "New program",
+      "addTitle": "Add a batch to \"{{name}}\"",
+      "subtitle": "Pick a rhythm and a duration, then fill in as many boxes as you want — empty ones are ignored.",
+      "unit": {
+        "DAILY": "Days",
+        "WEEKLY": "Weeks",
+        "MONTHLY": "Months",
+        "YEARLY": "Years"
+      },
+      "count": "Number of boxes",
+      "boxPlaceholder": "Argument title…",
+      "submit": "Create",
+      "errNoTitles": "Fill in at least one box.",
+      "errNoName": "The program name is required.",
+      "existingTitle": "Existing arguments"
     },
     "confirmDeleteProgram": "Permanently delete this program and all its arguments?",
     "backLink": "← My programs",

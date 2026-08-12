@@ -43,6 +43,19 @@ public class StudyArgumentService {
         return argumentRepository.save(argument);
     }
 
+    public List<StudyArgument> createBulk(UUID userId, UUID programId, List<StudyArgumentRequest> requests) {
+        requireOwnedProgram(userId, programId);
+        List<StudyArgument> arguments = requests.stream()
+                .map(request -> {
+                    StudyArgument argument = new StudyArgument(programId, request.title(), request.scheduledDate());
+                    argument.setUserId(userId);
+                    argument.setContent(request.content());
+                    return argument;
+                })
+                .toList();
+        return argumentRepository.saveAll(arguments);
+    }
+
     public StudyArgument update(UUID userId, UUID id, StudyArgumentRequest request) {
         StudyArgument argument = getOrThrow(userId, id);
         argument.edit(request.title(), request.scheduledDate(), request.content(), request.completed());

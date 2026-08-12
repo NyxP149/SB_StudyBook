@@ -208,9 +208,28 @@
     "namePlaceholder": "es: Studio della domenica",
     "frequencyLabel": "Ritmo",
     "frequency": {
+      "DAILY": "Giornaliero",
       "WEEKLY": "Settimanale",
       "MONTHLY": "Mensile",
       "YEARLY": "Annuale"
+    },
+    "addBatch": "+ Aggiungi un lotto",
+    "grid": {
+      "newTitle": "Nuovo programma",
+      "addTitle": "Aggiungi un lotto a «{{name}}»",
+      "subtitle": "Scegli un ritmo e una durata, poi compila le caselle che vuoi — quelle vuote saranno ignorate.",
+      "unit": {
+        "DAILY": "Giorni",
+        "WEEKLY": "Settimane",
+        "MONTHLY": "Mesi",
+        "YEARLY": "Anni"
+      },
+      "count": "Numero di caselle",
+      "boxPlaceholder": "Titolo dell'argomento…",
+      "submit": "Crea",
+      "errNoTitles": "Compila almeno una casella.",
+      "errNoName": "Il nome del programma è richiesto.",
+      "existingTitle": "Argomenti esistenti"
     },
     "confirmDeleteProgram": "Eliminare definitivamente questo programma e tutti i suoi argomenti?",
     "backLink": "← I miei programmi",

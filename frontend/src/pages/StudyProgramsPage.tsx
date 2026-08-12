@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { createStudyProgram, deleteStudyProgram, listStudyPrograms, listStudyUpcoming, updateStudyProgram } from '../api/client'
+import { deleteStudyProgram, listStudyPrograms, listStudyUpcoming, updateStudyProgram } from '../api/client'
 import { formatDateOnly } from '../utils/formatDate'
 import type { StudyProgram, StudyProgramFrequency, StudyProgramInput, StudyUpcoming } from '../types'
 import './StudyPage.css'
 
-const FREQUENCIES: StudyProgramFrequency[] = ['WEEKLY', 'MONTHLY', 'YEARLY']
+const FREQUENCIES: StudyProgramFrequency[] = ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']
 
 function emptyForm(): StudyProgramInput {
   return { name: '', frequency: 'WEEKLY' }
@@ -32,12 +32,6 @@ export function StudyProgramsPage() {
 
   useEffect(refresh, [])
 
-  const startCreate = () => {
-    setEditingId('new')
-    setForm(emptyForm())
-    setError(null)
-  }
-
   const startEdit = (program: StudyProgram) => {
     setEditingId(program.id)
     setForm({ name: program.name, frequency: program.frequency })
@@ -53,11 +47,8 @@ export function StudyProgramsPage() {
     setSaving(true)
     setError(null)
     try {
-      if (editingId && editingId !== 'new') {
-        await updateStudyProgram(editingId, form)
-      } else {
-        await createStudyProgram(form)
-      }
+      if (!editingId) return
+      await updateStudyProgram(editingId, form)
       setEditingId(null)
       refresh()
     } catch (e) {
@@ -88,9 +79,9 @@ export function StudyProgramsPage() {
           <p>{t('study.subtitle')}</p>
         </div>
         {!isEditing && (
-          <button type="button" className="new-template-button" onClick={startCreate}>
+          <Link to="/study/programs/new" className="new-template-button">
             {t('study.newProgram')}
-          </button>
+          </Link>
         )}
       </header>
 
@@ -169,11 +160,9 @@ export function StudyProgramsPage() {
           </label>
 
           <div className="template-form-actions">
-            {editingId !== 'new' && (
-              <button type="button" className="delete-template-button" onClick={() => editingId && remove(editingId)}>
-                {t('common.delete')}
-              </button>
-            )}
+            <button type="button" className="delete-template-button" onClick={() => editingId && remove(editingId)}>
+              {t('common.delete')}
+            </button>
             <div className="template-form-actions-right">
               <button type="button" className="cancel-button" onClick={cancelEdit}>
                 {t('common.cancel')}

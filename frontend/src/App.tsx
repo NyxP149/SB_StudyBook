@@ -8,6 +8,7 @@ import { TemplatesPage } from './pages/TemplatesPage'
 import { FoldersPage } from './pages/FoldersPage'
 import { StudyProgramsPage } from './pages/StudyProgramsPage'
 import { StudyProgramDetailPage } from './pages/StudyProgramDetailPage'
+import { StudyProgramGridPage } from './pages/StudyProgramGridPage'
 import { StudyArgumentDetailPage } from './pages/StudyArgumentDetailPage'
 import { AuthPage } from './pages/AuthPage'
 import { useAuth } from './auth/AuthContext'
@@ -33,7 +34,9 @@ function App() {
         <Route path="/templates" element={<TemplatesPage />} />
         <Route path="/folders" element={<FoldersPage />} />
         <Route path="/study" element={<StudyProgramsPage />} />
+        <Route path="/study/programs/new" element={<StudyProgramGridPage />} />
         <Route path="/study/programs/:id" element={<StudyProgramDetailPage />} />
+        <Route path="/study/programs/:id/grid" element={<StudyProgramGridPage />} />
         <Route path="/study/arguments/:id" element={<StudyArgumentDetailPage />} />
       </Routes>
     </AppShell>

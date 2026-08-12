@@ -108,9 +108,14 @@ export function StudyProgramDetailPage() {
           )}
         </div>
         {!isEditing && (
-          <button type="button" className="new-template-button" onClick={startCreate}>
-            {t('study.newArgument')}
-          </button>
+          <div className="study-detail-header-actions">
+            <Link to={`/study/programs/${id}/grid`} className="save-button">
+              {t('study.addBatch')}
+            </Link>
+            <button type="button" className="new-template-button" onClick={startCreate}>
+              {t('study.newArgument')}
+            </button>
+          </div>
         )}
       </header>
 

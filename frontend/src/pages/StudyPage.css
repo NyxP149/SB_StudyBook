@@ -311,3 +311,91 @@
   color: var(--ink-faint);
   flex-shrink: 0;
 }
+
+.study-detail-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.study-grid-unit-tabs {
+  align-self: flex-start;
+}
+
+.study-grid-count-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.study-grid-count-field {
+  max-width: 140px;
+}
+
+.study-grid-shortcuts {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 2px;
+}
+
+.study-grid-shortcut {
+  border: 1px solid var(--line);
+  background: var(--paper-card);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.study-grid-shortcut.active {
+  background: var(--gold-bright);
+  border-color: var(--gold-bright);
+  color: var(--on-accent);
+}
+
+.study-grid-boxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.study-grid-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.study-grid-box-date {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-faint);
+}
+
+.study-grid-box input {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.study-grid-existing {
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.study-grid-existing h3 {
+  font-family: var(--font-display);
+  font-size: 17px;
+}

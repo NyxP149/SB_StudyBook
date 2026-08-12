@@ -67,7 +67,7 @@ export interface TemplateInput {
   sections: TemplateSection[]
 }
 
-export type StudyProgramFrequency = 'WEEKLY' | 'MONTHLY' | 'YEARLY'
+export type StudyProgramFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
 
 export interface StudyProgram {
   id: string

@@ -302,6 +302,18 @@ export async function createStudyArgument(programId: string, input: StudyArgumen
   return parseOrThrow<StudyArgument>(response)
 }
 
+export async function createStudyArgumentsBulk(
+  programId: string,
+  inputs: StudyArgumentInput[],
+): Promise<StudyArgument[]> {
+  const response = await authFetch(`${STUDY_URL}/programs/${programId}/arguments/bulk`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ arguments: inputs }),
+  })
+  return parseOrThrow<StudyArgument[]>(response)
+}
+
 export async function updateStudyArgument(id: string, input: StudyArgumentInput): Promise<StudyArgument> {
   const response = await authFetch(`${STUDY_URL}/arguments/${id}`, {
     method: 'PUT',

@@ -208,9 +208,28 @@
     "namePlaceholder": "ex : Étude du dimanche",
     "frequencyLabel": "Rythme",
     "frequency": {
+      "DAILY": "Quotidien",
       "WEEKLY": "Hebdomadaire",
       "MONTHLY": "Mensuel",
       "YEARLY": "Annuel"
+    },
+    "addBatch": "+ Ajouter un lot",
+    "grid": {
+      "newTitle": "Nouveau programme",
+      "addTitle": "Ajouter un lot à « {{name}} »",
+      "subtitle": "Choisis un rythme et une durée, puis remplis les cases que tu veux — les vides seront ignorées.",
+      "unit": {
+        "DAILY": "Jours",
+        "WEEKLY": "Semaines",
+        "MONTHLY": "Mois",
+        "YEARLY": "Années"
+      },
+      "count": "Nombre de cases",
+      "boxPlaceholder": "Titre de l'argument…",
+      "submit": "Créer",
+      "errNoTitles": "Remplis au moins une case.",
+      "errNoName": "Le nom du programme est requis.",
+      "existingTitle": "Arguments existants"
     },
     "confirmDeleteProgram": "Supprimer définitivement ce programme et tous ses arguments ?",
     "backLink": "← Mes programmes",

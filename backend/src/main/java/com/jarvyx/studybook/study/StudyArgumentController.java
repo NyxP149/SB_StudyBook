@@ -1,6 +1,7 @@
 package com.jarvyx.studybook.study;
 
 import com.jarvyx.studybook.auth.CurrentUser;
+import com.jarvyx.studybook.study.dto.BulkStudyArgumentRequest;
 import com.jarvyx.studybook.study.dto.StudyArgumentNoteRequest;
 import com.jarvyx.studybook.study.dto.StudyArgumentNoteResponse;
 import com.jarvyx.studybook.study.dto.StudyArgumentRequest;
@@ -42,6 +43,16 @@ public class StudyArgumentController {
             @PathVariable UUID programId, @Valid @RequestBody StudyArgumentRequest request) {
         StudyArgument argument = argumentService.create(currentUser.getUserId(), programId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(StudyArgumentResponse.from(argument));
+    }
+
+    @PostMapping("/programs/{programId}/arguments/bulk")
+    public ResponseEntity<List<StudyArgumentResponse>> createBulk(
+            @PathVariable UUID programId, @Valid @RequestBody BulkStudyArgumentRequest request) {
+        List<StudyArgumentResponse> created = argumentService.createBulk(currentUser.getUserId(), programId, request.arguments())
+                .stream()
+                .map(StudyArgumentResponse::from)
+                .toList();
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping("/programs/{programId}/arguments")
