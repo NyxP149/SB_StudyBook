@@ -1,0 +1,156 @@
+# SB_StudyBook — Implémentation, étape par étape
+
+> Historique chronologique des fonctionnalités livrées, avec les difficultés/bugs rencontrés et comment ils ont été résolus. Voir [SB_conception.md](SB_conception.md) pour l'architecture d'ensemble et [SB_deploy.md](SB_deploy.md) pour la mise en production.
+>
+> Chaque section correspond à un ou plusieurs commits réels du dépôt (référencés entre parenthèses).
+
+## Phase 0 — Prototype et validation du concept (02–04/08)
+
+### Prototype Python (`c260e00`)
+Avant d'écrire la moindre ligne de Java, le cœur du produit (audio → transcription Whisper → note structurée via LLM) a été validé en local avec `faster-whisper` et un système de providers interchangeables (Ollama, Anthropic, stub). Objectif : prouver que le pipeline produit un résultat correct avant d'investir dans le backend/frontend.
+
+**Difficultés rencontrées et corrigées à ce stade :**
+- **Notes polluées par du texte de remplissage** (`ca98925`) — Ollama (llama3.1) enveloppait la note structurée dans des phrases comme "Voici la fiche..." ou "Laissez-moi savoir...". *Fix* : instruction explicite dans le prompt de ne produire que le Markdown demandé, rien d'autre.
+- **Références bibliques halluciné­es** (`7855758`) — le petit modèle Ollama inventait une référence "Jean 3:16" jamais prononcée dans la transcription, vraisemblablement amorcé par l'exemple donné dans le prompt lui-même. *Fix* : suppression de cet exemple et ajout d'une règle explicite : ne lister que les références **littéralement dites** dans la transcription, sinon indiquer qu'aucune n'a été citée. Première leçon retenue sur les prompts LLM de ce projet : un exemple dans le prompt peut devenir un biais de génération.
+
+### Backend Spring Boot (`969d08a`)
+API REST (Java 21, Spring Boot 4.1, PostgreSQL) qui **encapsule** le prototype Python plutôt que de le réécrire : `POST /api/notes` accepte un fichier audio, lance Whisper + le générateur de note via `ProcessBuilder`, persiste transcription/note. PostgreSQL tourne en local via docker-compose sur le port 5433 (5432 déjà pris par un autre projet sur la machine de dev).
+
+### Traitement asynchrone (`0f6d12a`)
+Un pipeline complet peut prendre plusieurs minutes (modèle `large-v3` + Ollama). `POST /api/notes` a été rendu asynchrone : réponse 202 immédiate avec statut `PENDING`, traitement sur un thread pool dédié (max 2 concurrents), le client poll `GET /api/notes/{id}`.
+
+**Piège Spring rencontré** : la méthode `@Async` ne pouvait pas être une méthode de `NoteService` s'appelant elle-même — le proxy AOP de Spring n'intercepte pas le self-invocation, ce qui aurait exécuté le traitement de façon synchrone malgré l'annotation. *Fix* : extraction dans un bean séparé, `NotePipelineRunner`.
+
+### Frontend React (`dbffe25`)
+Vite + React + TypeScript, design "journal" fait sur mesure (polices Fraunces/Inter, palette papier chaud) plutôt qu'une librairie de composants générique. Trois écrans initiaux : upload/enregistrement, liste des notes (cartes façon fiches), détail d'une note. Le serveur de dev tourne sur le port 5174 (5173 déjà utilisé par LFM_LanguegesForMe sur la même machine) et proxy `/api` vers `localhost:8080` pour éviter le CORS en dev.
+
+### Templates de notes personnalisables (`a9960ad`, `f813b18`, `a27fdb6`)
+Passage d'une structure de note figée (5 sections codées en dur) à une liste configurable de sections (titre + instructions), consommée par le prompt LLM. Nouvelle API CRUD `/api/templates`, stockage via `@ElementCollection` JPA. `POST /api/notes` accepte un `templateId` optionnel ; le backend sérialise les sections en JSON temporaire, le passe au script Python via `--template-file`, puis nettoie le fichier temporaire. Écran `/templates` dédié côté frontend, testé end-to-end (création → apparaît au choix à l'upload → édition pré-remplit → suppression fonctionne).
+
+**Piège de version rencontré** : Spring Boot 4 embarque Jackson 3, dont l'`ObjectMapper` vit sous `tools.jackson.databind` et non `com.fasterxml.jackson.databind` — a cassé la sérialisation JSON du template au premier essai avec les imports habituels.
+
+## Phase 1 — Fonctionnalités cœur (06/08)
+
+### Édition, export et recherche (`fe5b537`)
+`PATCH /api/notes/{id}` pour corriger le markdown d'une note DONE. Édition inline côté frontend, téléchargement `.md`, vue impression/PDF navigateur. Recherche par nom de fichier + filtres statut/template sur la liste.
+
+### Import texte/PDF (`ff6cfad`)
+Alternative à l'enregistrement audio : `main.py` accepte `--transcript-file` pour sauter Whisper, nouvel endpoint `POST /api/notes/from-text` (texte collé, `.txt`, ou `.pdf` via PDFBox), routé dans le même pipeline par templates que les notes audio.
+
+### Dossiers et niveaux d'importance (`408a233`)
+Entité `Folder` + CRUD, `Note` gagne `folderId` et `importance` (NORMALE/IMPORTANTE/URGENTE), `PATCH /api/notes/{id}/organize`.
+
+**Bug de concurrence anticipé et corrigé avant même d'apparaître en prod** : des changements rapides et successifs de dossier/importance sur la même note pouvaient partir en parallèle et se faire écraser l'un l'autre côté serveur (race condition). *Fix* : sérialisation client-side des requêtes d'organisation (file d'attente, une seule requête en vol à la fois).
+
+## Phase 2 — Mise en production (06/08)
+
+Voir [SB_deploy.md](SB_deploy.md) pour le détail complet de cette phase (Dockerfile, Render, Neon, Gemini, et tous les bugs de production rencontrés : OOM 512MB, colonne réservée `user`, modèle Gemini sans quota, plan Render payant par erreur...).
+
+Résumé des étapes livrées ici : Dockerfile multi-stage (`5055e28`), provider Gemini gratuit (`0a10823`), comptes utilisateurs avec tokens opaques (`4712eb6`), fix crash mémoire en forçant `gemini`/`tiny` par défaut (`0f7f0ab`), transcription audio via Gemini pour éviter l'OOM Whisper (`f132306`), upload de gros fichiers audio via l'API Files de Gemini (`0ecfa68`).
+
+## Phase 3 — Fiabilisation et confort d'usage (08/08)
+
+### Suppression de notes, suppression en masse (`0ecfa68`, `7efc473`)
+Ajouté après avoir dû nettoyer manuellement des notes restées bloquées en `PROCESSING` suite à un crash backend qui avait orphelin leur tâche async. La suppression en masse (`7efc473`) a été demandée directement après avoir dû supprimer ces notes une par une.
+
+### PWA et mode hors-ligne (`5210bf9`)
+Application installable (manifest + icônes + service worker via `vite-plugin-pwa`). Les GET (notes/dossiers/templates) sont mis en cache (StaleWhileRevalidate) pour rester lisibles hors-ligne. Le cache est vidé à la déconnexion pour éviter qu'un appareil partagé garde les données d'un utilisateur précédent.
+
+Décision de conception : la création de note reste toujours en ligne (le pipeline tourne côté serveur), mais **l'enregistrement audio** fonctionne hors-ligne — sauvegardé en IndexedDB, affiché dans une liste "enregistrements en attente", envoi toujours manuel et explicite (jamais automatique à la reconnexion, sur demande explicite).
+
+### Détection des enregistrements silencieux (`abbfee3`)
+**Bug découvert par l'usage réel, pas par un test** : Whisper et Gemini ne renvoient pas une transcription vide pour un silence — ils **hallucinent** la suite statistiquement probable d'après leurs données d'entraînement, ce qui donne souvent des phrases de type "abonnez-vous à la chaîne" (les phrases de fin de vidéo YouTube sont surreprésentées dans les corpus d'entraînement ASR). *Fix* : décodage du blob audio via la Web Audio API côté client, rejet avant envoi (erreur claire, aucune requête réseau) si la durée est sous 0.5s ou si l'amplitude crête ne dépasse jamais un seuil de quasi-silence. Validé directement contre des blobs WAV synthétiques (silence, court, tonalité).
+
+### Trois bugs hors-ligne (`2f8264e`)
+Trois symptômes remontés (faux verrouillage de connexion, statut de connexion peu fiable, rechargement mort hors-ligne) qui partageaient en réalité **une seule cause racine** : l'effet de montage d'`AuthContext` appelait `getMe()` pour valider le token stocké, et son `catch` déconnectait l'utilisateur sur **n'importe quelle** erreur — y compris une simple erreur réseau hors-ligne, indistinguable d'un vrai 401 avec l'`Error` générique levée jusque-là.
+- *Fix 1* : ajout d'un `ApiError` avec un champ `status` — seul un vrai 401 déclenche la déconnexion ; une panne réseau laisse la session en cache intacte, et le nom d'utilisateur en cache s'affiche immédiatement sans attendre l'aller-retour réseau.
+- *Fix 2* : `useOnlineStatus` reposait uniquement sur `navigator.onLine`, qui ne reflète que l'état de l'interface réseau, pas l'accessibilité réelle du backend (ex. wifi connecté mais pas d'internet, DNS/serveur down). Passé à un ping actif de `/api/health` (timeout généreux de 8s / intervalle 20s, car le tier gratuit Render peut prendre 20-30s à se réveiller d'un cold start).
+- *Fix 3* : `navigateFallback` du service worker rendu explicite pour qu'un rechargement forcé hors-ligne serve `index.html` précaché plutôt que la page d'erreur réseau du navigateur.
+
+## Phase 4 — i18n et navigation (11/08)
+
+### Sidebar repliable + traductions FR/EN/IT (`6057dfe`)
+La navigation passe du header vers une sidebar gauche entièrement repliable (état persisté en `localStorage`, en overlay sur mobile plutôt qu'en poussant le contenu). Mise en place complète d'i18next : toutes les chaînes de l'UI traduites dans les 3 langues, y compris pluriels et formatage de dates localisé. Choix de langue persisté, avec repli sur la langue du navigateur puis le français.
+
+**Bugs UI mineurs corrigés dans la foulée** :
+- Bouton de bascule sidebar repliée qui chevauchait le titre de page (`422ae8b`).
+- Bouton logout devenu invisible une fois la sidebar repliée (comportement par défaut sur mobile) puisqu'il vivait désormais dans la sidebar elle-même — plus aucun moyen de se déconnecter sans d'abord trouver le bouton ☰. *Fix* (`8a6e8a2`) : petit bouton power fixe en haut à droite, visible uniquement quand la sidebar est repliée, miroir du toggle ☰ existant côté opposé.
+
+## Phase 5 — Étude personnelle (11/08)
+
+Fonctionnalité non prévue dans la roadmap initiale : programmes d'étude personnelle indépendants du flux audio→note.
+
+### Fondations (`968b185`)
+`StudyProgram` (nom + rythme indicatif WEEKLY/MONTHLY/YEARLY) contient des `StudyArgument`, chacun daté manuellement, avec son propre contenu libre et des images attachées (stockées en `bytea` Postgres, plafonnées à 5MB — pas de disque persistant sur le tier gratuit Render, donc pas de stockage externe simple à ce stade). `GET /api/study/upcoming` alimente un panneau de rappel (arguments en retard + à échéance sous 7 jours).
+
+Les images sont servies derrière l'authentification (`GET /api/study/images/{id}`), donc le frontend les récupère via `authFetch` + URL `blob:` (composant `AuthedImage`) plutôt qu'une balise `<img src>` classique, qui ne peut pas porter de bearer token.
+
+### Bugs de production sur les images (`9ab474c`, `574df48`)
+**Découverts en testant le cycle upload→fetch→delete sur le déploiement réel**, pas seulement l'upload isolé :
+- `@Lob` sur un `byte[]` fait stocker Hibernate en objet large PostgreSQL (OID) plutôt qu'en colonne `bytea` classique — lire/supprimer un OID nécessite un streaming dans une transaction active, ce que les appels `findByIdAndUserId()`/`deleteById()` simples utilisés ici ne fournissaient pas. Chaque fetch ou delete d'image renvoyait donc un 500. *Fix* : abandon de `@Lob`, colonne `columnDefinition="bytea"` explicite (champ renommé pour que Hibernate crée une colonne fraîche via `ddl-auto` plutôt que de tenter d'altérer l'ancienne colonne mal typée — l'ancienne colonne reste orpheline, sans conséquence puisque rien ne la référençait en dehors de cette fonctionnalité encore non annoncée).
+- Une fois ce premier fix en place : `ddl-auto=update` ne peut pas ajouter une colonne `NOT NULL` sans valeur par défaut sur une table qui a déjà des lignes (présentes ici à cause du test précédent) — Postgres refuse, la migration ne s'appliquait donc jamais silencieusement, et chaque upload d'image continuait de planter en 500. *Fix* : suppression de la contrainte `NOT NULL` en base (la couche service garantit déjà une valeur non nulle à chaque insertion, donc la contrainte n'était pas structurellement nécessaire).
+
+### Affichage de date incorrect (`2844c79`)
+`scheduledDate` est un `LocalDate` pur (sans heure), mais les pages l'affichaient avec des fonctions de formatage incluant heure/minute — un artefact de `new Date(iso)` qui traite la chaîne comme minuit UTC puis la localise, faisant apparaître par exemple "11 août, 2h00" pour une simple date. *Fix* : nouvelle fonction `formatDateOnly` qui parse la date par composants année/mois/jour locaux (évite aussi qu'elle recule d'un jour dans les fuseaux UTC négatifs) et formate sans heure.
+
+### Liaison automatique note↔argument par IA (`3e661f6`)
+Dernière brique d'Étude personnelle : quand le pipeline d'une note se termine, `NoteLinkingService` compare son contenu aux arguments d'étude de l'utilisateur via un appel Gemini direct côté Java (pas via le pipeline Python — nécessite un accès DB à la liste des arguments). Si Gemini identifie un candidat, il est stocké en `suggestedArgumentId` et proposé à l'utilisateur avec confirmer/écarter ; la confirmation le déplace en `linkedArgumentId`, affiché comme badge permanent.
+
+Conçu **best-effort** de bout en bout : absence de clé Gemini, absence d'arguments à comparer, ou échec d'appel API — dans tous les cas, la suggestion est simplement ignorée silencieusement, sans jamais affecter la complétion de la note elle-même.
+
+### Thèmes et images inline (`75f35a5`, `739f4b0`)
+7 thèmes d'accent (noir, vert, violet, orange, cyan, bleu, fuchsia) en plus de l'or par défaut. Seules `--gold`/`--gold-bright` sont redéfinies par thème pour ne pas avoir à auditer chaque usage de couleur dans l'app.
+
+Images inline dans les notes (`NoteImage`, store générique découplé de `Note`/`StudyArgument`, référencé par `note-image:{id}` inséré à la position du curseur), et passage à plusieurs notes personnelles par argument d'étude (`StudyArgumentNote` remplace le champ `content` unique). Page argument réorganisée en deux onglets ("Mes notes" / "Notes liées") pour ne pas surcharger l'écran mobile.
+
+**Bugs découverts en testant en live sur le déploiement, pas via tsc/build :**
+- `bfb04a7` — react-markdown vide par défaut tout `src`/`href` dont le schéma d'URI n'est pas reconnu (protection XSS sur les liens), ce qui effaçait silencieusement les placeholders `note-image:{id}` avant même que le renderer d'image ne les voie. *Fix* : `urlTransform` qui laisse passer spécifiquement le préfixe `note-image:` et délègue au sanitizer par défaut de react-markdown pour le reste.
+- `7c2eeb8` — `StudyProgramService.delete()` purgeait déjà les images de chaque argument avant de cascade-supprimer les arguments, mais oubliait la nouvelle table `study_argument_note` ajoutée en même temps que le cascade (correct, lui) de `StudyArgumentService` — repéré en nettoyant les données de test après la vérification live de la fonctionnalité multi-notes.
+
+### Vrais modes clair/sombre (`bcc6018`, `593fb97`)
+Avant ce commit, les "thèmes" ne recoloraient que les boutons — pas un vrai changement de thème. Ajout d'un second axe indépendant (Défaut/Clair/Sombre) qui override fond de page/texte/lignes/ombres/couleurs sémantiques, combinable avec n'importe quel accent. Introduction de `--on-accent` : couleur fixe pour le texte posé sur un fond accent plein (boutons, onglets, badges), découplée de `--ink` qui elle-même s'inverse en mode sombre.
+
+**Bug de contraste découvert en mesurant réellement, pas en jugeant à l'œil** : `--teal` servait deux rôles contradictoires — couleur de texte/bordure sur fond de page (veut s'éclaircir en mode sombre) et fond plein sous texte blanc (veut rester sombre pour le contraste, quel que soit le mode). Contraste mesuré : 2,28:1, sous le seuil WCAG AA. *Fix* (`593fb97`) : rôle de fond séparé en `--teal-solid`, inchangé du mode par défaut en mode Clair, plus sombre que le `--teal` éclairci en mode Sombre. Appliqué aux 5 boutons pleins teal+texte blanc du site.
+
+## Phase 6 — Personnalisation visuelle des notes (12/08)
+
+### Fonds de note (`a4e1aa9`, `e959963`)
+`Note.background` : clé nullable additive, `null` = papier par défaut. 7 couleurs plates + 6 "chemises" décorées (parchemin ancien, nuit étoilée, lin naturel, feuille d'olivier, aquarelle poudrée, ardoise minérale), implémentées comme overrides de custom properties CSS scopées à une classe `.note-bg-{key}`, appliquées à la fois sur `.note-card` et `.note-markdown` — comme les deux rendent déjà via `background: var(--paper-card)` etc., la cascade CSS gère tous les descendants gratuitement.
+
+**Bug de contraste découvert en mesurant en live, même schéma que le bug teal** : les 7 couleurs plates ne redéfinissaient que `--paper-card`/`--line`, laissant `--ink` à la couleur du mode d'app courant. En mode Sombre, `--ink` est une couleur claire pensée pour un fond sombre — combinée à ces papiers pastel clairs, le contraste mesuré tombait à ~1,5:1. *Fix* (`e959963`) : `--ink`/`--ink-soft`/`--ink-faint`/`--gold` épinglés par preset, comme le faisaient déjà les chemises.
+
+## Phase 7 — Programmes d'étude enrichis (12/08)
+
+- **Grille de création en masse** (`ba093b1`) — choix d'un rythme (jour/semaine/mois/année) + un nombre, remplissage d'une grille de titres en une fois plutôt qu'ajouter les arguments un par un. Fonctionne pour un nouveau programme ou pour ajouter en masse à un programme existant. Nouvel endpoint `POST /api/study/programs/{id}/arguments/bulk`.
+- **Export .ics** (`5012bb1`) — calendrier RFC 5545 (un VEVENT jour entier par argument), généré et téléchargé entièrement côté client, sans OAuth.
+- **Encouragement + progression** (`7a0bacb`) — marquer un argument comme terminé appelle un endpoint dédié qui génère un message d'encouragement Gemini (best-effort, repli sur un message fixe si l'API échoue). Barre de progression X/Y calculée côté client à partir des arguments déjà chargés, sans endpoint supplémentaire.
+
+## Phase 8 — Import/export de documents (12/08)
+
+- **.docx** (`0d4de96`) — import via Apache POI (`XWPFDocument`), même schéma que l'extraction PDFBox existante ; export via la librairie `docx` côté client (headings, listes, gras/italique, images inline), même schéma que les exports `.md`/`.ics` déjà en place.
+- **.pdf natif** (`5bf28b6`) — export via `jsPDF` côté client, remplace le recours au dialogue d'impression du navigateur pour ce format.
+
+## Phase 9 — Barre de mise en forme riche (12/08)
+
+### Fonctionnalité (`a43803b`)
+Nouvelle barre d'outils au-dessus de chaque zone de texte de note (notes transcrites et notes d'étude personnelle) : gras, italique, souligné, majuscules, titre, liste à puces, et un sélecteur 4 couleurs de surlignage — chaque bouton enveloppe/préfixe la sélection courante par manipulation d'index de chaîne pure (`toggleWrap`, `toggleLinePrefix`, `uppercaseSelection`). Souligné/surlignage passent par `<u>`/`<mark>` autorisés dans le rendu markdown via `rehype-raw` + une allowlist `rehype-sanitize` (classe restreinte aux 4 couleurs `hl-*` prédéfinies).
+
+**Deux bugs préexistants, révélés uniquement par cette fonctionnalité** (parce qu'elle est la première à faire des calculs d'index bruts sur le contenu des notes) :
+
+1. **Désynchronisation CRLF des index de sélection.** `<textarea>.value` normalise toujours les retours ligne en LF pur (norme HTML), mais du contenu venant du serveur pouvait contenir des CRLF (ex. texte extrait de fichiers créés sous Windows). Amorcer l'état d'édition avec du CRLF non normalisé faisait diverger `selectionStart`/`selectionEnd` (DOM, en LF) des calculs d'index faits sur la chaîne React — un clic "gras" sur "Résumé" enveloppait par exemple 4 caractères au mauvais endroit, produisant un résultat corrompu.
+   *Diagnostic* : élimination méthodique de plusieurs hypothèses (imprécision du double-clic, perte de sélection au blur du bouton, double invocation du handler) via des logs de debug attachés à `window` (plus fiables ici que `console.log` + lecture de la console, dont le tampon s'est révélé retourner des entrées obsolètes entre rechargements de page) — jusqu'à confirmer que la chaîne React contenait des `\r\n` invisibles dans le `.value` du DOM.
+   *Fix* : `frontend/src/utils/text.ts` → `normalizeLineEndings()`, appelée partout où l'état d'un textarea est initialisé depuis du contenu serveur (`NoteDetailPage.startEditing`, et l'état initial + `startEditing` de `StudyArgumentDetailPage`).
+
+2. **Mise en forme perdue dans les titres.** Une fois le premier bug corrigé, des notes sauvegardées avec par ex. `## **Résumé**` ou `## <mark>Perles</mark> <u>spirituelles</u>` s'affichaient avec un titre complètement vide. Cause : le renderer de titre de `NoteMarkdown.tsx` aplatissait `children` en texte brut pour en extraire l'icône de section, puis **réaffichait ce texte aplati** au lieu des vrais nœuds React — perdant toute balise `<strong>`/`<mark>`/`<u>` imbriquée.
+   *Fix* : réécriture de la fonction d'extraction de texte pour parcourir récursivement l'arbre de `ReactNode` (via `isValidElement`), et rendu de `{children}` (les vrais nœuds) plutôt que du texte aplati.
+
+Les deux corrections ont été vérifiées indépendamment en navigateur avant de considérer la fonctionnalité terminée.
+
+## Enseignements transverses
+
+Quelques motifs récurrents observés sur l'ensemble de ces phases :
+
+- **Beaucoup de bugs n'ont été détectés qu'en testant le flux réel en navigateur** (parfois sur le déploiement lui-même), pas par le typecheck ni le build — en particulier tout ce qui touche au rendu markdown, au contraste de couleurs, et aux calculs d'index sur `<textarea>`. Le typecheck/build attrape les erreurs de types, pas les erreurs de comportement.
+- **Les prompts LLM peuvent s'auto-biaiser** : un exemple donné dans un prompt de génération peut être repris littéralement par le modèle (références bibliques hallucinées) — éviter les exemples concrets dans les prompts de génération de contenu factuel.
+- **Chaque fonctionnalité "best-effort" liée à l'IA (Gemini) est conçue pour échouer silencieusement** sans jamais bloquer le flux principal (liaison note↔argument, message d'encouragement) — un choix de robustesse répété volontairement à chaque ajout d'IA.
+- **Les contraintes du tier gratuit Render (512MB RAM, pas de disque persistant, cold start 20-30s) ont concrètement façonné plusieurs décisions d'architecture** : transcription Gemini plutôt que Whisper local en prod, images en `bytea` Postgres plutôt que sur disque, ping actif de `/api/health` côté frontend pour détecter un backend réellement joignable.
