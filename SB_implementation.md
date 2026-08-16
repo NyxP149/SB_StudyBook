@@ -146,6 +146,12 @@ Nouvelle barre d'outils au-dessus de chaque zone de texte de note (notes transcr
 
 Les deux corrections ont été vérifiées indépendamment en navigateur avant de considérer la fonctionnalité terminée.
 
+## Phase 10 — Étude personnelle disponible hors-ligne (16/08)
+
+En documentant l'architecture offline (§3.5 de [SB_conception.md](SB_conception.md)), il est apparu que la règle de cache du service worker (`frontend/vite.config.ts`) ne couvrait que `/api/(notes|folders|templates)` — les routes `/api/study/*` (programmes, arguments, notes et images d'étude personnelle) en étaient absentes malgré le même besoin de lecture hors-ligne. *Fix* : ajout de `study` au regex de la règle `runtimeCaching` existante (même stratégie StaleWhileRevalidate, même cache `studybook-api-cache`, aucune règle nouvelle nécessaire puisque toutes les routes d'étude personnelle vivent déjà sous le préfixe unique `/api/study`).
+
+Vérifié après build de production : le regex mis à jour est bien injecté dans le `sw.js` généré par `vite-plugin-pwa`, et testé en isolation (`/api/study`, `/api/study/programs/5/arguments`, `/api/study/upcoming`, `/api/study/images/9` matchent ; `/api/auth/login` et `/api/note-images/3` restent exclus, comme avant). Le comportement réel de mise en cache (contenu réellement lisible après coupure réseau) n'a pas pu être vérifié de bout en bout en environnement de preview faute de backend attaché — à confirmer manuellement : ouvrir un programme d'étude en ligne, couper le réseau, recharger.
+
 ## Enseignements transverses
 
 Quelques motifs récurrents observés sur l'ensemble de ces phases :

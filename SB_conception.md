@@ -94,7 +94,7 @@ Les deux axes sont combinables, stockés en `localStorage`, appliqués via un at
 
 Contrairement à LFM_LanguegesForMe (voir sa propre doc), StudyBook n'a **pas** d'architecture offline-first généralisée avec outbox de synchronisation : la création de note nécessite toujours une connexion (le pipeline tourne côté serveur). Le seul flux qui fonctionne hors-ligne est l'**enregistrement audio** : un enregistrement réalisé sans réseau est stocké en IndexedDB (`frontend/src/offline/pendingRecordings.ts`, IndexedDB brut — pas de Dexie) et apparaît dans une liste « enregistrements en attente » sur la page d'upload. L'envoi reste toujours une action manuelle explicite par enregistrement, jamais automatique à la reconnexion (choix demandé explicitement).
 
-Les GET (`notes`, `folders`, `templates`) sont mis en cache par le service worker (stratégie StaleWhileRevalidate) pour que les notes déjà consultées restent lisibles hors-ligne. Le cache API est vidé à la déconnexion pour qu'un appareil partagé ne conserve pas les données d'un utilisateur précédent.
+Les GET (`notes`, `folders`, `templates`, `study` — programmes, arguments, notes et images d'étude personnelle) sont mis en cache par le service worker (stratégie StaleWhileRevalidate) pour que le contenu déjà consulté reste lisible hors-ligne. Le cache API est vidé à la déconnexion pour qu'un appareil partagé ne conserve pas les données d'un utilisateur précédent.
 
 ## 4. Providers interchangeables (pipeline Python)
 

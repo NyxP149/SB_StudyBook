@@ -28,14 +28,14 @@ export default defineConfig({
         // navigateur au lieu de resservir l'app (React Router gère ensuite
         // la route côté client une fois le JS chargé).
         navigateFallback: '/index.html',
-        // Notes/dossiers/templates restent lisibles hors ligne une fois
-        // consultés une première fois. Tout le reste (auth, création de
-        // note, etc.) n'est volontairement pas mis en cache : ça ne
-        // fonctionne de toute façon pas sans connexion au backend.
+        // Notes/dossiers/templates/étude personnelle restent lisibles hors
+        // ligne une fois consultés une première fois. Tout le reste (auth,
+        // création de note, etc.) n'est volontairement pas mis en cache :
+        // ça ne fonctionne de toute façon pas sans connexion au backend.
         runtimeCaching: [
           {
             urlPattern: ({ url, request }) =>
-              request.method === 'GET' && /\/api\/(notes|folders|templates)(\/|$|\?)/.test(url.pathname),
+              request.method === 'GET' && /\/api\/(notes|folders|templates|study)(\/|$|\?)/.test(url.pathname),
             handler: 'StaleWhileRevalidate',
             options: { cacheName: 'studybook-api-cache' },
           },
