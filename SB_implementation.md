@@ -195,6 +195,29 @@ Le flux complet a ensuite été testé manuellement (instance locale dédiée, b
 
 **Vérification** : `mvn compile` et `tsc -b`/`vite build`/`oxlint` propres sur les deux applications ; bundle chargé en navigateur sans erreur console ; backend recompilé et redémarré proprement après les correctifs (health check OK) ; flux réel (import brut, dossiers multiples) confirmé fonctionnel par test manuel de l'utilisateur sur l'instance locale.
 
+## Phase 12 — Correction UX : fermeture des panneaux au clic extérieur (19/08)
+
+Bug rapporté par l'utilisateur : les trois panneaux flottants de type "bouton bascule + panneau" (`SaveAsTemplateButton`, `NoteFolderPicker`, `NoteBackgroundPicker`) ne se refermaient qu'en recliquant sur le bouton qui les avait ouverts — un clic n'importe où ailleurs sur la page n'avait aucun effet, contrairement au comportement standard attendu d'un menu déroulant.
+
+Cause : chacun implémentait indépendamment le même patron minimal (`useState` + `onClick` qui bascule l'état), sans jamais écouter les clics en dehors du panneau. *Fix* : nouveau hook partagé `frontend/src/hooks/useClickOutside.ts` (écoute `pointerdown` sur `document`, ferme si la cible n'est pas contenue dans le conteneur référencé), branché dans les trois composants sur un `ref` posé sur leur `<div>` racine (qui englobe à la fois le bouton et le panneau, donc un clic sur le bouton déclencheur lui-même n'est jamais traité comme "extérieur").
+
+Vérifié par `tsc -b` et `vite build` propres sur les trois composants modifiés. Test du comportement réel non effectué en navigateur (fonctionnalité protégée par connexion, hors de portée de l'automatisation ici) — à confirmer manuellement : ouvrir un des trois panneaux, cliquer ailleurs sur la page, vérifier qu'il se referme.
+
+## Phase 13 — Import .docx "tel quel" : conservation de la mise en forme (19/08)
+
+Bug rapporté avec capture d'écran d'un document source structuré (titre, sous-titre en gras, sections avec icône colorée, liste à puces) : importé en mode « Ajouter tel quel », la note résultante était un unique bloc de texte plat, sans titres ni puces ni gras.
+
+Cause : `NoteService.extractText()` utilisait `XWPFWordExtractor.getText()` pour les `.docx`, qui ne renvoie que le texte brut paragraphe par paragraphe — aucune info de style n'est conservée. Ce texte plat devient directement la note en mode "tel quel" (`--no-generate` sauté toute génération LLM qui aurait pu, sinon, réintroduire une structure), d'où le bloc unique observé.
+
+*Fix* : remplacement par `convertDocxToMarkdown()`, qui parcourt les paragraphes du document via l'API structurée d'Apache POI (déjà une dépendance existante) et reconstruit du vrai markdown :
+- Style de paragraphe `Title` → `#` ; `HeadingN` → `#` répété `N+1` fois (le style Word "Titre 1", le plus courant en pratique, devient ainsi `##` — même niveau visuel que les sections `## Titre` des notes générées par IA, cf. `note_generator.py DEFAULT_SECTIONS`, pour un rendu cohérent entre note importée et note générée).
+- Runs en gras/italique/souligné → enveloppés en `**gras**`/`*italique*`/`<u>souligné</u>` (le rendu markdown du frontend accepte déjà `<u>`, ajouté pour la barre de formatage — voir Phase 7).
+- Paragraphe avec numérotation Word (`numId` présent) → préfixé `- ` (liste à puces ; la distinction numérotée/à puces n'est pas conservée, jugée hors scope).
+
+Volontairement limité au `.docx` : le `.pdf` n'a aucune notion native de "titre" (tout n'est que texte positionné par police/taille), une récupération fiable de structure y demanderait une heuristique nettement plus lourde et moins fiable — laissé de côté après discussion avec l'utilisateur, qui a préféré ne corriger que le cas `.docx`.
+
+**Vérification** : test unitaire jetable (non conservé) construit un `.docx` de test via le paquet `docx` (déjà utilisé côté frontend pour l'export) avec titre/heading1 gras/paragraphe gras+italique/heading2/liste à puces avec gras inline, invoqué `convertDocxToMarkdown()` par réflexion (méthode privée, aucune dépendance Spring nécessaire), et vérifié par assertions que chaque élément de mise en forme survit à la conversion. Toutes les assertions passent après un aller-retour de correction (le premier essai avait mal cartographié Heading1→`#` au lieu de `##`, repéré par le test lui-même). Le flux HTTP complet (upload réel via l'UI) n'a pas pu être testé de bout en bout, l'écran d'upload étant derrière l'authentification.
+
 ## Enseignements transverses
 
 Quelques motifs récurrents observés sur l'ensemble de ces phases :

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FLAT_BACKGROUNDS, CHEMISE_BACKGROUNDS, BACKGROUND_PREVIEW } from '../noteBackgrounds'
+import { useClickOutside } from '../hooks/useClickOutside'
 import '../styles/noteBackgrounds.css'
 import './NoteBackgroundPicker.css'
 
@@ -15,6 +16,9 @@ export function NoteBackgroundPicker({
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useClickOutside(rootRef, open, () => setOpen(false))
 
   function pick(next: string | null) {
     onSelect(next)
@@ -22,7 +26,7 @@ export function NoteBackgroundPicker({
   }
 
   return (
-    <div className="note-bg-picker">
+    <div className="note-bg-picker" ref={rootRef}>
       <button
         type="button"
         className="note-action-button"

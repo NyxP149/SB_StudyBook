@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { createTemplate, extractTemplateSectionsAI } from '../api/client'
 import { extractTemplateSections } from '../utils/extractTemplateSections'
+import { useClickOutside } from '../hooks/useClickOutside'
 import type { TemplateSection } from '../types'
 import './SaveAsTemplateButton.css'
 
@@ -12,6 +13,9 @@ export function SaveAsTemplateButton({ noteMarkdown, disabled }: { noteMarkdown:
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useClickOutside(rootRef, open, () => setOpen(false))
 
   function toggle() {
     setOpen((v) => !v)
@@ -49,7 +53,7 @@ export function SaveAsTemplateButton({ noteMarkdown, disabled }: { noteMarkdown:
   }
 
   return (
-    <div className="save-as-template">
+    <div className="save-as-template" ref={rootRef}>
       <button type="button" className="note-action-button" onClick={toggle} disabled={disabled}>
         {t('noteDetail.saveAsTemplate')}
       </button>

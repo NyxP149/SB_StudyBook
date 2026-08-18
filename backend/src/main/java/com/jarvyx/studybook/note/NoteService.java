@@ -17,8 +17,10 @@ import java.util.UUID;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -248,15 +250,86 @@ public class NoteService {
                 }
             }
             if (".docx".equals(extension)) {
-                try (XWPFDocument document = new XWPFDocument(file.getInputStream());
-                        XWPFWordExtractor extractor = new XWPFWordExtractor(document)) {
-                    return extractor.getText();
+                try (XWPFDocument document = new XWPFDocument(file.getInputStream())) {
+                    return convertDocxToMarkdown(document);
                 }
             }
             return new String(file.getBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new PipelineException("Impossible de lire le fichier reçu : " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Reconstruit le markdown (titres, gras, italique, souligné, puces) depuis les
+     * styles Word du document, au lieu du texte plat qu'aurait rendu XWPFWordExtractor
+     * — nécessaire pour que l'import "tel quel" (sans IA) conserve la mise en forme
+     * du document source plutôt que de tout aplatir en un seul bloc de texte.
+     */
+    private String convertDocxToMarkdown(XWPFDocument document) {
+        StringBuilder markdown = new StringBuilder();
+        for (XWPFParagraph paragraph : document.getParagraphs()) {
+            String line = paragraphToMarkdownLine(paragraph);
+            if (!line.isEmpty()) {
+                markdown.append(line).append("\n\n");
+            }
+        }
+        return markdown.toString().strip() + "\n";
+    }
+
+    private String paragraphToMarkdownLine(XWPFParagraph paragraph) {
+        String text = runsToMarkdown(paragraph);
+        if (text.isEmpty()) {
+            return "";
+        }
+
+        int headingLevel = headingLevel(paragraph.getStyleID());
+        if (headingLevel > 0) {
+            return "#".repeat(headingLevel) + " " + text;
+        }
+        if (paragraph.getNumID() != null) {
+            return "- " + text;
+        }
+        return text;
+    }
+
+    private int headingLevel(String styleId) {
+        if (styleId == null) {
+            return 0;
+        }
+        if ("Title".equalsIgnoreCase(styleId)) {
+            return 1;
+        }
+        if (styleId.matches("(?i)Heading[1-6]")) {
+            // +1 : "Heading 1" est le niveau de titre de section le plus courant dans
+            // un .docx, et on le fait correspondre au "##" utilisé pour les sections
+            // dans les notes générées par IA (voir note_generator.py DEFAULT_SECTIONS),
+            // pour un rendu visuel cohérent entre note importée et note générée.
+            int digit = Character.getNumericValue(styleId.charAt(styleId.length() - 1));
+            return Math.min(digit + 1, 6);
+        }
+        return 0;
+    }
+
+    private String runsToMarkdown(XWPFParagraph paragraph) {
+        StringBuilder text = new StringBuilder();
+        for (XWPFRun run : paragraph.getRuns()) {
+            String runText = run.getText(0);
+            if (runText == null || runText.isEmpty()) {
+                continue;
+            }
+            if (run.isBold()) {
+                runText = "**" + runText + "**";
+            }
+            if (run.isItalic()) {
+                runText = "*" + runText + "*";
+            }
+            if (run.getUnderline() != UnderlinePatterns.NONE) {
+                runText = "<u>" + runText + "</u>";
+            }
+            text.append(runText);
+        }
+        return text.toString().strip();
     }
 
     private static String extractExtension(String filename) {
