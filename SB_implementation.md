@@ -218,6 +218,20 @@ Volontairement limité au `.docx` : le `.pdf` n'a aucune notion native de "titre
 
 **Vérification** : test unitaire jetable (non conservé) construit un `.docx` de test via le paquet `docx` (déjà utilisé côté frontend pour l'export) avec titre/heading1 gras/paragraphe gras+italique/heading2/liste à puces avec gras inline, invoqué `convertDocxToMarkdown()` par réflexion (méthode privée, aucune dépendance Spring nécessaire), et vérifié par assertions que chaque élément de mise en forme survit à la conversion. Toutes les assertions passent après un aller-retour de correction (le premier essai avait mal cartographié Heading1→`#` au lieu de `##`, repéré par le test lui-même). Le flux HTTP complet (upload réel via l'UI) n'a pas pu être testé de bout en bout, l'écran d'upload étant derrière l'authentification.
 
+## Phase 14 — Import .pdf "tel quel" : heuristique de mise en forme (19/08)
+
+Suite de la Phase 13 : après avoir limité le premier correctif au `.docx` (le `.pdf` restant en texte plat, faute de notion native de "titre"), l'utilisateur a demandé d'aller quand même jusqu'au bout pour le `.pdf`, en acceptant explicitement le compromis fiabilité/effort déjà posé.
+
+*Approche* : nouvelle classe `PdfMarkdownStripper`, une sous-classe de `PDFTextStripper` (`LineCollectingStripper`) qui capture, pour chaque ligne visuelle du PDF, sa taille de police moyenne, son caractère gras/italique (détecté via `PDFontDescriptor.isForceBold()/isItalic()` avec repli sur le nom de police s'il contient "bold"/"italic"/"oblique" — le flag `ForceBold` n'est pas toujours fiable sur des polices de sous-ensemble embarquées) et la position Y de son premier glyphe. Un post-traitement classe ensuite chaque ligne :
+
+- **Titre** : taille de police / taille médiane du document ≥ 1.8 → `#`, ≥ 1.4 → `##`, ≥ 1.15 → `###` (médiane plutôt que moyenne, pour ne pas être faussée par un gros titre isolé).
+- **Puce** : ligne commençant par un glyphe de puce usuel (`•`, `◦`, `‣`, `▪`, `●`, `·`, `-`, `*`) ou une numérotation (`1.`, `2)`) → `- ` (distinction numérotée/à puces non conservée, même simplification que pour le `.docx`).
+- **Paragraphe** : les lignes "normales" consécutives sont fusionnées en un seul paragraphe si l'écart vertical entre elles reste proche d'un simple retour à la ligne (`≤ 1.6×` la taille de police) — sans quoi un paragraphe qui occupe 5 lignes visuelles dans le PDF source deviendrait 5 "paragraphes" markdown séparés par des lignes vides, un artefact bien pire que le bloc de texte plat qu'on cherche à corriger.
+
+Volontairement **plus simple que le `.docx`** sur un point : la mise en forme (gras/italique) est déterminée par ligne entière, pas glyphe par glyphe comme le permettrait la granularité de `TextPosition` — un compromis complexité/bénéfice jugé raisonnable pour une heuristique déjà annoncée comme "best-effort".
+
+**Vérification** : comme le `.docx`, aucune donnée de test réaliste facilement disponible (pas de PDF d'exemple sous la main, et generer un `.docx`->`.pdf` via LibreOffice aurait ajouté une dépendance externe fragile) — donc un PDF de test a été **généré directement avec PDFBox** (déjà une dépendance backend) dans un test unitaire jetable : titre en 24pt gras, deux sous-titres en 16pt gras, un paragraphe étalé sur deux lignes rapprochées (pour vérifier la fusion), deux puces. Toutes les assertions passent : titre → `# **...**`, sous-titres → `## **...**`, les deux lignes du paragraphe fusionnent bien en une seule, les puces sont détectées. Le test a été supprimé après vérification (non conservé dans le dépôt). Comme pour le `.docx`, le flux HTTP réel via l'UI n'a pas pu être testé de bout en bout (authentification requise) — et ici encore moins que pour le `.docx`, puisqu'aucun vrai PDF "du monde réel" (export Word, scan, etc.) n'a pu être essayé : la robustesse de l'heuristique sur des PDF réels reste à confirmer par l'utilisateur.
+
 ## Enseignements transverses
 
 Quelques motifs récurrents observés sur l'ensemble de ces phases :

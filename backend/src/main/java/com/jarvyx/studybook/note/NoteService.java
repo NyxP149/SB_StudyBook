@@ -16,7 +16,6 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -246,7 +245,7 @@ public class NoteService {
         try {
             if (".pdf".equals(extension)) {
                 try (PDDocument document = Loader.loadPDF(file.getBytes())) {
-                    return new PDFTextStripper().getText(document);
+                    return PdfMarkdownStripper.toMarkdown(document);
                 }
             }
             if (".docx".equals(extension)) {
