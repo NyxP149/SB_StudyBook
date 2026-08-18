@@ -1,8 +1,10 @@
 package com.jarvyx.studybook.template;
 
 import com.jarvyx.studybook.auth.CurrentUser;
+import com.jarvyx.studybook.template.dto.ExtractSectionsRequest;
 import com.jarvyx.studybook.template.dto.TemplateRequest;
 import com.jarvyx.studybook.template.dto.TemplateResponse;
+import com.jarvyx.studybook.template.dto.TemplateSectionDto;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -22,11 +24,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class NoteTemplateController {
 
     private final NoteTemplateService templateService;
+    private final TemplateExtractionService extractionService;
     private final CurrentUser currentUser;
 
-    public NoteTemplateController(NoteTemplateService templateService, CurrentUser currentUser) {
+    public NoteTemplateController(
+            NoteTemplateService templateService, TemplateExtractionService extractionService, CurrentUser currentUser) {
         this.templateService = templateService;
+        this.extractionService = extractionService;
         this.currentUser = currentUser;
+    }
+
+    @PostMapping("/extract-sections")
+    public List<TemplateSectionDto> extractSections(@Valid @RequestBody ExtractSectionsRequest request) {
+        return extractionService.extract(request.markdown());
     }
 
     @PostMapping

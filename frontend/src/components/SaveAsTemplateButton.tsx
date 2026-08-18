@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { createTemplate } from '../api/client'
+import { createTemplate, extractTemplateSectionsAI } from '../api/client'
 import { extractTemplateSections } from '../utils/extractTemplateSections'
+import type { TemplateSection } from '../types'
 import './SaveAsTemplateButton.css'
 
 export function SaveAsTemplateButton({ noteMarkdown, disabled }: { noteMarkdown: string; disabled?: boolean }) {
@@ -19,13 +20,23 @@ export function SaveAsTemplateButton({ noteMarkdown, disabled }: { noteMarkdown:
   }
 
   async function save() {
-    const sections = extractTemplateSections(noteMarkdown, t('noteDetail.saveAsTemplateInstructions'))
-    if (sections.length === 0) {
-      setError(t('noteDetail.saveAsTemplateNoHeadings'))
-      return
-    }
     setSaving(true)
     setError(null)
+
+    let sections: TemplateSection[]
+    try {
+      sections = await extractTemplateSectionsAI(noteMarkdown)
+    } catch {
+      // L'IA n'a pas pu identifier les sections (clé absente, quota, réseau...) :
+      // on retombe sur l'extraction locale par titres markdown (#/##/###).
+      sections = extractTemplateSections(noteMarkdown, t('noteDetail.saveAsTemplateInstructions'))
+    }
+    if (sections.length === 0) {
+      setError(t('noteDetail.saveAsTemplateNoHeadings'))
+      setSaving(false)
+      return
+    }
+
     try {
       await createTemplate({ name: name.trim(), description: '', sections })
       setSuccess(true)

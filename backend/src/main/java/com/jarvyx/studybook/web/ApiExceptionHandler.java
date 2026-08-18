@@ -1,6 +1,7 @@
 package com.jarvyx.studybook.web;
 
 import com.jarvyx.studybook.pipeline.PipelineException;
+import com.jarvyx.studybook.template.TemplateExtractionException;
 import java.util.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,11 @@ public class ApiExceptionHandler {
     @ExceptionHandler(PipelineException.class)
     public ResponseEntity<ErrorResponse> handlePipelineFailure(PipelineException e) {
         log.error("Échec du pipeline de transcription", e);
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(TemplateExtractionException.class)
+    public ResponseEntity<ErrorResponse> handleTemplateExtractionFailure(TemplateExtractionException e) {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ErrorResponse(e.getMessage()));
     }
 

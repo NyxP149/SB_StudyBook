@@ -152,7 +152,7 @@
     "saveAsTemplate": "🗂️ Enregistrer comme modèle",
     "saveAsTemplateNamePlaceholder": "Nom du modèle",
     "saveAsTemplateInstructions": "Rédige cette section comme dans le discours.",
-    "saveAsTemplateNoHeadings": "Aucun titre (#) trouvé dans cette note à transformer en sections.",
+    "saveAsTemplateNoHeadings": "Aucune section identifiable dans cette note (ni par l'IA, ni par ses titres).",
     "saveAsTemplateSuccess": "Modèle enregistré ✓",
     "backgroundDefault": "Papier (défaut)",
     "background": {
@@ -163,12 +163,14 @@
       "prune": "Prune",
       "olive": "Olive",
       "corail": "Corail",
-      "parchemin": "Parchemin ancien",
       "nuit-etoilee": "Nuit étoilée",
-      "lin-naturel": "Lin naturel",
-      "feuille-olivier": "Feuille d'olivier",
-      "aquarelle-poudree": "Aquarelle poudrée",
-      "ardoise-minerale": "Ardoise minérale"
+      "seve-de-sauge": "Sève de sauge",
+      "poudre-rose": "Poudré rosé",
+      "feuille-tropicale": "Feuille tropicale",
+      "lin-dore": "Lin doré",
+      "facettes-sombres": "Facettes sombres",
+      "aube-corail": "Aube corail",
+      "marbre-clair": "Marbre clair"
     }
   },
   "importance": {

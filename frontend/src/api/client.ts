@@ -16,6 +16,7 @@ import type {
   SubmitTextOptions,
   Template,
   TemplateInput,
+  TemplateSection,
 } from '../types'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
@@ -270,6 +271,15 @@ export async function updateTemplate(id: string, input: TemplateInput): Promise<
 export async function deleteTemplate(id: string): Promise<void> {
   const response = await authFetch(`${TEMPLATES_URL}/${id}`, { method: 'DELETE' })
   return parseOrThrow<void>(response)
+}
+
+export async function extractTemplateSectionsAI(markdown: string): Promise<TemplateSection[]> {
+  const response = await authFetch(`${TEMPLATES_URL}/extract-sections`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ markdown }),
+  })
+  return parseOrThrow<TemplateSection[]>(response)
 }
 
 export async function listStudyPrograms(): Promise<StudyProgram[]> {

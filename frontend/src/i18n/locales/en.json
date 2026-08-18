@@ -152,7 +152,7 @@
     "saveAsTemplate": "🗂️ Save as template",
     "saveAsTemplateNamePlaceholder": "Template name",
     "saveAsTemplateInstructions": "Write this section as in the talk.",
-    "saveAsTemplateNoHeadings": "No heading (#) found in this note to turn into sections.",
+    "saveAsTemplateNoHeadings": "No section could be identified in this note (neither by AI nor by its headings).",
     "saveAsTemplateSuccess": "Template saved ✓",
     "backgroundDefault": "Paper (default)",
     "background": {
@@ -163,12 +163,14 @@
       "prune": "Plum",
       "olive": "Olive",
       "corail": "Coral",
-      "parchemin": "Old parchment",
       "nuit-etoilee": "Starry night",
-      "lin-naturel": "Natural linen",
-      "feuille-olivier": "Olive leaf",
-      "aquarelle-poudree": "Powder watercolor",
-      "ardoise-minerale": "Mineral slate"
+      "seve-de-sauge": "Sage sap",
+      "poudre-rose": "Powder pink",
+      "feuille-tropicale": "Tropical leaf",
+      "lin-dore": "Golden linen",
+      "facettes-sombres": "Dark facets",
+      "aube-corail": "Coral dawn",
+      "marbre-clair": "Light marble"
     }
   },
   "importance": {

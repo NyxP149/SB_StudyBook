@@ -152,7 +152,7 @@
     "saveAsTemplate": "🗂️ Salva come modello",
     "saveAsTemplateNamePlaceholder": "Nome del modello",
     "saveAsTemplateInstructions": "Scrivi questa sezione come nel discorso.",
-    "saveAsTemplateNoHeadings": "Nessun titolo (#) trovato in questa nota da trasformare in sezioni.",
+    "saveAsTemplateNoHeadings": "Nessuna sezione identificabile in questa nota (né dall'IA né dai suoi titoli).",
     "saveAsTemplateSuccess": "Modello salvato ✓",
     "backgroundDefault": "Carta (predefinito)",
     "background": {
@@ -163,12 +163,14 @@
       "prune": "Prugna",
       "olive": "Oliva",
       "corail": "Corallo",
-      "parchemin": "Pergamena antica",
       "nuit-etoilee": "Notte stellata",
-      "lin-naturel": "Lino naturale",
-      "feuille-olivier": "Foglia d'ulivo",
-      "aquarelle-poudree": "Acquerello cipria",
-      "ardoise-minerale": "Ardesia minerale"
+      "seve-de-sauge": "Linfa di salvia",
+      "poudre-rose": "Rosa cipria",
+      "feuille-tropicale": "Foglia tropicale",
+      "lin-dore": "Lino dorato",
+      "facettes-sombres": "Sfaccettature scure",
+      "aube-corail": "Alba corallo",
+      "marbre-clair": "Marmo chiaro"
     }
   },
   "importance": {

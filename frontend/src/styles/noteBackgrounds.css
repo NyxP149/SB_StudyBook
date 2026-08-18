@@ -68,24 +68,30 @@
   --line: rgba(179, 90, 51, 0.18);
 }
 
-/* --- 6 "chemises" décorées : fond illustré + police assortie --- */
-
-.note-bg-parchemin {
-  --paper-card: radial-gradient(ellipse at center, #f6ecd4 0%, #e6d3a8 100%);
-  --ink: #4a3520;
-  --ink-soft: #6b5439;
-  --ink-faint: #8a7355;
-  --gold: #8a6a35;
-  --line: rgba(74, 53, 32, 0.2);
-}
+/* --- 8 "chemises" décorées : fond illustré + police assortie ---
+   "seve-de-sauge", "poudre-rose" et "lin-dore" ont un motif assez chargé
+   pour gêner la lecture du titre/de la date sur une NoteCard : ces trois-là
+   posent aussi un panneau translucide (voir plus bas) derrière
+   .note-card-head/.note-card-meta. Les 5 autres restent assez sobres pour
+   que le texte se lise directement dessus, sans panneau. */
 
 .note-bg-nuit-etoilee {
+  /* Étoiles gardées en dégradés radiaux : leur rayon est déjà en px fixe (la
+     position seule est en %), donc elles ne subissent pas le bug de taille
+     corrigé ailleurs (cf. commentaires plus bas) — pas besoin de les passer
+     en SVG. La silhouette de sommets, elle, était dans l'aperçu validé mais
+     n'avait jamais été implémentée (un dégradé seul ne peut pas dessiner un
+     contour en dents de scie) : ajoutée ici en SVG, hauteur fixe pour rester
+     une ligne d'horizon fine même sur une note très longue.
+  */
   --paper-card: radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.55) 0 2px, transparent 3px),
     radial-gradient(circle at 68% 55%, rgba(255, 255, 255, 0.4) 0 1.5px, transparent 2.5px),
     radial-gradient(circle at 42% 78%, rgba(255, 255, 255, 0.35) 0 1.5px, transparent 2.5px),
     radial-gradient(circle at 85% 18%, rgba(255, 255, 255, 0.45) 0 2px, transparent 3px),
     radial-gradient(circle at 30% 45%, rgba(255, 255, 255, 0.3) 0 1px, transparent 2px),
     radial-gradient(circle at 92% 70%, rgba(255, 255, 255, 0.3) 0 1px, transparent 2px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 80'%3E%3Cpolygon points='0,80 0,50 56,32 96,46 152,18 200,42 252,27 304,48 352,24 400,44 400,80' fill='%230c1024' fill-opacity='0.85'/%3E%3C/svg%3E")
+      no-repeat bottom / 100% 70px,
     linear-gradient(160deg, #1b2340 0%, #10152b 100%);
   --ink: #ede4c8;
   --ink-soft: #cfc4a0;
@@ -94,17 +100,18 @@
   --line: rgba(237, 228, 200, 0.2);
 }
 
-.note-bg-lin-naturel {
-  --paper-card: repeating-linear-gradient(45deg, #efe7d8, #efe7d8 3px, #e9dfcb 3px, #e9dfcb 6px);
-  --ink: #4a4030;
-  --ink-soft: #6b6048;
-  --ink-faint: #8f8468;
-  --gold: #a08a4f;
-  --line: rgba(74, 64, 48, 0.18);
-}
-
-.note-bg-feuille-olivier {
-  --paper-card: radial-gradient(ellipse at top right, #dbe6cd 0%, #c9d9b8 100%);
+.note-bg-seve-de-sauge {
+  /* Lavis de taches (dégradés radiaux) + une petite feuille SVG en coin bas
+     droit, pour donner un peu de texture botanique en plus du simple lavis
+     de couleur. Taille en px fixes (pas en %) : un accent décoratif doit
+     rester petit même sur une note très large, pas s'étirer avec la carte. */
+  --paper-card: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 98'%3E%3Cpath d='M35 2C63 14 63 84 35 96C7 84 7 14 35 2Z' fill='%235c7a3f' fill-opacity='0.3'/%3E%3Cline x1='35' y1='8' x2='35' y2='90' stroke='%235c7a3f' stroke-opacity='0.32' stroke-width='1.4'/%3E%3C/svg%3E")
+      no-repeat bottom 12px right 14px / 60px auto,
+    radial-gradient(circle at 20% 18%, rgba(124, 164, 101, 0.55), transparent 42%),
+    radial-gradient(circle at 82% 12%, rgba(93, 138, 110, 0.5), transparent 40%),
+    radial-gradient(circle at 75% 70%, rgba(157, 184, 124, 0.5), transparent 45%),
+    radial-gradient(circle at 15% 78%, rgba(110, 150, 120, 0.45), transparent 42%),
+    #eaf1e2;
   --ink: #2f3d24;
   --ink-soft: #4d5c3d;
   --ink-faint: #71805e;
@@ -112,8 +119,16 @@
   --line: rgba(47, 61, 36, 0.18);
 }
 
-.note-bg-aquarelle-poudree {
-  --paper-card: radial-gradient(ellipse at 30% 20%, #fbe6ea 0%, #f3d6de 60%, #ecc9d6 100%);
+.note-bg-poudre-rose {
+  /* Même principe que seve-de-sauge : lavis de taches + une petite fleur
+     SVG (5 pétales) en coin bas droit. */
+  --paper-card: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cg fill='%23b06a86' fill-opacity='0.34'%3E%3Cellipse cx='40' cy='18' rx='9' ry='16'/%3E%3Cellipse cx='40' cy='18' rx='9' ry='16' transform='rotate(72 40 40)'/%3E%3Cellipse cx='40' cy='18' rx='9' ry='16' transform='rotate(144 40 40)'/%3E%3Cellipse cx='40' cy='18' rx='9' ry='16' transform='rotate(216 40 40)'/%3E%3Cellipse cx='40' cy='18' rx='9' ry='16' transform='rotate(288 40 40)'/%3E%3C/g%3E%3Ccircle cx='40' cy='40' r='6' fill='%23b06a86' fill-opacity='0.42'/%3E%3C/svg%3E")
+      no-repeat bottom 10px right 14px / 52px auto,
+    radial-gradient(circle at 22% 16%, rgba(214, 150, 171, 0.5), transparent 42%),
+    radial-gradient(circle at 85% 20%, rgba(232, 180, 195, 0.55), transparent 42%),
+    radial-gradient(circle at 78% 75%, rgba(198, 130, 155, 0.45), transparent 46%),
+    radial-gradient(circle at 12% 72%, rgba(224, 170, 188, 0.5), transparent 42%),
+    #fbeef0;
   --ink: #5c2f3f;
   --ink-soft: #7a4b5c;
   --ink-faint: #9c7382;
@@ -121,11 +136,106 @@
   --line: rgba(92, 47, 63, 0.18);
 }
 
-.note-bg-ardoise-minerale {
-  --paper-card: linear-gradient(135deg, #2b2d33 0%, #1e2024 50%, #303339 100%);
+.note-bg-feuille-tropicale {
+  /* Deux feuilles (silhouette SVG encodée) plutôt qu'un simple dégradé
+     radial : un halo diffus ne se voyait quasiment pas sur un fond plein
+     contrasté. Taille en px fixes : à 45%/32% la feuille devenait énorme et
+     déformée sur une note large (rapporté par test utilisateur). */
+  --paper-card: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cpath d='M50 2C90 20 90 120 50 138C10 120 10 20 50 2Z' fill='%23ffffff' fill-opacity='0.14'/%3E%3Cline x1='50' y1='10' x2='50' y2='130' stroke='%23ffffff' stroke-opacity='0.2' stroke-width='2'/%3E%3C/svg%3E")
+      no-repeat top right / 110px auto,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cpath d='M50 2C90 20 90 120 50 138C10 120 10 20 50 2Z' fill='%23000000' fill-opacity='0.14'/%3E%3C/svg%3E")
+      no-repeat bottom left / 80px auto,
+    linear-gradient(155deg, #1c9c74 0%, #0f6e56 100%);
+  --ink: #eaf6ef;
+  --ink-soft: #bfe4d4;
+  --ink-faint: #8fc2ac;
+  --gold: #d8f3e6;
+  --line: rgba(234, 246, 239, 0.22);
+}
+
+.note-bg-lin-dore {
+  /* Brindille fine (tige + petites feuilles ovales) dans deux coins, comme
+     dans l'aperçu validé — pas des feuilles pleines massives : la première
+     version (3 feuilles pointues sans tige, à 42%/30%) rendait comme un
+     amas de taches solides sur une note large, très différent de l'aperçu
+     (rapporté par test utilisateur). */
+  --paper-card: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 130'%3E%3Cline x1='45' y1='8' x2='40' y2='118' stroke='%23a9822f' stroke-opacity='0.55' stroke-width='1.6'/%3E%3Cellipse cx='45' cy='30' rx='9' ry='14' fill='%23c7a349' fill-opacity='0.5' transform='rotate(-35 45 30)'/%3E%3Cellipse cx='42' cy='62' rx='8' ry='12' fill='%23c7a349' fill-opacity='0.5' transform='rotate(30 42 62)'/%3E%3Cellipse cx='41' cy='94' rx='7' ry='11' fill='%23c7a349' fill-opacity='0.5' transform='rotate(-25 41 94)'/%3E%3C/svg%3E")
+      no-repeat top right / 72px auto,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 130'%3E%3Cline x1='45' y1='8' x2='40' y2='118' stroke='%23a9822f' stroke-opacity='0.55' stroke-width='1.6'/%3E%3Cellipse cx='45' cy='30' rx='9' ry='14' fill='%23c7a349' fill-opacity='0.5' transform='rotate(-35 45 30)'/%3E%3Cellipse cx='42' cy='62' rx='8' ry='12' fill='%23c7a349' fill-opacity='0.5' transform='rotate(30 42 62)'/%3E%3Cellipse cx='41' cy='94' rx='7' ry='11' fill='%23c7a349' fill-opacity='0.5' transform='rotate(-25 41 94)'/%3E%3C/svg%3E")
+      no-repeat bottom left / 56px auto,
+    #fbf3dd;
+  --ink: #6b5222;
+  --ink-soft: #8a6a35;
+  --ink-faint: #a9895a;
+  --gold: #a9822f;
+  --line: rgba(107, 82, 34, 0.18);
+}
+
+.note-bg-facettes-sombres {
+  /* Polygones (SVG encodé) groupés en haut à droite, plutôt que des bandes
+     diagonales en dégradé qui s'étiraient sur toute la carte et ne lisaient
+     pas comme des "facettes" mais comme un dégradé cassé. Taille en px
+     fixe pour rester un accent de coin, pas un motif qui grossit avec la
+     largeur de la note. */
+  --paper-card: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpolygon points='40,0 200,20 164,140 20,200 0,80' fill='%233a3c43' fill-opacity='0.6'/%3E%3Cpolygon points='60,8 192,40 138,150 30,120' fill='%2352545c' fill-opacity='0.5'/%3E%3Cpolygon points='90,130 200,155 150,200 70,180' fill='%23151618' fill-opacity='0.65'/%3E%3C/svg%3E")
+      no-repeat top right / 160px auto,
+    linear-gradient(140deg, #2b2d33 0%, #1c1e22 60%, #26282d 100%);
   --ink: #ece9e2;
   --ink-soft: #c2beb4;
   --ink-faint: #948f84;
   --gold: #b8b0a0;
   --line: rgba(236, 233, 226, 0.18);
+}
+
+.note-bg-aube-corail {
+  --paper-card: linear-gradient(165deg, #fbe0c8 0%, #f2b48f 55%, #e2896a 100%);
+  --ink: #5c2f14;
+  --ink-soft: #7a4b2c;
+  --ink-faint: #9c7355;
+  --gold: #b35a33;
+  --line: rgba(92, 47, 20, 0.18);
+}
+
+.note-bg-marbre-clair {
+  --paper-card: linear-gradient(112deg, transparent 38%, rgba(150, 138, 112, 0.22) 39.5%, transparent 41%),
+    linear-gradient(96deg, transparent 58%, rgba(150, 138, 112, 0.16) 59%, transparent 60.5%),
+    linear-gradient(128deg, transparent 70%, rgba(184, 140, 80, 0.18) 71%, transparent 72.5%),
+    linear-gradient(104deg, transparent 18%, rgba(150, 138, 112, 0.14) 19%, transparent 20.5%),
+    radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.5), transparent 60%),
+    #f5f2ea;
+  --ink: #3a342b;
+  --ink-soft: #5c5548;
+  --ink-faint: #847b68;
+  --gold: #8a7355;
+  --line: rgba(58, 52, 43, 0.18);
+}
+
+/* Panneau translucide derrière le titre/la date d'une NoteCard, pour les
+   chemises au motif chargé (voir commentaire plus haut). Ne s'applique que
+   sur la NoteCard (liste) : sur NoteDetailPage la chemise ne colore que le
+   corps de la note (.note-markdown), jamais l'entête, donc pas besoin d'y
+   ajouter un panneau. */
+.note-bg-seve-de-sauge .note-card-head,
+.note-bg-seve-de-sauge .note-card-meta,
+.note-bg-poudre-rose .note-card-head,
+.note-bg-poudre-rose .note-card-meta,
+.note-bg-lin-dore .note-card-head,
+.note-bg-lin-dore .note-card-meta {
+  position: relative;
+  z-index: 1;
+}
+
+.note-bg-seve-de-sauge .note-card-head::before,
+.note-bg-seve-de-sauge .note-card-meta::before,
+.note-bg-poudre-rose .note-card-head::before,
+.note-bg-poudre-rose .note-card-meta::before,
+.note-bg-lin-dore .note-card-head::before,
+.note-bg-lin-dore .note-card-meta::before {
+  content: '';
+  position: absolute;
+  inset: -3px -8px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px);
+  border-radius: 8px;
+  z-index: -1;
 }
