@@ -62,6 +62,8 @@ Le backend ne réimplémente pas la logique de transcription/génération en Jav
 
 Point d'implémentation notable : la méthode `@Async` vit dans un bean séparé (`NotePipelineRunner`), pas directement dans `NoteService` — le proxy AOP de Spring ne peut pas intercepter un self-invocation (un bean qui appelle sa propre méthode `@Async` l'exécuterait de façon synchrone).
 
+Pour l'import texte/PDF/DOCX, l'étape de génération LLM est optionnelle (`generate=false` sur `POST /api/notes/from-text`, `--no-generate` côté script Python) : le texte extrait devient alors la note telle quelle, sans appel IA — utile pour importer un document déjà rédigé (ex. une fiche existante) sans le faire reformuler. `gemini_provider.py` retente aussi automatiquement (jusqu'à 3 tentatives, backoff) les erreurs transitoires (429/500/502/503/504) de l'API Gemini, qui n'étaient auparavant pas distinguées d'une vraie erreur et faisaient échouer la note au premier aléa réseau côté Google.
+
 ### 3.2 Modèle de données (entités principales)
 
 | Entité | Rôle |
@@ -69,7 +71,7 @@ Point d'implémentation notable : la méthode `@Async` vit dans un bean séparé
 | `User` / `AuthToken` | comptes, tokens opaques (pas de JWT) |
 | `Note` | note générée (transcription + markdown structuré), statut PENDING/PROCESSING/DONE/FAILED |
 | `NoteImage` | images intégrées dans le markdown d'une note, référencées par `note-image:{id}` |
-| `Folder` | dossiers pour organiser les notes |
+| `Folder` | dossiers pour organiser les notes (relation many-to-many via `note_folders` — une note peut appartenir à plusieurs dossiers, ou aucun) |
 | `NoteTemplate` / `TemplateSection` | structure de sections personnalisée pour la génération de note |
 | `StudyProgram` | programme d'étude personnelle (rythme WEEKLY/MONTHLY/YEARLY/DAILY) |
 | `StudyArgument` | un sujet daté à l'intérieur d'un programme |
@@ -77,6 +79,8 @@ Point d'implémentation notable : la méthode `@Async` vit dans un bean séparé
 | `StudyImage` | images attachées à un argument d'étude |
 
 Toutes les entités « contenu utilisateur » (`Note`, `Folder`, `NoteTemplate`, `StudyProgram`...) portent un `userId` et sont scoping systématiquement par utilisateur courant : un accès croisé entre comptes renvoie 404 (jamais les données de l'autre compte), jamais un 403 qui confirmerait l'existence de la ressource.
+
+`Note.folderIds` est un `@ElementCollection` (table `note_folders`, simple table de jointure — pas de relation bidirectionnelle vers `Folder`, rien ne navigue jamais dans l'autre sens). Ce champ a remplacé un `folderId` unique d'origine ; l'ancienne colonne `note.folder_id` reste en base (Hibernate `ddl-auto=update` ne supprime jamais de colonne) mais n'est plus mappée — un `ApplicationRunner` (`LegacyFolderMigration`) copie une fois au démarrage les affectations historiques vers `note_folders`.
 
 ### 3.3 Auth
 

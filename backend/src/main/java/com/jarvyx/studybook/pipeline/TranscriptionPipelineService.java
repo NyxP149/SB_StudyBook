@@ -41,14 +41,18 @@ public class TranscriptionPipelineService {
         return execute(command, audioFile);
     }
 
-    public PipelineResult runFromText(Path transcriptFile, String provider, Path templateFile) {
+    public PipelineResult runFromText(Path transcriptFile, String provider, Path templateFile, boolean generateNote) {
         List<String> command = new ArrayList<>(List.of(
                 properties.pythonExecutableAsPath().toString(),
                 properties.scriptPathAsPath().toString(),
                 "--transcript-file", transcriptFile.toAbsolutePath().toString(),
                 "--provider", effectiveProvider(provider),
                 "--output-dir", properties.outputDirAsPath().toAbsolutePath().toString()));
-        appendTemplateArg(command, templateFile);
+        if (generateNote) {
+            appendTemplateArg(command, templateFile);
+        } else {
+            command.add("--no-generate");
+        }
         return execute(command, transcriptFile);
     }
 

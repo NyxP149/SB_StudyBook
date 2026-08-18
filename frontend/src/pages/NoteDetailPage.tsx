@@ -14,7 +14,9 @@ import {
 import { FormattingToolbar } from '../components/FormattingToolbar'
 import { InsertImageButton } from '../components/InsertImageButton'
 import { NoteBackgroundPicker } from '../components/NoteBackgroundPicker'
+import { NoteFolderPicker } from '../components/NoteFolderPicker'
 import { NoteMarkdown } from '../components/NoteMarkdown'
+import { SaveAsTemplateButton } from '../components/SaveAsTemplateButton'
 import { StatusBadge } from '../components/StatusBadge'
 import { backgroundClassName } from '../noteBackgrounds'
 import { downloadNoteDocx } from '../utils/docx'
@@ -63,7 +65,7 @@ export function NoteDetailPage() {
   const [docxError, setDocxError] = useState<string | null>(null)
   const [exportingPdf, setExportingPdf] = useState(false)
   const [pdfError, setPdfError] = useState<string | null>(null)
-  type OrganizeTarget = { folderId: string | null; importance: NoteImportance }
+  type OrganizeTarget = { folderIds: string[]; importance: NoteImportance }
   const latestOrganizeTargetRef = useRef<OrganizeTarget | null>(null)
   const queuedOrganizeRef = useRef<OrganizeTarget | null>(null)
   const organizeInFlightRef = useRef(false)
@@ -117,8 +119,8 @@ export function NoteDetailPage() {
     }
   }
 
-  async function handleOrganize(folderId: string | null, importance: NoteImportance) {
-    const target = { folderId, importance }
+  async function handleOrganize(folderIds: string[], importance: NoteImportance) {
+    const target = { folderIds, importance }
     latestOrganizeTargetRef.current = target
     queuedOrganizeRef.current = target
     setOrganizeError(null)
@@ -132,7 +134,7 @@ export function NoteDetailPage() {
         const toSend = queuedOrganizeRef.current
         queuedOrganizeRef.current = null
         try {
-          const updated = await organizeNote(note!.id, toSend.folderId, toSend.importance)
+          const updated = await organizeNote(note!.id, toSend.folderIds, toSend.importance)
           setNote(updated)
         } catch (e) {
           setOrganizeError(e instanceof Error ? e.message : t('noteDetail.organizeFailed'))
@@ -286,24 +288,17 @@ export function NoteDetailPage() {
               key={opt.value}
               type="button"
               className={`importance-button imp-${opt.value.toLowerCase()} ${note.importance === opt.value ? 'active' : ''}`}
-              onClick={() => handleOrganize(latestOrganizeTargetRef.current?.folderId ?? note.folderId, opt.value)}
+              onClick={() => handleOrganize(latestOrganizeTargetRef.current?.folderIds ?? note.folderIds, opt.value)}
             >
               {opt.icon} {t(opt.labelKey)}
             </button>
           ))}
         </div>
-        <select
-          className="notes-template-select"
-          value={note.folderId ?? ''}
-          onChange={(e) => handleOrganize(e.target.value || null, latestOrganizeTargetRef.current?.importance ?? note.importance)}
-        >
-          <option value="">{t('common.noFolder')}</option>
-          {folders.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.name}
-            </option>
-          ))}
-        </select>
+        <NoteFolderPicker
+          folders={folders}
+          selectedIds={latestOrganizeTargetRef.current?.folderIds ?? note.folderIds}
+          onChange={(folderIds) => handleOrganize(folderIds, latestOrganizeTargetRef.current?.importance ?? note.importance)}
+        />
       </div>
 
       {organizeError && <p className="upload-error no-print">{organizeError}</p>}
@@ -364,6 +359,7 @@ export function NoteDetailPage() {
                   {exportingPdf ? t('noteDetail.saving') : t('noteDetail.downloadPdf')}
                 </button>
                 <NoteBackgroundPicker value={note.background} onSelect={handleBackgroundChange} />
+                <SaveAsTemplateButton noteMarkdown={note.noteMarkdown} />
               </>
             )}
           </div>

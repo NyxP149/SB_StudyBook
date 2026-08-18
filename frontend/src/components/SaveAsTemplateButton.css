@@ -1,0 +1,35 @@
+.save-as-template {
+  position: relative;
+  display: inline-block;
+}
+
+.save-as-template-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 240px;
+  padding: 12px;
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lift);
+}
+
+.save-as-template-panel input {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.save-as-template-success {
+  font-size: 13px;
+  color: var(--teal);
+  margin: 0;
+}

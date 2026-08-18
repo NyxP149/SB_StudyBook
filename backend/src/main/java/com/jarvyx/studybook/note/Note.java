@@ -1,13 +1,20 @@
 package com.jarvyx.studybook.note;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,7 +42,16 @@ public class Note {
 
     private UUID templateId;
 
-    private UUID folderId;
+    // Une note peut appartenir a plusieurs dossiers (ou aucun) ; table de
+    // jointure simple plutot qu'une relation @ManyToMany bidirectionnelle,
+    // puisque rien ne navigue jamais Folder -> Note via l'entite elle-meme.
+    // EAGER : toujours nécessaire pour sérialiser NoteResponse/NoteSummaryResponse,
+    // et les endpoints qui les renvoient n'ouvrent pas de session Hibernate assez
+    // longtemps pour un chargement lazy (LazyInitializationException sinon).
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "note_folders", joinColumns = @JoinColumn(name = "note_id"))
+    @Column(name = "folder_id")
+    private Set<UUID> folderIds = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "varchar(255) default 'NORMALE'")
@@ -94,9 +110,17 @@ public class Note {
         this.noteMarkdown = noteMarkdown;
     }
 
-    public void organize(UUID folderId, NoteImportance importance) {
-        this.folderId = folderId;
+    public void organize(Collection<UUID> folderIds, NoteImportance importance) {
+        this.folderIds = folderIds != null ? new HashSet<>(folderIds) : new HashSet<>();
         this.importance = importance;
+    }
+
+    public void addFolder(UUID folderId) {
+        this.folderIds.add(folderId);
+    }
+
+    public void removeFolder(UUID folderId) {
+        this.folderIds.remove(folderId);
     }
 
     public void suggestLink(UUID argumentId) {

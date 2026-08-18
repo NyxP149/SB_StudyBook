@@ -7,13 +7,11 @@
 .folder-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  text-align: left;
+  gap: 8px;
   background: var(--paper-card);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 18px 20px;
-  cursor: pointer;
+  padding: 8px 8px 8px 20px;
   font-family: var(--font-body);
   box-shadow: var(--shadow);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -24,10 +22,36 @@
   box-shadow: var(--shadow-lift);
 }
 
-.folder-card h3 {
+.folder-card-open {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  text-decoration: none;
+  padding: 10px 0;
+}
+
+.folder-card-open h3 {
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 600;
+  color: var(--ink);
+}
+
+.folder-card-edit {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.folder-card-edit:hover {
   color: var(--ink);
 }
 

@@ -16,16 +16,14 @@ const IMPORTANCE_ICON: Record<NoteSummary['importance'], string | null> = {
 export function NoteCard({
   note,
   templateName,
-  folderName,
-  folderColor,
+  folders,
   selectable,
   selected,
   onToggleSelect,
 }: {
   note: NoteSummary
   templateName?: string
-  folderName?: string
-  folderColor?: string
+  folders?: Array<{ id: string; name: string; color: string }>
   selectable?: boolean
   selected?: boolean
   onToggleSelect?: (id: string) => void
@@ -60,12 +58,12 @@ export function NoteCard({
       </div>
       <div className="note-card-tags">
         {templateName && <span className="note-card-template">{templateName}</span>}
-        {folderName && (
-          <span className="note-card-folder">
-            <span className="note-card-folder-dot" style={{ background: folderColor }} />
-            {folderName}
+        {folders?.map((folder) => (
+          <span key={folder.id} className="note-card-folder">
+            <span className="note-card-folder-dot" style={{ background: folder.color }} />
+            {folder.name}
           </span>
-        )}
+        ))}
       </div>
     </>
   )

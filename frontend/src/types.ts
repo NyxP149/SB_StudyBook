@@ -7,7 +7,7 @@ export interface NoteSummary {
   provider: string
   modelSize: string | null
   templateId: string | null
-  folderId: string | null
+  folderIds: string[]
   importance: NoteImportance
   status: NoteStatus
   background: string | null
@@ -46,6 +46,7 @@ export interface SubmitOptions {
 export interface SubmitTextOptions {
   provider?: string
   templateId?: string
+  generate?: boolean
 }
 
 export interface TemplateSection {

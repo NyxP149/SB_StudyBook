@@ -54,8 +54,9 @@ public class NotePipelineRunner {
     }
 
     @Async("pipelineExecutor")
-    public void runFromText(UUID noteId, Path transcriptFile, String provider, UUID templateId) {
-        process(noteId, templateId, templateFile -> pipelineService.runFromText(transcriptFile, provider, templateFile));
+    public void runFromText(UUID noteId, Path transcriptFile, String provider, UUID templateId, boolean generateNote) {
+        process(noteId, generateNote ? templateId : null,
+                templateFile -> pipelineService.runFromText(transcriptFile, provider, templateFile, generateNote));
     }
 
     private void process(UUID noteId, UUID templateId, Function<Path, PipelineResult> pipelineCall) {

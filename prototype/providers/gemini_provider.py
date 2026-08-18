@@ -22,6 +22,14 @@ API_ROOT = "https://generativelanguage.googleapis.com/v1beta"
 API_BASE = f"{API_ROOT}/models"
 UPLOAD_URL = "https://generativelanguage.googleapis.com/upload/v1beta/files"
 
+# Gemini renvoie parfois une indisponibilite transitoire (surcharge cote
+# Google) sans lien avec la requete elle-meme ; un simple nouvel essai suffit
+# generalement. Les erreurs 4xx restantes (cle invalide, requete malformee...)
+# ne sont pas transitoires et sont propagees immediatement.
+_RETRYABLE_STATUS = {429, 500, 502, 503, 504}
+_MAX_ATTEMPTS = 3
+_RETRY_BACKOFF_SECONDS = (2, 6)
+
 # generateContent accepte l'audio en inline_data (base64 dans le corps JSON),
 # mais c'est limite a ~20 Mo au total cote API. Au-dela, on passe par la Files
 # API (upload prealable, puis reference par URI) — jusqu'a 2 Go par fichier,
@@ -127,12 +135,19 @@ class GeminiProvider:
         return file_info
 
     def _call_generate_content(self, content: dict) -> str:
-        response = httpx.post(
-            f"{API_BASE}/{self.model}:generateContent",
-            params={"key": self.api_key},
-            json={"contents": [content]},
-            timeout=300,
-        )
+        response = None
+        for attempt in range(_MAX_ATTEMPTS):
+            response = httpx.post(
+                f"{API_BASE}/{self.model}:generateContent",
+                params={"key": self.api_key},
+                json={"contents": [content]},
+                timeout=300,
+            )
+            if response.status_code in _RETRYABLE_STATUS and attempt < _MAX_ATTEMPTS - 1:
+                time.sleep(_RETRY_BACKOFF_SECONDS[attempt])
+                continue
+            break
+
         response.raise_for_status()
         data = response.json()
         candidates = data.get("candidates") or []

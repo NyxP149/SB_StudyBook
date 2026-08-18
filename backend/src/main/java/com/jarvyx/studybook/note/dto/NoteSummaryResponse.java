@@ -4,6 +4,7 @@ import com.jarvyx.studybook.note.Note;
 import com.jarvyx.studybook.note.NoteImportance;
 import com.jarvyx.studybook.note.NoteStatus;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public record NoteSummaryResponse(
@@ -12,7 +13,7 @@ public record NoteSummaryResponse(
         String provider,
         String modelSize,
         UUID templateId,
-        UUID folderId,
+        List<UUID> folderIds,
         NoteImportance importance,
         NoteStatus status,
         String background,
@@ -25,7 +26,7 @@ public record NoteSummaryResponse(
                 note.getProvider(),
                 note.getModelSize(),
                 note.getTemplateId(),
-                note.getFolderId(),
+                List.copyOf(note.getFolderIds()),
                 note.getImportance(),
                 note.getStatus(),
                 note.getBackground(),

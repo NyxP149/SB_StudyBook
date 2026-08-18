@@ -70,6 +70,14 @@ def parse_args() -> argparse.Namespace:
         help="Chemin vers un JSON {\"sections\": [{\"title\":..., \"instructions\":...}, ...]} "
         "definissant la structure de la note. Sans cette option, la structure par defaut est utilisee.",
     )
+    parser.add_argument(
+        "--no-generate",
+        action="store_true",
+        help="Saute entierement la generation LLM : la note produite est le texte "
+        "fourni (--transcript-file) tel quel, sans appel a un provider. Utile pour "
+        "importer un document deja redige (ex: une fiche existante) sans le faire "
+        "reformuler par l'IA.",
+    )
     return parser.parse_args()
 
 
@@ -136,12 +144,16 @@ def main() -> int:
     transcript_path.write_text(text, encoding="utf-8")
     print(f"      -> transcription brute sauvee dans {transcript_path}")
 
-    print(f"[2/3] Generation de la note structuree (provider={args.provider})...")
-    t0 = time.time()
-    provider = get_provider(args.provider)
-    sections = load_sections(args.template_file)
-    note = generate_note(text, provider, sections)
-    print(f"      -> termine ({time.time() - t0:.1f}s)")
+    if args.no_generate:
+        print("[2/3] Generation LLM sautee (--no-generate) : la note est le texte fourni tel quel.")
+        note = text.strip() + "\n"
+    else:
+        print(f"[2/3] Generation de la note structuree (provider={args.provider})...")
+        t0 = time.time()
+        provider = get_provider(args.provider)
+        sections = load_sections(args.template_file)
+        note = generate_note(text, provider, sections)
+        print(f"      -> termine ({time.time() - t0:.1f}s)")
 
     print("[3/3] Sauvegarde...")
     note_path = output_dir / f"{stem}.note.md"

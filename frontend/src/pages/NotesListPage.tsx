@@ -71,7 +71,7 @@ export function NotesListPage() {
         if (templateFilter === 'DEFAULT' ? note.templateId !== null : note.templateId !== templateFilter) return false
       }
       if (folderFilter !== 'ALL') {
-        if (folderFilter === 'NONE' ? note.folderId !== null : note.folderId !== folderFilter) return false
+        if (folderFilter === 'NONE' ? note.folderIds.length !== 0 : !note.folderIds.includes(folderFilter)) return false
       }
       if (query && !note.originalFilename.toLowerCase().includes(query)) return false
       return true
@@ -241,14 +241,15 @@ export function NotesListPage() {
       {filteredNotes && filteredNotes.length > 0 && (
         <div className="notes-grid">
           {filteredNotes.map((note) => {
-            const folder = note.folderId ? foldersById.get(note.folderId) : undefined
+            const noteFolders = note.folderIds
+              .map((id) => foldersById.get(id))
+              .filter((f): f is Folder => f !== undefined)
             return (
               <NoteCard
                 key={note.id}
                 note={note}
                 templateName={note.templateId ? templateNames.get(note.templateId) : undefined}
-                folderName={folder?.name}
-                folderColor={folder?.color}
+                folders={noteFolders}
                 selectable={selectMode}
                 selected={selectedIds.has(note.id)}
                 onToggleSelect={toggleSelect}

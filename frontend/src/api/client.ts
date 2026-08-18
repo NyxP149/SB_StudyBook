@@ -143,6 +143,7 @@ export async function submitTextNote(
   else if (input.text) formData.append('text', input.text)
   if (options.provider) formData.append('provider', options.provider)
   if (options.templateId) formData.append('templateId', options.templateId)
+  if (options.generate === false) formData.append('generate', 'false')
 
   const response = await authFetch(`${NOTES_URL}/from-text`, { method: 'POST', body: formData })
   return parseOrThrow<Note>(response)
@@ -172,11 +173,11 @@ export async function deleteNote(id: string): Promise<void> {
   return parseOrThrow<void>(response)
 }
 
-export async function organizeNote(id: string, folderId: string | null, importance: NoteImportance): Promise<Note> {
+export async function organizeNote(id: string, folderIds: string[], importance: NoteImportance): Promise<Note> {
   const response = await authFetch(`${NOTES_URL}/${id}/organize`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ folderId, importance }),
+    body: JSON.stringify({ folderIds, importance }),
   })
   return parseOrThrow<Note>(response)
 }
@@ -226,6 +227,21 @@ export async function updateFolder(id: string, input: FolderInput): Promise<Fold
 export async function deleteFolder(id: string): Promise<void> {
   const response = await authFetch(`${FOLDERS_URL}/${id}`, { method: 'DELETE' })
   return parseOrThrow<void>(response)
+}
+
+export async function listFolderNotes(folderId: string): Promise<NoteSummary[]> {
+  const response = await authFetch(`${FOLDERS_URL}/${folderId}/notes`)
+  return parseOrThrow<NoteSummary[]>(response)
+}
+
+export async function addNoteToFolder(folderId: string, noteId: string): Promise<Note> {
+  const response = await authFetch(`${FOLDERS_URL}/${folderId}/notes/${noteId}`, { method: 'POST' })
+  return parseOrThrow<Note>(response)
+}
+
+export async function removeNoteFromFolder(folderId: string, noteId: string): Promise<Note> {
+  const response = await authFetch(`${FOLDERS_URL}/${folderId}/notes/${noteId}`, { method: 'DELETE' })
+  return parseOrThrow<Note>(response)
 }
 
 export async function listTemplates(): Promise<Template[]> {

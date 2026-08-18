@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { createFolder, deleteFolder, listFolders, updateFolder } from '../api/client'
 import type { Folder, FolderInput } from '../types'
@@ -108,10 +109,21 @@ export function FoldersPage() {
           {folders && folders.length > 0 && (
             <div className="folders-grid">
               {folders.map((folder) => (
-                <button key={folder.id} type="button" className="folder-card" onClick={() => startEdit(folder)}>
-                  <span className="folder-swatch" style={{ background: folder.color }} />
-                  <h3>{folder.name}</h3>
-                </button>
+                <div key={folder.id} className="folder-card">
+                  <Link to={`/folders/${folder.id}`} className="folder-card-open">
+                    <span className="folder-swatch" style={{ background: folder.color }} />
+                    <h3>{folder.name}</h3>
+                  </Link>
+                  <button
+                    type="button"
+                    className="folder-card-edit"
+                    onClick={() => startEdit(folder)}
+                    aria-label={t('folders.edit')}
+                    title={t('folders.edit')}
+                  >
+                    ✎
+                  </button>
+                </div>
               ))}
             </div>
           )}

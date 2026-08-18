@@ -3,6 +3,9 @@ package com.jarvyx.studybook.folder;
 import com.jarvyx.studybook.auth.CurrentUser;
 import com.jarvyx.studybook.folder.dto.FolderRequest;
 import com.jarvyx.studybook.folder.dto.FolderResponse;
+import com.jarvyx.studybook.note.NoteService;
+import com.jarvyx.studybook.note.dto.NoteResponse;
+import com.jarvyx.studybook.note.dto.NoteSummaryResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -22,10 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class FolderController {
 
     private final FolderService folderService;
+    private final NoteService noteService;
     private final CurrentUser currentUser;
 
-    public FolderController(FolderService folderService, CurrentUser currentUser) {
+    public FolderController(FolderService folderService, NoteService noteService, CurrentUser currentUser) {
         this.folderService = folderService;
+        this.noteService = noteService;
         this.currentUser = currentUser;
     }
 
@@ -49,5 +54,22 @@ public class FolderController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         folderService.delete(currentUser.getUserId(), id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/notes")
+    public List<NoteSummaryResponse> notes(@PathVariable UUID id) {
+        folderService.getOrThrow(currentUser.getUserId(), id);
+        return noteService.listByFolder(currentUser.getUserId(), id).stream().map(NoteSummaryResponse::from).toList();
+    }
+
+    @PostMapping("/{id}/notes/{noteId}")
+    public NoteResponse addNote(@PathVariable UUID id, @PathVariable UUID noteId) {
+        folderService.getOrThrow(currentUser.getUserId(), id);
+        return noteService.toResponse(noteService.addToFolder(currentUser.getUserId(), id, noteId));
+    }
+
+    @DeleteMapping("/{id}/notes/{noteId}")
+    public NoteResponse removeNote(@PathVariable UUID id, @PathVariable UUID noteId) {
+        return noteService.toResponse(noteService.removeFromFolder(currentUser.getUserId(), id, noteId));
     }
 }

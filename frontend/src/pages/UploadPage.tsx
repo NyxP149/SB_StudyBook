@@ -36,6 +36,7 @@ export function UploadPage() {
   const [pastedText, setPastedText] = useState('')
   const [textFile, setTextFile] = useState<File | null>(null)
   const [isTextDragging, setIsTextDragging] = useState(false)
+  const [generateNote, setGenerateNote] = useState(true)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
@@ -118,14 +119,14 @@ export function UploadPage() {
     try {
       const note = await submitTextNote(
         { file: textFile ?? undefined, text: textFile ? undefined : pastedText },
-        { provider, templateId: templateId || undefined },
+        { provider, templateId: templateId || undefined, generate: generateNote },
       )
       navigate(`/notes/${note.id}`)
     } catch (e) {
       setError(e instanceof Error ? e.message : t('upload.errSendFailed'))
       setState('idle')
     }
-  }, [navigate, provider, templateId, pastedText, textFile, t])
+  }, [navigate, provider, templateId, pastedText, textFile, generateNote, t])
 
   const handleTextFile = useCallback((file: File) => {
     const isTextLike =
@@ -320,39 +321,63 @@ export function UploadPage() {
         </div>
       )}
 
-      <div className="upload-settings">
-        <label>
-          {t('upload.provider')}
-          <select value={provider} onChange={(e) => setProvider(e.target.value)} disabled={state === 'submitting'}>
-            <option value="ollama">{t('upload.providerOllama')}</option>
-            <option value="gemini">{t('upload.providerGemini')}</option>
-            <option value="anthropic">{t('upload.providerClaude')}</option>
-            <option value="stub">{t('upload.providerStub')}</option>
-          </select>
-        </label>
-        {mode === 'audio' && (
+      {mode === 'text' && (
+        <div className="mode-tabs generate-mode-tabs">
+          <button
+            type="button"
+            className={`mode-tab ${generateNote ? 'active' : ''}`}
+            onClick={() => setGenerateNote(true)}
+            disabled={state === 'submitting'}
+          >
+            {t('upload.generateModeAi')}
+          </button>
+          <button
+            type="button"
+            className={`mode-tab ${!generateNote ? 'active' : ''}`}
+            onClick={() => setGenerateNote(false)}
+            disabled={state === 'submitting'}
+          >
+            {t('upload.generateModeRaw')}
+          </button>
+        </div>
+      )}
+      {mode === 'text' && !generateNote && <p className="upload-mode-hint">{t('upload.generateModeRawHint')}</p>}
+
+      {(mode === 'audio' || generateNote) && (
+        <div className="upload-settings">
           <label>
-            {t('upload.whisperModel')}
-            <select value={modelSize} onChange={(e) => setModelSize(e.target.value)} disabled={state === 'submitting'}>
-              <option value="tiny">{t('upload.modelTiny')}</option>
-              <option value="small">{t('upload.modelSmall')}</option>
-              <option value="medium">{t('upload.modelMedium')}</option>
-              <option value="large-v3">{t('upload.modelLarge')}</option>
+            {t('upload.provider')}
+            <select value={provider} onChange={(e) => setProvider(e.target.value)} disabled={state === 'submitting'}>
+              <option value="ollama">{t('upload.providerOllama')}</option>
+              <option value="gemini">{t('upload.providerGemini')}</option>
+              <option value="anthropic">{t('upload.providerClaude')}</option>
+              <option value="stub">{t('upload.providerStub')}</option>
             </select>
           </label>
-        )}
-        <label>
-          {t('upload.template')}
-          <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} disabled={state === 'submitting'}>
-            <option value="">{t('common.defaultStructure')}</option>
-            {templates.map((tpl) => (
-              <option key={tpl.id} value={tpl.id}>
-                {tpl.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+          {mode === 'audio' && (
+            <label>
+              {t('upload.whisperModel')}
+              <select value={modelSize} onChange={(e) => setModelSize(e.target.value)} disabled={state === 'submitting'}>
+                <option value="tiny">{t('upload.modelTiny')}</option>
+                <option value="small">{t('upload.modelSmall')}</option>
+                <option value="medium">{t('upload.modelMedium')}</option>
+                <option value="large-v3">{t('upload.modelLarge')}</option>
+              </select>
+            </label>
+          )}
+          <label>
+            {t('upload.template')}
+            <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} disabled={state === 'submitting'}>
+              <option value="">{t('common.defaultStructure')}</option>
+              {templates.map((tpl) => (
+                <option key={tpl.id} value={tpl.id}>
+                  {tpl.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
 
       {mode === 'text' && (
         <button
@@ -361,7 +386,11 @@ export function UploadPage() {
           onClick={submitText}
           disabled={state === 'submitting' || !hasTextInput}
         >
-          {state === 'submitting' ? t('upload.sending') : t('upload.generateButton')}
+          {state === 'submitting'
+            ? t('upload.sending')
+            : generateNote
+              ? t('upload.generateButton')
+              : t('upload.generateButtonRaw')}
         </button>
       )}
 

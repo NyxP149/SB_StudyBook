@@ -89,7 +89,7 @@
   padding: 14px 20px;
   border: 1.5px solid var(--gold);
   border-radius: 16px;
-  background: #fdf6e8;
+  background: var(--paper-card);
   font-size: 14px;
   color: var(--ink);
 }
@@ -293,9 +293,14 @@
   cursor: pointer;
 }
 
-.upload-template-hint {
+.upload-template-hint,
+.upload-mode-hint {
   font-size: 13px;
   color: var(--ink-faint);
+}
+
+.generate-mode-tabs {
+  margin-top: 4px;
 }
 
 .upload-template-hint a {

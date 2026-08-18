@@ -71,10 +71,16 @@ public class NoteService {
 
     /**
      * Saute la transcription Whisper : la note part directement d'un texte déjà
-     * écrit (collé) ou extrait d'un fichier .txt/.pdf.
+     * écrit (collé) ou extrait d'un fichier .txt/.pdf/.docx.
+     *
+     * @param generateNote si false, aucun appel LLM n'est fait : le texte extrait
+     *     devient la note telle quelle (utile pour importer un document déjà
+     *     rédigé, ex. une fiche existante, sans le faire reformuler par l'IA).
      */
-    public Note submitText(UUID userId, String text, MultipartFile file, String provider, UUID templateId) {
-        requireOwnedTemplate(userId, templateId);
+    public Note submitText(
+            UUID userId, String text, MultipartFile file, String provider, UUID templateId, boolean generateNote) {
+        UUID effectiveTemplateId = generateNote ? templateId : null;
+        requireOwnedTemplate(userId, effectiveTemplateId);
 
         String extractedText;
         String originalFilename;
@@ -88,14 +94,18 @@ public class NoteService {
             throw new IllegalArgumentException("Fournis soit un texte, soit un fichier .txt, .pdf ou .docx.");
         }
 
-        String effectiveProvider = provider != null ? provider : pipelineProperties.provider();
+        // "stub" ici est un simple choix valide pour --provider : le script Python
+        // ignore ce paramètre en mode --no-generate (aucune génération LLM), mais
+        // argparse rejette toute valeur hors {ollama,anthropic,gemini,stub}.
+        String effectiveProvider =
+                generateNote ? (provider != null ? provider : pipelineProperties.provider()) : "stub";
 
         Path transcriptFile = storeTranscript(extractedText);
-        Note note = new Note(originalFilename, effectiveProvider, null, templateId);
+        Note note = new Note(originalFilename, effectiveProvider, null, effectiveTemplateId);
         note.setUserId(userId);
         note = noteRepository.save(note);
 
-        pipelineRunner.runFromText(note.getId(), transcriptFile, effectiveProvider, templateId);
+        pipelineRunner.runFromText(note.getId(), transcriptFile, effectiveProvider, effectiveTemplateId, generateNote);
         return note;
     }
 
@@ -112,13 +122,41 @@ public class NoteService {
                 .orElseThrow(() -> new NoSuchElementException("Note introuvable : " + id));
     }
 
-    public Note organize(UUID userId, UUID id, UUID folderId, NoteImportance importance) {
+    public Note organize(UUID userId, UUID id, List<UUID> folderIds, NoteImportance importance) {
         Note note = getOrThrow(userId, id);
-        if (folderId != null && folderRepository.findByIdAndUserId(folderId, userId).isEmpty()) {
+        requireOwnedFolders(userId, folderIds);
+        note.organize(folderIds, importance);
+        return noteRepository.save(note);
+    }
+
+    public List<Note> listByFolder(UUID userId, UUID folderId) {
+        return noteRepository.findAllByFolderIdAndUserId(folderId, userId);
+    }
+
+    public Note addToFolder(UUID userId, UUID folderId, UUID noteId) {
+        Note note = getOrThrow(userId, noteId);
+        if (folderRepository.findByIdAndUserId(folderId, userId).isEmpty()) {
             throw new NoSuchElementException("Dossier introuvable : " + folderId);
         }
-        note.organize(folderId, importance);
+        note.addFolder(folderId);
         return noteRepository.save(note);
+    }
+
+    public Note removeFromFolder(UUID userId, UUID folderId, UUID noteId) {
+        Note note = getOrThrow(userId, noteId);
+        note.removeFolder(folderId);
+        return noteRepository.save(note);
+    }
+
+    private void requireOwnedFolders(UUID userId, List<UUID> folderIds) {
+        if (folderIds == null) {
+            return;
+        }
+        for (UUID folderId : folderIds) {
+            if (folderRepository.findByIdAndUserId(folderId, userId).isEmpty()) {
+                throw new NoSuchElementException("Dossier introuvable : " + folderId);
+            }
+        }
     }
 
     public void delete(UUID userId, UUID id) {

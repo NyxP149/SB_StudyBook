@@ -15,6 +15,9 @@ public interface NoteRepository extends JpaRepository<Note, UUID> {
 
     List<Note> findAllByLinkedArgumentIdAndUserIdOrderByCreatedAtDesc(UUID linkedArgumentId, UUID userId);
 
+    @Query("select n from Note n join n.folderIds f where f = :folderId and n.userId = :userId order by n.createdAt desc")
+    List<Note> findAllByFolderIdAndUserId(UUID folderId, UUID userId);
+
     @Modifying
     @Query("update Note n set n.userId = :userId where n.userId is null")
     void claimOrphaned(UUID userId);

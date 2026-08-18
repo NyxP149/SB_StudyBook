@@ -152,6 +152,35 @@ En documentant l'architecture offline (§3.5 de [SB_conception.md](SB_conception
 
 Vérifié après build de production : le regex mis à jour est bien injecté dans le `sw.js` généré par `vite-plugin-pwa`, et testé en isolation (`/api/study`, `/api/study/programs/5/arguments`, `/api/study/upcoming`, `/api/study/images/9` matchent ; `/api/auth/login` et `/api/note-images/3` restent exclus, comme avant). Le comportement réel de mise en cache (contenu réellement lisible après coupure réseau) n'a pas pu être vérifié de bout en bout en environnement de preview faute de backend attaché — à confirmer manuellement : ouvrir un programme d'étude en ligne, couper le réseau, recharger.
 
+## Phase 11 — Import brut, extraction de template, dossiers multiples (18/08)
+
+### Bug rapporté : crash lors de l'import d'une fiche déjà rédigée
+Signalé avec une capture d'écran montrant `httpx.HTTPStatusError: Server error '503 Service Unavailable'` sur `gemini_provider.py`, lors de l'import d'un `.docx` contenant une fiche déjà entièrement structurée (thème, plan, versets...). Diagnostic : le contenu du fichier n'était pas en cause — `_call_generate_content()` n'avait **aucune logique de nouvel essai**, donc la moindre indisponibilité transitoire côté Gemini (503, ou 429/500/502/504) faisait échouer la note immédiatement, sans deuxième chance. *Fix* : jusqu'à 3 tentatives avec backoff (2s, 6s) sur ces codes précis ; les autres erreurs (ex. 400, clé invalide) sont toujours propagées immédiatement, sans retry inutile.
+
+Ceci dit, regénérer une fiche déjà rédigée par IA reste un vrai gaspillage (appel API inutile, risque de reformulation d'un texte déjà bon) — d'où les deux fonctionnalités suivantes, demandées dans la foulée.
+
+### Import texte sans passer par l'IA
+Nouveau choix sur l'onglet Texte de la page d'upload : « Générer une fiche avec l'IA » (comportement existant) vs « Ajouter tel quel (sans IA) ». En mode brut, `POST /api/notes/from-text` reçoit `generate=false`, propagé jusqu'au script Python (`--no-generate`) qui saute entièrement l'étape LLM — le texte extrait (du `.txt`/`.pdf`/`.docx`) devient directement le contenu de la note. Le sélecteur de provider/modèle/template est masqué dans ce mode puisqu'aucun des trois ne s'applique. Scope volontairement limité au texte (pas à l'audio), qui a de toute façon besoin d'une transcription.
+
+### Extraire la structure d'une note en template réutilisable
+Nouveau bouton « Enregistrer comme modèle » sur une note terminée : parcourt les titres markdown (`#`/`##`/`###`) de la note via une regex (`extractTemplateSections.ts`), nettoie le balisage inline (`**gras**`, `<u>`, `<mark>`), et crée un `NoteTemplate` dont chaque section reprend un titre trouvé avec une instruction générique (« Rédige cette section comme dans le discours. »), modifiable ensuite comme n'importe quel template existant. Entièrement client-side — aucun nouvel endpoint backend, réutilise `POST /api/templates` déjà en place.
+
+### Dossiers multiples par note + vue de contenu d'un dossier
+Jusque-là une note n'appartenait qu'à un seul dossier (`Note.folderId`, `UUID` simple). Remplacé par `Note.folderIds` (`@ElementCollection<UUID>`, table `note_folders`) pour permettre à une note d'appartenir à plusieurs dossiers à la fois. Migration des données historiques via un `ApplicationRunner` (`LegacyFolderMigration`) qui copie au démarrage `note.folder_id` (colonne héritée, laissée en place) vers `note_folders`, en ne réinsérant jamais un doublon — sûr à rejouer à chaque démarrage.
+
+Nouvelles routes sous `/api/folders/{id}` : `GET /notes` (contenu du dossier), `POST /notes/{noteId}` (ajouter), `DELETE /notes/{noteId}` (retirer, sans supprimer la note). `PATCH /api/notes/{id}/organize` accepte désormais `folderIds: UUID[]` au lieu d'un `folderId` unique.
+
+Côté frontend : le sélecteur de dossier unique de `NoteDetailPage` devient `NoteFolderPicker`, un panneau à cases à cocher (même patron que `NoteBackgroundPicker`). `NoteCard` affiche un badge par dossier au lieu d'un seul. Nouvelle page `FolderDetailPage` (`/folders/:id`, accessible depuis une carte de `FoldersPage`, désormais scindée en un lien "ouvrir" + un bouton "modifier" séparé) : liste les notes du dossier avec « Retirer du dossier » (désaffectation) et « Supprimer définitivement » (suppression réelle, avec confirmation) sur chaque ligne, plus un sélecteur pour ajouter une note existante au dossier.
+
+### Bugs trouvés lors du test manuel réel
+Le flux complet a ensuite été testé manuellement (instance locale dédiée, base Postgres jetable sur le port 5434 puisque le port habituel 5433 était occupé par le conteneur d'un autre projet sur la même machine). Deux régressions réelles sont ressorties, invisibles au typecheck/build :
+
+- **500 sur toute consultation de note** (`GET /api/notes`, `GET /api/notes/{id}`) : `Note.folderIds` (`@ElementCollection`) est chargé en lazy par défaut, mais les endpoints qui sérialisent `NoteResponse`/`NoteSummaryResponse` ne gardent pas de session Hibernate ouverte à ce moment → `LazyInitializationException`. *Fix* : `@ElementCollection(fetch = FetchType.EAGER)` sur `Note.folderIds` — collection minuscule (quelques UUID par note), sans impact perf mesurable.
+- **Pipeline en échec systématique en mode « Ajouter tel quel »** : `NoteService.submitText` passait `"none"` comme `--provider` au script Python quand `generateNote=false`, mais l'argparse de `main.py` n'accepte que `{ollama,anthropic,gemini,stub}` — rejeté avant même d'atteindre `--no-generate`. *Fix* : passer `"stub"` (valeur inerte, jamais réellement invoquée dans ce mode) à la place.
+- **Fond du chip de fichier attaché codé en dur** (`#fdf6e8`, crème) dans `UploadPage.css` : illisible en thème sombre où `--ink` devient un texte quasi blanc. *Fix* : `background: var(--paper-card)`, qui s'adapte aux 3 modes.
+
+**Vérification** : `mvn compile` et `tsc -b`/`vite build`/`oxlint` propres sur les deux applications ; bundle chargé en navigateur sans erreur console ; backend recompilé et redémarré proprement après les correctifs (health check OK) ; flux réel (import brut, dossiers multiples) confirmé fonctionnel par test manuel de l'utilisateur sur l'instance locale.
+
 ## Enseignements transverses
 
 Quelques motifs récurrents observés sur l'ensemble de ces phases :

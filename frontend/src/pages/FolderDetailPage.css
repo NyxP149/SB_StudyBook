@@ -1,0 +1,84 @@
+.folder-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.folder-detail-header .folder-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.folder-detail-add {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.folder-detail-add select {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-card);
+  color: var(--ink);
+  font: inherit;
+  min-width: 220px;
+}
+
+.folder-detail-add-hint {
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.folder-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.folder-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.folder-detail-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.folder-detail-row-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-detail-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.folder-detail-row-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}

@@ -49,8 +49,9 @@ public class NoteController {
             @RequestParam(value = "text", required = false) String text,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "provider", required = false) String provider,
-            @RequestParam(value = "templateId", required = false) UUID templateId) {
-        Note note = noteService.submitText(currentUser.getUserId(), text, file, provider, templateId);
+            @RequestParam(value = "templateId", required = false) UUID templateId,
+            @RequestParam(value = "generate", required = false, defaultValue = "true") boolean generate) {
+        Note note = noteService.submitText(currentUser.getUserId(), text, file, provider, templateId, generate);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(noteService.toResponse(note));
     }
 
@@ -84,7 +85,7 @@ public class NoteController {
     @PatchMapping("/{id}/organize")
     public NoteResponse organize(@PathVariable UUID id, @Valid @RequestBody OrganizeNoteRequest request) {
         return noteService.toResponse(
-                noteService.organize(currentUser.getUserId(), id, request.folderId(), request.importance()));
+                noteService.organize(currentUser.getUserId(), id, request.folderIds(), request.importance()));
     }
 
     @PatchMapping("/{id}/link/confirm")
