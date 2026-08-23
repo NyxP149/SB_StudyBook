@@ -387,6 +387,11 @@ export function NoteDetailPage() {
         <div className="note-failed">
           <strong>{t('noteDetail.failedTitle')}</strong>
           <pre>{note.errorMessage}</pre>
+          {note.modelSize && (
+            <p className="note-failed-hint">
+              {t('noteDetail.failedAudioHint')} <Link to="/upload">{t('noteDetail.failedAudioHintLink')}</Link>
+            </p>
+          )}
         </div>
       )}
 

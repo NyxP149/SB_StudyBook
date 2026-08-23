@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { submitNote } from '../api/client'
-import { deletePendingRecording, listPendingRecordings, type PendingRecording } from '../offline/pendingRecordings'
+import { deleteNote, submitNote } from '../api/client'
+import {
+  deletePendingRecording,
+  listPendingRecordings,
+  updatePendingRecording,
+  type PendingRecording,
+} from '../offline/pendingRecordings'
+import { reconcilePendingRecordings } from '../offline/reconcilePendingRecordings'
 import { useOnlineStatus } from '../hooks/useOnlineStatus'
 import { formatDateShort } from '../utils/formatDate'
 import './PendingRecordings.css'
@@ -16,11 +22,13 @@ export function PendingRecordings({ onSent }: { onSent?: () => void }) {
   const [error, setError] = useState<string | null>(null)
 
   async function refresh() {
-    setItems(await listPendingRecordings())
+    // Les entrées "processing" (déjà envoyées, en attente du pipeline) ne sont pas
+    // affichées ici — elles ont déjà leur propre suivi sur la page de la note.
+    setItems((await listPendingRecordings()).filter((item) => item.state !== 'processing'))
   }
 
   useEffect(() => {
-    void refresh()
+    void reconcilePendingRecordings().then(refresh)
   }, [])
 
   async function handleSend(item: PendingRecording) {
@@ -33,6 +41,29 @@ export function PendingRecordings({ onSent }: { onSent?: () => void }) {
         templateId: item.templateId,
       })
       await deletePendingRecording(item.id)
+      onSent?.()
+      navigate(`/notes/${note.id}`)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t('upload.errSendFailed'))
+      setSendingId(null)
+    }
+  }
+
+  async function handleRetry(item: PendingRecording) {
+    setSendingId(item.id)
+    setError(null)
+    try {
+      const note = await submitNote(item.blob, item.filename, {
+        provider: item.provider,
+        modelSize: item.modelSize,
+        templateId: item.templateId,
+      })
+      if (item.linkedNoteId) {
+        // Best-effort : la note en échec est remplacée par ce nouvel essai, on évite
+        // qu'elle traîne dans la liste. Son éventuel échec n'empêche pas de continuer.
+        deleteNote(item.linkedNoteId).catch(() => {})
+      }
+      await updatePendingRecording(item.id, { state: 'processing', linkedNoteId: note.id })
       onSent?.()
       navigate(`/notes/${note.id}`)
     } catch (e) {
@@ -67,16 +98,28 @@ export function PendingRecordings({ onSent }: { onSent?: () => void }) {
               <span className="pending-recording-meta">
                 {formatDateShort(item.createdAt, i18n.language)} · {item.provider}
               </span>
+              {item.state === 'failed' && <p className="pending-recording-failed">{t('pending.failedHint')}</p>}
             </div>
             <div className="pending-recording-actions">
-              <button
-                type="button"
-                className="note-action-button primary"
-                onClick={() => handleSend(item)}
-                disabled={!isOnline || sendingId === item.id}
-              >
-                {sendingId === item.id ? t('pending.sending') : t('pending.send')}
-              </button>
+              {item.state === 'failed' ? (
+                <button
+                  type="button"
+                  className="note-action-button primary"
+                  onClick={() => handleRetry(item)}
+                  disabled={!isOnline || sendingId === item.id}
+                >
+                  {sendingId === item.id ? t('pending.sending') : t('pending.retry')}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="note-action-button primary"
+                  onClick={() => handleSend(item)}
+                  disabled={!isOnline || sendingId === item.id}
+                >
+                  {sendingId === item.id ? t('pending.sending') : t('pending.send')}
+                </button>
+              )}
               <button
                 type="button"
                 className="note-action-button danger"

@@ -182,6 +182,17 @@
   margin-top: 10px;
 }
 
+.note-failed-hint {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--burgundy);
+}
+
+.note-failed-hint a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 /* --- Organisation (dossier / importance) --- */
 
 .note-organize-bar {

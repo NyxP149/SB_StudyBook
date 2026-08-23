@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { listTemplates, submitNote, submitTextNote } from '../api/client'
 import { PendingRecordings } from '../components/PendingRecordings'
 import { useOnlineStatus } from '../hooks/useOnlineStatus'
-import { savePendingRecording } from '../offline/pendingRecordings'
+import { savePendingRecording, updatePendingRecording } from '../offline/pendingRecordings'
 import { isSilentAudio } from '../utils/audioSilence'
 import type { Template } from '../types'
 import './UploadPage.css'
@@ -64,16 +64,33 @@ export function UploadPage() {
         return
       }
 
-      if (!isOnline) {
-        try {
-          await savePendingRecording({ blob, filename, provider, modelSize, templateId: templateId || undefined })
-          setInfo(t('upload.infoSavedOffline'))
-          setPendingRefreshKey((k) => k + 1)
-        } catch {
+      // Sauvée localement avant tout envoi (en ligne ou non) : si le pipeline échoue
+      // après coup côté serveur, la copie reste disponible pour un nouvel essai sans
+      // redemander l'enregistrement — voir reconcilePendingRecordings.ts.
+      let pendingId: string | null = null
+      try {
+        const saved = await savePendingRecording({
+          blob,
+          filename,
+          provider,
+          modelSize,
+          templateId: templateId || undefined,
+        })
+        pendingId = saved.id
+      } catch {
+        if (!isOnline) {
           setError(t('upload.errSaveOfflineFailed'))
-        } finally {
           setState('idle')
+          return
         }
+        // En ligne, la sauvegarde locale n'est qu'un filet de secours : son échec ne
+        // doit pas bloquer l'envoi direct.
+      }
+
+      if (!isOnline) {
+        setInfo(t('upload.infoSavedOffline'))
+        setPendingRefreshKey((k) => k + 1)
+        setState('idle')
         return
       }
 
@@ -83,10 +100,16 @@ export function UploadPage() {
           modelSize,
           templateId: templateId || undefined,
         })
+        if (pendingId) {
+          await updatePendingRecording(pendingId, { state: 'processing', linkedNoteId: note.id })
+        }
         navigate(`/notes/${note.id}`)
       } catch (e) {
         setError(e instanceof Error ? e.message : t('upload.errSendFailed'))
         setState('idle')
+        if (pendingId) {
+          setPendingRefreshKey((k) => k + 1)
+        }
       }
     },
     [navigate, provider, modelSize, templateId, isOnline, t],

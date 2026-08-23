@@ -101,6 +101,8 @@
     "hintOffline": "Salvate localmente — saranno pronte da inviare non appena torni online.",
     "send": "📤 Invia",
     "sending": "Invio…",
+    "retry": "🔁 Riprova",
+    "failedHint": "L'elaborazione di questa registrazione è fallita — l'audio originale è conservato, puoi riprovare.",
     "confirmDiscard": "Eliminare questa registrazione in attesa?"
   },
   "notes": {
@@ -134,6 +136,8 @@
     "processing": "Trascrizione e redazione in corso…",
     "processingHint": "Può richiedere qualche minuto a seconda del modello scelto.",
     "failedTitle": "Elaborazione non riuscita",
+    "failedAudioHint": "Se era una registrazione audio, potrebbe essere ancora recuperabile nella pagina di invio:",
+    "failedAudioHintLink": "vedi le registrazioni in attesa",
     "saving": "Salvataggio…",
     "save": "✓ Salva",
     "edit": "✎ Modifica",

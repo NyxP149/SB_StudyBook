@@ -244,6 +244,27 @@ Puisque `originalFilename` est déjà le champ lu partout où une note est réf�
 
 **Vérification** : `tsc -b`, `vite build` et `mvn compile` propres. Flux HTTP réel non testé de bout en bout (authentification requise) ; le rendu de l'écran de connexion sans erreur console a été vérifié en navigateur, mais l'interaction de renommage elle-même reste à confirmer manuellement par l'utilisateur.
 
+## Phase 16 — Filet de secours quand le pipeline échoue (23/08)
+
+Question posée par l'utilisateur : si le traitement d'un enregistrement audio échoue, l'enregistrement original est-il perdu ? Vérification faite avant tout correctif : oui, dans les deux sens.
+
+- **Côté serveur** : `Note` n'a jamais gardé de référence vers le fichier stocké par `storeUpload()` — même si le fichier physique traîne encore sur disque après un échec, rien ne permet de le retrouver depuis l'app. Et en production ça n'aurait de toute façon aucune importance : le disque Render (tier gratuit) n'est pas persistant ([SB_deploy.md](SB_deploy.md)).
+- **Côté navigateur** : la file "enregistrements en attente" (IndexedDB, pour le cas hors-ligne) supprimait sa copie **dès que la requête d'upload était acceptée** (note créée en statut `PENDING`) — donc bien avant que le pipeline ait pu échouer. Pire : le chemin d'envoi *en ligne* (le cas le plus fréquent) n'écrivait même jamais dans cette file — `UploadPage.submit()` appelait `submitNote()` directement, sans passer par `savePendingRecording()`.
+
+Après discussion, l'utilisateur a choisi l'option sans changement de schéma serveur : garder la copie côté navigateur jusqu'à confirmation du succès, plutôt que de stocker l'audio en base (option écartée : alourdit la base, complique le nettoyage).
+
+*Fix* :
+- `UploadPage.submit()` sauve désormais systématiquement le blob dans IndexedDB **avant** tout envoi, en ligne ou non (jusque-là réservé au cas hors-ligne). Un échec de cette sauvegarde locale reste non bloquant en ligne (l'envoi direct est quand même tenté) — seul le cas hors-ligne préexistant en dépendait réellement.
+- Nouveaux champs sur `PendingRecording` (`frontend/src/offline/pendingRecordings.ts`) : `state` (`queued`/`processing`/`failed`, `undefined` = `queued` pour compat avec les enregistrements déjà stockés) et `linkedNoteId`. Nouvelle fonction `updatePendingRecording()` (get + merge + put, IndexedDB n'a pas de `UPDATE` partiel natif).
+- Après un envoi réussi (en ligne), l'enregistrement local passe en `processing` avec `linkedNoteId` renseigné — il n'est plus supprimé immédiatement.
+- Nouveau module `reconcilePendingRecordings.ts` : à chaque chargement de la page d'envoi, interroge le statut de chaque note `processing` liée. `DONE` → la copie locale est supprimée (plus utile). `FAILED` → passe en `failed`, conservée. Toute autre erreur (hors-ligne, 5xx transitoire, 401 sans session) est **ignorée sans rien supprimer** — seul un vrai 404 (note introuvable) déclenche un nettoyage ; volontairement prudent, pour ne jamais perdre une copie locale à cause d'un problème réseau passager.
+- `PendingRecordings.tsx` : les entrées `processing` restent invisibles dans la liste (déjà suivies sur leur propre page de note) ; les entrées `failed` affichent un message dédié et un bouton « 🔁 Réessayer » qui renvoie le même blob et, en best-effort, supprime l'ancienne note en échec côté serveur pour éviter qu'elle traîne.
+- `NoteDetailPage` : le bloc d'échec affiche désormais un lien vers la page d'envoi quand la note provenait d'un audio (détecté via `note.modelSize`, seul renseigné pour les notes audio) — sans ce lien, la fonctionnalité existerait mais resterait difficile à découvrir.
+
+**Limite assumée** : protège contre un échec du pipeline *après* l'envoi. Ne protège pas contre une fermeture de l'onglet avant même le premier essai d'envoi (aucune sauvegarde locale n'a encore eu lieu à ce moment) — cas déjà hors du périmètre de la file d'attente existante.
+
+**Vérification** : `tsc -b` et `vite build` propres. La logique IndexedDB (`savePendingRecording`/`updatePendingRecording`/`listPendingRecordings`/`deletePendingRecording`) et `reconcilePendingRecordings()` ont été testées directement en navigateur via import ESM natif du serveur de dev (`import('/src/offline/...')`, sans authentification requise puisque c'est du stockage 100% client) : transitions d'état confirmées (`queued` implicite → `processing` avec `linkedNoteId` → `failed`, `linkedNoteId` préservé), et confirmé que `reconcilePendingRecordings()` ne supprime jamais une entrée sur une erreur autre qu'un 404 (testé avec le backend éteint : erreur réseau ignorée, entrée intacte). Le flux complet (vrai échec de pipeline, vrai bouton Réessayer cliqué) n'a pas pu être testé de bout en bout, authentification requise.
+
 ## Enseignements transverses
 
 Quelques motifs récurrents observés sur l'ensemble de ces phases :

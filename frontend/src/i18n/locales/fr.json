@@ -101,6 +101,8 @@
     "hintOffline": "Enregistrés localement — ils seront prêts à envoyer dès que tu retrouves une connexion.",
     "send": "📤 Envoyer",
     "sending": "Envoi…",
+    "retry": "🔁 Réessayer",
+    "failedHint": "Le traitement de cet envoi a échoué — ton enregistrement original est conservé, tu peux réessayer.",
     "confirmDiscard": "Supprimer cet enregistrement en attente ?"
   },
   "notes": {
@@ -134,6 +136,8 @@
     "processing": "Transcription et rédaction en cours…",
     "processingHint": "Ça peut prendre quelques minutes selon le modèle choisi.",
     "failedTitle": "Le traitement a échoué",
+    "failedAudioHint": "Si c'était un enregistrement audio, il est peut-être encore récupérable sur la page d'envoi :",
+    "failedAudioHintLink": "voir les enregistrements en attente",
     "saving": "Enregistrement…",
     "save": "✓ Enregistrer",
     "edit": "✎ Modifier",

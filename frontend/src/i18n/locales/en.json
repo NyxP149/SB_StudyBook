@@ -101,6 +101,8 @@
     "hintOffline": "Saved locally — ready to send as soon as you're back online.",
     "send": "📤 Send",
     "sending": "Sending…",
+    "retry": "🔁 Retry",
+    "failedHint": "Processing this recording failed — your original audio is kept, you can try again.",
     "confirmDiscard": "Delete this pending recording?"
   },
   "notes": {
@@ -134,6 +136,8 @@
     "processing": "Transcribing and writing…",
     "processingHint": "This can take a few minutes depending on the chosen model.",
     "failedTitle": "Processing failed",
+    "failedAudioHint": "If this was an audio recording, it may still be recoverable on the upload page:",
+    "failedAudioHintLink": "see pending recordings",
     "saving": "Saving…",
     "save": "✓ Save",
     "edit": "✎ Edit",

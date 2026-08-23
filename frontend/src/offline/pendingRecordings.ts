@@ -2,6 +2,8 @@ const DB_NAME = 'studybook-offline'
 const STORE_NAME = 'pending-recordings'
 const DB_VERSION = 1
 
+export type PendingRecordingState = 'queued' | 'processing' | 'failed'
+
 export interface PendingRecording {
   id: string
   blob: Blob
@@ -10,6 +12,12 @@ export interface PendingRecording {
   modelSize: string
   templateId?: string
   createdAt: string
+  // 'queued' (défaut, y compris pour les enregistrements sauvés avant l'ajout de ce
+  // champ) : pas encore envoyé. 'processing' : note créée côté serveur, en attente du
+  // pipeline (linkedNoteId renseigné). 'failed' : le pipeline a échoué, blob conservé
+  // pour permettre un nouvel essai sans redemander l'enregistrement à l'utilisateur.
+  state?: PendingRecordingState
+  linkedNoteId?: string
 }
 
 function openDb(): Promise<IDBDatabase> {
@@ -54,4 +62,27 @@ export async function listPendingRecordings(): Promise<PendingRecording[]> {
 
 export async function deletePendingRecording(id: string): Promise<void> {
   await withStore('readwrite', (store) => store.delete(id))
+}
+
+export async function updatePendingRecording(id: string, patch: Partial<PendingRecording>): Promise<void> {
+  const db = await openDb()
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite')
+    const store = tx.objectStore(STORE_NAME)
+    const getRequest = store.get(id)
+    getRequest.onsuccess = () => {
+      const existing = getRequest.result as PendingRecording | undefined
+      if (!existing) {
+        resolve()
+        return
+      }
+      store.put({ ...existing, ...patch })
+    }
+    getRequest.onerror = () => reject(getRequest.error)
+    tx.oncomplete = () => {
+      db.close()
+      resolve()
+    }
+    tx.onerror = () => reject(tx.error)
+  })
 }
