@@ -148,6 +148,7 @@
     "dismissLink": "Dismiss",
     "insertImage": "🖼 Insert an image",
     "changeBackground": "🎨 Change background",
+    "renameAria": "Rename this note",
     "foldersCount": "{{count}} folders",
     "saveAsTemplate": "🗂️ Save as template",
     "saveAsTemplateNamePlaceholder": "Template name",

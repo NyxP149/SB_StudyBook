@@ -148,6 +148,7 @@
     "dismissLink": "Ignora",
     "insertImage": "🖼 Inserisci un'immagine",
     "changeBackground": "🎨 Cambia sfondo",
+    "renameAria": "Rinomina questa nota",
     "foldersCount": "{{count}} cartelle",
     "saveAsTemplate": "🗂️ Salva come modello",
     "saveAsTemplateNamePlaceholder": "Nome del modello",

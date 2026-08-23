@@ -8,6 +8,7 @@ import {
   dismissNoteLink,
   listFolders,
   organizeNote,
+  renameNote,
   updateNote,
   updateNoteBackground,
 } from '../api/client'
@@ -61,6 +62,10 @@ export function NoteDetailPage() {
   const [linkActionPending, setLinkActionPending] = useState(false)
   const [linkError, setLinkError] = useState<string | null>(null)
   const [backgroundError, setBackgroundError] = useState<string | null>(null)
+  const [isRenaming, setIsRenaming] = useState(false)
+  const [nameDraft, setNameDraft] = useState('')
+  const [renaming, setRenaming] = useState(false)
+  const [renameError, setRenameError] = useState<string | null>(null)
   const [exportingDocx, setExportingDocx] = useState(false)
   const [docxError, setDocxError] = useState<string | null>(null)
   const [exportingPdf, setExportingPdf] = useState(false)
@@ -179,6 +184,34 @@ export function NoteDetailPage() {
     }
   }
 
+  function startRenaming() {
+    setNameDraft(note!.originalFilename)
+    setRenameError(null)
+    setIsRenaming(true)
+  }
+
+  function cancelRenaming() {
+    setIsRenaming(false)
+    setRenameError(null)
+  }
+
+  async function saveRename() {
+    const name = nameDraft.trim()
+    if (!name) {
+      return
+    }
+    setRenaming(true)
+    setRenameError(null)
+    try {
+      setNote(await renameNote(note!.id, name))
+      setIsRenaming(false)
+    } catch (e) {
+      setRenameError(e instanceof Error ? e.message : t('common.saveFailed'))
+    } finally {
+      setRenaming(false)
+    }
+  }
+
   async function handleExportDocx() {
     setDocxError(null)
     setExportingDocx(true)
@@ -224,7 +257,46 @@ export function NoteDetailPage() {
 
       <header className="note-detail-header">
         <div>
-          <h1>{note.originalFilename}</h1>
+          {isRenaming ? (
+            <div className="note-detail-rename no-print">
+              <input
+                type="text"
+                value={nameDraft}
+                onChange={(e) => setNameDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') saveRename()
+                  if (e.key === 'Escape') cancelRenaming()
+                }}
+                disabled={renaming}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="note-action-button primary"
+                onClick={saveRename}
+                disabled={renaming || !nameDraft.trim()}
+              >
+                {renaming ? t('noteDetail.saving') : t('common.save')}
+              </button>
+              <button type="button" className="note-action-button" onClick={cancelRenaming} disabled={renaming}>
+                {t('common.cancel')}
+              </button>
+            </div>
+          ) : (
+            <h1 className="note-detail-title">
+              {note.originalFilename}
+              <button
+                type="button"
+                className="note-detail-rename-trigger no-print"
+                onClick={startRenaming}
+                aria-label={t('noteDetail.renameAria')}
+                title={t('noteDetail.renameAria')}
+              >
+                ✎
+              </button>
+            </h1>
+          )}
+          {renameError && <p className="upload-error no-print">{renameError}</p>}
           {theme && <p className="note-detail-theme">{theme}</p>}
         </div>
         <div className="note-detail-header-actions no-print">

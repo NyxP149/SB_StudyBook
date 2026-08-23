@@ -180,6 +180,12 @@ public class NoteService {
         return noteRepository.save(note);
     }
 
+    public Note rename(UUID userId, UUID id, String name) {
+        Note note = getOrThrow(userId, id);
+        note.rename(name.strip());
+        return noteRepository.save(note);
+    }
+
     public Note confirmLink(UUID userId, UUID id) {
         Note note = getOrThrow(userId, id);
         if (note.getSuggestedArgumentId() == null) {

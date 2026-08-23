@@ -232,6 +232,18 @@ Volontairement **plus simple que le `.docx`** sur un point : la mise en forme (g
 
 **Vérification** : comme le `.docx`, aucune donnée de test réaliste facilement disponible (pas de PDF d'exemple sous la main, et generer un `.docx`->`.pdf` via LibreOffice aurait ajouté une dépendance externe fragile) — donc un PDF de test a été **généré directement avec PDFBox** (déjà une dépendance backend) dans un test unitaire jetable : titre en 24pt gras, deux sous-titres en 16pt gras, un paragraphe étalé sur deux lignes rapprochées (pour vérifier la fusion), deux puces. Toutes les assertions passent : titre → `# **...**`, sous-titres → `## **...**`, les deux lignes du paragraphe fusionnent bien en une seule, les puces sont détectées. Le test a été supprimé après vérification (non conservé dans le dépôt). Comme pour le `.docx`, le flux HTTP réel via l'UI n'a pas pu être testé de bout en bout (authentification requise) — et ici encore moins que pour le `.docx`, puisqu'aucun vrai PDF "du monde réel" (export Word, scan, etc.) n'a pu être essayé : la robustesse de l'heuristique sur des PDF réels reste à confirmer par l'utilisateur.
 
+## Phase 15 — Renommage d'une note (23/08)
+
+Le nom d'une note (`Note.originalFilename`) n'était jusque-là jamais choisi par l'utilisateur : dérivé du fichier uploadé (`audio.getOriginalFilename()`), ou synthétisé (`texte-colle-{timestamp}.txt`) pour un texte collé — arbitraire, comme relevé par l'utilisateur, et pas toujours parlant.
+
+*Fix* : nouvelle route `PATCH /api/notes/{id}/rename` (`RenameNoteRequest{name}` → `NoteService.rename()` → `Note.rename()`, même patron que `updateBackground`/`organize`), pas de restriction de statut (contrairement à `updateMarkdown`, réservé aux notes `DONE` — renommer une note `PENDING`/`FAILED` reste utile). Champ backend gardé sous le même nom `originalFilename` (aucun changement de schéma, aucun DTO à retoucher côté liste/liens) : seule sa valeur devient éditable.
+
+Frontend : titre de `NoteDetailPage` cliquable via une icône crayon (`✎`, visible en permanence à faible opacité — pas seulement au survol, pour rester utilisable au tactile) qui bascule vers un `<input>` inline (Entrée valide, Échap annule), suivant le même aller-retour `useState`/`try-catch` que les autres actions de la page (fond, dossiers, importance).
+
+Puisque `originalFilename` est déjà le champ lu partout où une note est référencée par son nom — carte de la liste, page de détail, liste "notes liées" d'un argument d'étude personnelle, liste de contenu d'un dossier — le nom choisi s'y répercute automatiquement, sans code supplémentaire : c'est exactement le second besoin exprimé par l'utilisateur ("le nom de la note pourra aussi servir pour les notes liées").
+
+**Vérification** : `tsc -b`, `vite build` et `mvn compile` propres. Flux HTTP réel non testé de bout en bout (authentification requise) ; le rendu de l'écran de connexion sans erreur console a été vérifié en navigateur, mais l'interaction de renommage elle-même reste à confirmer manuellement par l'utilisateur.
+
 ## Enseignements transverses
 
 Quelques motifs récurrents observés sur l'ensemble de ces phases :

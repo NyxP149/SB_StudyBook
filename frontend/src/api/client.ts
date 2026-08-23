@@ -183,6 +183,15 @@ export async function organizeNote(id: string, folderIds: string[], importance: 
   return parseOrThrow<Note>(response)
 }
 
+export async function renameNote(id: string, name: string): Promise<Note> {
+  const response = await authFetch(`${NOTES_URL}/${id}/rename`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  })
+  return parseOrThrow<Note>(response)
+}
+
 export async function updateNoteBackground(id: string, background: string | null): Promise<Note> {
   const response = await authFetch(`${NOTES_URL}/${id}/background`, {
     method: 'PATCH',

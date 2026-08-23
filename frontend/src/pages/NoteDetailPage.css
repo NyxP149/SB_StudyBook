@@ -19,9 +19,54 @@
   flex-wrap: wrap;
 }
 
-.note-detail-header h1 {
+.note-detail-header h1,
+.note-detail-title {
   font-size: clamp(24px, 3.5vw, 34px);
   line-height: 1.2;
+}
+
+.note-detail-title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.note-detail-rename-trigger {
+  border: none;
+  background: none;
+  color: var(--ink-faint);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px;
+  opacity: 0.45;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.note-detail-title:hover .note-detail-rename-trigger,
+.note-detail-rename-trigger:focus-visible {
+  opacity: 1;
+}
+
+.note-detail-rename-trigger:hover {
+  color: var(--gold);
+}
+
+.note-detail-rename {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.note-detail-rename input {
+  font-size: clamp(20px, 3vw, 28px);
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-card);
+  color: var(--ink);
+  min-width: 240px;
 }
 
 .note-detail-header-actions {

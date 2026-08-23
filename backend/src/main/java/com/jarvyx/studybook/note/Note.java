@@ -110,6 +110,10 @@ public class Note {
         this.noteMarkdown = noteMarkdown;
     }
 
+    public void rename(String originalFilename) {
+        this.originalFilename = originalFilename;
+    }
+
     public void organize(Collection<UUID> folderIds, NoteImportance importance) {
         this.folderIds = folderIds != null ? new HashSet<>(folderIds) : new HashSet<>();
         this.importance = importance;
