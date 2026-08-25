@@ -46,6 +46,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  flex-wrap: wrap;
   background: var(--paper-card);
   border: 1px solid var(--line);
   border-radius: 12px;

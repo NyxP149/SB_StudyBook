@@ -273,6 +273,14 @@ Signalé par l'utilisateur : depuis le contenu d'un dossier, impossible d'après
 
 **Vérification** : `vite build` propre. Pas de test visuel en navigateur cette fois (changement CSS pur, à faible risque, cohérent avec le traitement au survol déjà utilisé ailleurs dans l'app — ex. `NoteCard`) ; à confirmer par l'utilisateur après déploiement.
 
+## Phase 18 — Bug mobile : titre écrasé par les boutons dans un dossier (24/08)
+
+Suite immédiate de la Phase 17 : capture d'écran mobile montrant le titre de la note quasiment invisible, écrasé par les boutons "Remove from folder"/"Delete forever". Cause distincte du bug de découvrabilité corrigé juste avant : `.folder-detail-row` n'avait pas `flex-wrap: wrap`, alors que `.folder-detail-row-main` a `min-width: 0` (nécessaire pour l'ellipsis sur les noms longs) et `.folder-detail-row-actions` a `flex-shrink: 0` (boutons de largeur fixe). Sur un écran étroit, les deux ne tiennent pas côte à côte : `min-width: 0` permettant au titre de se réduire sans limite alors que les actions refusent de rétrécir, le titre se retrouve compressé à une largeur quasi nulle plutôt que passer à la ligne.
+
+*Fix* : `flex-wrap: wrap` sur `.folder-detail-row` — même correctif déjà en place sur `.pending-recording-item` (`PendingRecordings.css`) pour un patron de ligne identique (contenu + actions), jamais reporté sur cette page-ci.
+
+**Vérification** : `vite build` propre. Testé en navigateur à 375px de large (préréglage mobile) via une reconstruction fidèle du CSS + markup réel : `getBoundingClientRect()` confirme l'absence de chevauchement (`overlapping: false`) et que les actions passent bien sous le titre (`stackedVertically: true`), avec le titre qui occupe désormais toute la largeur disponible et se tronque proprement par ellipsis au lieu d'être écrasé.
+
 ## Enseignements transverses
 
 Quelques motifs récurrents observés sur l'ensemble de ces phases :
