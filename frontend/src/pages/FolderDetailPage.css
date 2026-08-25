@@ -50,6 +50,11 @@
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 14px 18px;
+  transition: border-color 0.15s ease;
+}
+
+.folder-detail-row:has(.folder-detail-row-main:hover) {
+  border-color: var(--gold);
 }
 
 .folder-detail-row-main {
@@ -58,6 +63,7 @@
   gap: 4px;
   text-decoration: none;
   min-width: 0;
+  cursor: pointer;
 }
 
 .folder-detail-row-title {
@@ -67,6 +73,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.folder-detail-row-main:hover .folder-detail-row-title {
+  color: var(--gold);
+  text-decoration: underline;
 }
 
 .folder-detail-row-meta {

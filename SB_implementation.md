@@ -265,6 +265,14 @@ Après discussion, l'utilisateur a choisi l'option sans changement de schéma se
 
 **Vérification** : `tsc -b` et `vite build` propres. La logique IndexedDB (`savePendingRecording`/`updatePendingRecording`/`listPendingRecordings`/`deletePendingRecording`) et `reconcilePendingRecordings()` ont été testées directement en navigateur via import ESM natif du serveur de dev (`import('/src/offline/...')`, sans authentification requise puisque c'est du stockage 100% client) : transitions d'état confirmées (`queued` implicite → `processing` avec `linkedNoteId` → `failed`, `linkedNoteId` préservé), et confirmé que `reconcilePendingRecordings()` ne supprime jamais une entrée sur une erreur autre qu'un 404 (testé avec le backend éteint : erreur réseau ignorée, entrée intacte). Le flux complet (vrai échec de pipeline, vrai bouton Réessayer cliqué) n'a pas pu être testé de bout en bout, authentification requise.
 
+## Phase 17 — Découvrabilité : ouvrir une note depuis un dossier (24/08)
+
+Signalé par l'utilisateur : depuis le contenu d'un dossier, impossible d'après lui d'accéder à une note — seulement la retirer du dossier ou la supprimer définitivement. En relisant `FolderDetailPage.tsx`, le lien existait déjà (`<Link to={`/notes/${note.id}`}>` autour du titre, depuis la Phase 11) : le vrai problème n'était pas fonctionnel mais visuel — `.folder-detail-row-main` n'avait ni couleur de lien, ni soulignement, ni état de survol, donc rendu identique à du texte non cliquable (`color: var(--ink)` hérité, `text-decoration: none`, aucun `:hover`). Le même défaut existait à l'identique sur la liste "notes liées" d'un argument d'étude (`study-linked-note-row`, `StudyPage.css`), jamais remarqué faute de retour utilisateur dessus.
+
+*Fix* : état de survol sur les deux — titre en `var(--gold)` + soulignement, bordure de la ligne qui se colore au survol (`:has()` sur `FolderDetailPage`, directement sur la ligne pour `StudyPage` puisque toute la ligne y est déjà le lien). Aucun changement de structure ni de logique, uniquement du CSS.
+
+**Vérification** : `vite build` propre. Pas de test visuel en navigateur cette fois (changement CSS pur, à faible risque, cohérent avec le traitement au survol déjà utilisé ailleurs dans l'app — ex. `NoteCard`) ; à confirmer par l'utilisateur après déploiement.
+
 ## Enseignements transverses
 
 Quelques motifs récurrents observés sur l'ensemble de ces phases :

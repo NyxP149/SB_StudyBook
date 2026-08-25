@@ -296,6 +296,16 @@
   border-radius: 12px;
   background: var(--paper-card);
   border: 1px solid var(--line);
+  transition: border-color 0.15s ease;
+}
+
+.study-linked-note-row:hover {
+  border-color: var(--gold);
+}
+
+.study-linked-note-row:hover .study-linked-note-title {
+  color: var(--gold);
+  text-decoration: underline;
 }
 
 .study-linked-note-title {
