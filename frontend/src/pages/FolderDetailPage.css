@@ -1,8 +1,71 @@
+.folder-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0;
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.folder-breadcrumb-item a {
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.folder-breadcrumb-item a:hover {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+.folder-breadcrumb-sep {
+  margin-right: 6px;
+  opacity: 0.6;
+}
+
+.folder-breadcrumb-current {
+  color: var(--ink);
+  font-weight: 600;
+}
+
 .folder-detail-header {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 20px;
+}
+
+.folder-detail-subfolders-first {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.folder-detail-subfolders {
+  margin-bottom: 28px;
+}
+
+.folder-detail-subfolders-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.folder-detail-subfolders-header h2 {
+  font-family: var(--font-display);
+  font-size: 17px;
+}
+
+.folder-detail-sort-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
 }
 
 .folder-detail-header .folder-swatch {

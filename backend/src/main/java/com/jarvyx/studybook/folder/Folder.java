@@ -29,6 +29,17 @@ public class Folder {
     @Column(nullable = false)
     private String color;
 
+    // null = dossier racine ; sinon id d'un autre Folder du meme utilisateur.
+    private UUID parentId;
+
+    // Profondeur dans l'arbre (racine = 1), maintenue a jour par FolderService
+    // pour eviter de reparcourir la chaine de parents a chaque lecture.
+    // columnDefinition avec DEFAULT : ddl-auto=update ajoute cette colonne sur
+    // une table Postgres deja peuplee (prod), une simple NOT NULL sans defaut
+    // echouerait sur les lignes existantes.
+    @Column(nullable = false, columnDefinition = "integer default 1")
+    private int depth = 1;
+
     @Column(nullable = false)
     private Instant createdAt;
 

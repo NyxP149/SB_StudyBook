@@ -2,20 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { createFolder, deleteFolder, listFolders, updateFolder } from '../api/client'
+import { FOLDER_COLOR_PRESETS } from '../folderColors'
 import type { Folder, FolderInput } from '../types'
 import './FoldersPage.css'
 
-const COLOR_PRESETS = [
-  { nameKey: 'folders.colorGold', hex: '#b8863b' },
-  { nameKey: 'folders.colorSage', hex: '#3f6f4f' },
-  { nameKey: 'folders.colorBurgundy', hex: '#8c3b3b' },
-  { nameKey: 'folders.colorSlate', hex: '#3f5f7f' },
-  { nameKey: 'folders.colorPlum', hex: '#6b4577' },
-  { nameKey: 'folders.colorOlive', hex: '#6b7a3f' },
-]
-
 function emptyForm(): FolderInput {
-  return { name: '', color: COLOR_PRESETS[0].hex }
+  return { name: '', color: FOLDER_COLOR_PRESETS[0].hex, parentId: null }
 }
 
 export function FoldersPage() {
@@ -42,7 +34,7 @@ export function FoldersPage() {
 
   const startEdit = (folder: Folder) => {
     setEditingId(folder.id)
-    setForm({ name: folder.name, color: folder.color })
+    setForm({ name: folder.name, color: folder.color, parentId: folder.parentId })
     setError(null)
   }
 
@@ -80,6 +72,7 @@ export function FoldersPage() {
   }
 
   const isEditing = editingId !== null
+  const rootFolders = folders?.filter((f) => f.parentId === null) ?? null
 
   return (
     <div className="folders-page">
@@ -99,16 +92,16 @@ export function FoldersPage() {
 
       {!isEditing && (
         <>
-          {!folders && <p className="notes-loading">{t('common.loading')}</p>}
-          {folders && folders.length === 0 && (
+          {!rootFolders && <p className="notes-loading">{t('common.loading')}</p>}
+          {rootFolders && rootFolders.length === 0 && (
             <div className="notes-empty">
               <span>🗂️</span>
               <p>{t('folders.empty')}</p>
             </div>
           )}
-          {folders && folders.length > 0 && (
+          {rootFolders && rootFolders.length > 0 && (
             <div className="folders-grid">
-              {folders.map((folder) => (
+              {rootFolders.map((folder) => (
                 <div key={folder.id} className="folder-card">
                   <Link to={`/folders/${folder.id}`} className="folder-card-open">
                     <span className="folder-swatch" style={{ background: folder.color }} />
@@ -145,7 +138,7 @@ export function FoldersPage() {
           <div className="template-field">
             {t('folders.color')}
             <div className="folder-color-picker">
-              {COLOR_PRESETS.map((preset) => (
+              {FOLDER_COLOR_PRESETS.map((preset) => (
                 <button
                   key={preset.hex}
                   type="button"

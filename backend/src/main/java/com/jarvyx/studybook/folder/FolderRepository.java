@@ -11,6 +11,8 @@ public interface FolderRepository extends JpaRepository<Folder, UUID> {
 
     List<Folder> findAllByUserIdOrderByNameAsc(UUID userId);
 
+    List<Folder> findAllByUserIdAndParentIdOrderByNameAsc(UUID userId, UUID parentId);
+
     Optional<Folder> findByIdAndUserId(UUID id, UUID userId);
 
     @Modifying
