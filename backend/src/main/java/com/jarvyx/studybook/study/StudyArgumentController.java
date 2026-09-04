@@ -9,6 +9,7 @@ import com.jarvyx.studybook.study.dto.StudyArgumentRequest;
 import com.jarvyx.studybook.study.dto.StudyArgumentResponse;
 import com.jarvyx.studybook.study.dto.StudyImageResponse;
 import com.jarvyx.studybook.study.dto.StudyUpcomingResponse;
+import com.jarvyx.studybook.study.dto.UpdateArgumentNoteBackgroundRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -135,6 +137,13 @@ public class StudyArgumentController {
             @PathVariable UUID id, @Valid @RequestBody StudyArgumentNoteRequest request) {
         return StudyArgumentNoteResponse.from(
                 argumentService.updateNote(currentUser.getUserId(), id, request.content()));
+    }
+
+    @PatchMapping("/notes/{id}/background")
+    public StudyArgumentNoteResponse updateNoteBackground(
+            @PathVariable UUID id, @Valid @RequestBody UpdateArgumentNoteBackgroundRequest request) {
+        return StudyArgumentNoteResponse.from(
+                argumentService.updateNoteBackground(currentUser.getUserId(), id, request.background()));
     }
 
     @DeleteMapping("/notes/{id}")

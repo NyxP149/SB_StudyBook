@@ -177,6 +177,12 @@ public class StudyArgumentService {
         return argumentNoteRepository.save(note);
     }
 
+    public StudyArgumentNote updateNoteBackground(UUID userId, UUID noteId, String background) {
+        StudyArgumentNote note = getNoteOrThrow(userId, noteId);
+        note.setBackground(background);
+        return argumentNoteRepository.save(note);
+    }
+
     public StudyArgumentNote getNoteOrThrow(UUID userId, UUID noteId) {
         return argumentNoteRepository.findByIdAndUserId(noteId, userId)
                 .orElseThrow(() -> new NoSuchElementException("Note introuvable : " + noteId));

@@ -29,12 +29,15 @@ export interface Folder {
   id: string
   name: string
   color: string
+  parentId: string | null
+  depth: number
   createdAt: string
 }
 
 export interface FolderInput {
   name: string
   color: string
+  parentId?: string | null
 }
 
 export interface SubmitOptions {
@@ -118,6 +121,7 @@ export interface StudyArgumentNote {
   id: string
   argumentId: string
   content: string
+  background: string | null
   createdAt: string
   updatedAt: string
 }

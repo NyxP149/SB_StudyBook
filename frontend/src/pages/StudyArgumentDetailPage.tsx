@@ -14,13 +14,17 @@ import {
   listStudyImages,
   updateStudyArgument,
   updateStudyArgumentNote,
+  updateStudyArgumentNoteBackground,
   uploadStudyImage,
 } from '../api/client'
 import { AuthedImage } from '../components/AuthedImage'
 import { FormattingToolbar } from '../components/FormattingToolbar'
+import { ImageLightbox } from '../components/ImageLightbox'
 import { InsertImageButton } from '../components/InsertImageButton'
+import { NoteBackgroundPicker } from '../components/NoteBackgroundPicker'
 import { NoteMarkdown } from '../components/NoteMarkdown'
 import { StatusBadge } from '../components/StatusBadge'
+import { backgroundClassName } from '../noteBackgrounds'
 import { formatDateOnly, formatDateTime } from '../utils/formatDate'
 import { normalizeLineEndings } from '../utils/text'
 import type { NoteSummary, StudyArgument, StudyArgumentNote, StudyImage } from '../types'
@@ -42,6 +46,16 @@ function ArgumentNoteItem({
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState(normalizeLineEndings(note.content))
   const [saving, setSaving] = useState(false)
+  const [backgroundError, setBackgroundError] = useState<string | null>(null)
+
+  async function changeBackground(next: string | null) {
+    setBackgroundError(null)
+    try {
+      onSaved(await updateStudyArgumentNoteBackground(note.id, next))
+    } catch (e) {
+      setBackgroundError(e instanceof Error ? e.message : t('common.saveFailed'))
+    }
+  }
 
   function startEditing() {
     setDraft(normalizeLineEndings(note.content))
@@ -91,9 +105,12 @@ function ArgumentNoteItem({
             <button type="button" className="note-action-button danger" onClick={remove}>
               {t('common.delete')}
             </button>
+            <NoteBackgroundPicker value={note.background} onSelect={changeBackground} />
           </>
         )}
       </div>
+
+      {backgroundError && <p className="upload-error no-print">{backgroundError}</p>}
 
       {isEditing ? (
         <>
@@ -109,7 +126,7 @@ function ArgumentNoteItem({
           />
         </>
       ) : (
-        <NoteMarkdown content={note.content} />
+        <NoteMarkdown content={note.content} backgroundClass={backgroundClassName(note.background)} />
       )}
     </div>
   )
@@ -134,6 +151,7 @@ export function StudyArgumentDetailPage() {
   const [newNoteDraft, setNewNoteDraft] = useState('')
   const [savingNewNote, setSavingNewNote] = useState(false)
   const [encouragement, setEncouragement] = useState<string | null>(null)
+  const [lightboxImageId, setLightboxImageId] = useState<string | null>(null)
 
   const refresh = () => {
     if (!id) return
@@ -309,7 +327,11 @@ export function StudyArgumentDetailPage() {
         ) : (
           <div className="study-images-grid">
             {images.map((image) => (
-              <div key={image.id} className="study-image-tile">
+              <div
+                key={image.id}
+                className="study-image-tile"
+                onClick={() => setLightboxImageId(image.id)}
+              >
                 <AuthedImage
                   imageId={image.id}
                   alt={image.filename}
@@ -319,7 +341,10 @@ export function StudyArgumentDetailPage() {
                 <button
                   type="button"
                   className="study-image-remove"
-                  onClick={() => handleImageDelete(image.id)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleImageDelete(image.id)
+                  }}
                   aria-label={t('common.delete')}
                 >
                   ✕
@@ -329,6 +354,17 @@ export function StudyArgumentDetailPage() {
           </div>
         )}
       </div>
+
+      {lightboxImageId && (
+        <ImageLightbox onClose={() => setLightboxImageId(null)}>
+          <AuthedImage
+            imageId={lightboxImageId}
+            alt=""
+            className="image-lightbox-full"
+            fetcher={fetchStudyImageObjectUrl}
+          />
+        </ImageLightbox>
+      )}
 
       <div className="mode-tabs">
         <button

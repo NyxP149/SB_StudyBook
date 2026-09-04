@@ -29,6 +29,10 @@ public class StudyArgumentNote {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    // Clé d'un des présets de fond définis côté frontend (mêmes presets que
+    // pour les notes transcrites) ; null = fond papier par défaut.
+    private String background;
+
     @Column(nullable = false)
     private Instant createdAt;
 

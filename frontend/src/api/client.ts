@@ -444,6 +444,15 @@ export async function updateStudyArgumentNote(id: string, content: string): Prom
   return parseOrThrow<StudyArgumentNote>(response)
 }
 
+export async function updateStudyArgumentNoteBackground(id: string, background: string | null): Promise<StudyArgumentNote> {
+  const response = await authFetch(`${STUDY_URL}/notes/${id}/background`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ background }),
+  })
+  return parseOrThrow<StudyArgumentNote>(response)
+}
+
 export async function deleteStudyArgumentNote(id: string): Promise<void> {
   const response = await authFetch(`${STUDY_URL}/notes/${id}`, { method: 'DELETE' })
   return parseOrThrow<void>(response)
