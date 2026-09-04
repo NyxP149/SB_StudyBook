@@ -76,6 +76,47 @@
   gap: 18px;
 }
 
+.notes-grid.dense {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.notes-grid.dense .note-card {
+  padding: 14px 14px 12px;
+}
+
+.notes-grid.dense .note-card-head h3 {
+  font-size: 15px;
+}
+
+.notes-grid.dense .note-card-meta {
+  margin-top: 8px;
+}
+
+.notes-grid.dense .note-card-tags {
+  margin-top: 8px;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.view-mode-switch {
+  display: flex;
+  gap: 4px;
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.view-mode-switch .notes-status-tab {
+  font-size: 14px;
+  padding: 6px 10px;
+}
+
 .notes-filters {
   display: flex;
   align-items: center;

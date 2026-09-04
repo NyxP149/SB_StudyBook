@@ -136,3 +136,75 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
+
+.note-list-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 16px 10px 20px;
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color 0.15s ease;
+  overflow: hidden;
+}
+
+.note-list-row:hover {
+  border-color: var(--gold);
+}
+
+.note-list-row:hover .note-list-row-title {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+.note-list-row-tape {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  opacity: 0.85;
+}
+
+.note-list-row-main {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.note-list-row-title {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.note-list-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.note-list-row.selected {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold-bright);
+}
+
+.note-list-row .note-card-checkbox {
+  position: static;
+  flex-shrink: 0;
+}

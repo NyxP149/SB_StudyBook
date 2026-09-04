@@ -15,6 +15,20 @@ const STATUS_FILTERS: Array<{ value: NoteStatus | 'ALL'; labelKey: string }> = [
 
 const IMPORTANCE_RANK: Record<NoteImportance, number> = { URGENTE: 0, IMPORTANTE: 1, NORMALE: 2 }
 
+type ViewMode = 'grid' | 'denseGrid' | 'list'
+
+const VIEW_MODE_KEY = 'studybook.notesViewMode'
+const VIEW_MODES: Array<{ value: ViewMode; labelKey: string; icon: string }> = [
+  { value: 'grid', labelKey: 'notes.viewGrid', icon: '▦' },
+  { value: 'denseGrid', labelKey: 'notes.viewDenseGrid', icon: '▥' },
+  { value: 'list', labelKey: 'notes.viewList', icon: '☰' },
+]
+
+function readInitialViewMode(): ViewMode {
+  const stored = localStorage.getItem(VIEW_MODE_KEY)
+  return stored === 'grid' || stored === 'denseGrid' || stored === 'list' ? stored : 'grid'
+}
+
 export function NotesListPage() {
   const { t } = useTranslation()
   const [notes, setNotes] = useState<NoteSummary[] | null>(null)
@@ -30,6 +44,11 @@ export function NotesListPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkDeleting, setBulkDeleting] = useState(false)
   const [bulkError, setBulkError] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>(readInitialViewMode)
+
+  useEffect(() => {
+    localStorage.setItem(VIEW_MODE_KEY, viewMode)
+  }, [viewMode])
 
   useEffect(() => {
     let cancelled = false
@@ -231,6 +250,20 @@ export function NotesListPage() {
           >
             {t('notes.sortByImportance')}
           </button>
+          <div className="view-mode-switch" role="group" aria-label={t('notes.viewMode')}>
+            {VIEW_MODES.map((mode) => (
+              <button
+                key={mode.value}
+                type="button"
+                className={`notes-status-tab ${viewMode === mode.value ? 'active' : ''}`}
+                onClick={() => setViewMode(mode.value)}
+                title={t(mode.labelKey)}
+                aria-label={t(mode.labelKey)}
+              >
+                {mode.icon}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -239,7 +272,7 @@ export function NotesListPage() {
       )}
 
       {filteredNotes && filteredNotes.length > 0 && (
-        <div className="notes-grid">
+        <div className={viewMode === 'list' ? 'notes-list' : `notes-grid ${viewMode === 'denseGrid' ? 'dense' : ''}`}>
           {filteredNotes.map((note) => {
             const noteFolders = note.folderIds
               .map((id) => foldersById.get(id))
@@ -253,6 +286,7 @@ export function NotesListPage() {
                 selectable={selectMode}
                 selected={selectedIds.has(note.id)}
                 onToggleSelect={toggleSelect}
+                variant={viewMode === 'list' ? 'list' : 'grid'}
               />
             )
           })}

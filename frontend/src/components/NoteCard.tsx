@@ -20,6 +20,7 @@ export function NoteCard({
   selectable,
   selected,
   onToggleSelect,
+  variant = 'grid',
 }: {
   note: NoteSummary
   templateName?: string
@@ -27,10 +28,64 @@ export function NoteCard({
   selectable?: boolean
   selected?: boolean
   onToggleSelect?: (id: string) => void
+  variant?: 'grid' | 'list'
 }) {
   const { i18n } = useTranslation()
   const importanceIcon = IMPORTANCE_ICON[note.importance]
   const bgClass = backgroundClassName(note.background)
+
+  if (variant === 'list') {
+    const rowBody = (
+      <>
+        {selectable && (
+          <span className={`note-card-checkbox ${selected ? 'checked' : ''}`}>{selected ? '✓' : ''}</span>
+        )}
+        <span className={`note-list-row-tape tape-${note.status.toLowerCase()}`} />
+        <div className="note-list-row-main">
+          <span className="note-list-row-title">
+            {importanceIcon && <span className="note-card-importance">{importanceIcon}</span>}
+            {note.originalFilename}
+          </span>
+          <span className="note-list-row-meta">
+            {formatDateShort(note.createdAt, i18n.language)}
+            {templateName && (
+              <>
+                <span className="dot">·</span>
+                {templateName}
+              </>
+            )}
+            {folders?.map((folder) => (
+              <span key={folder.id} className="note-card-folder">
+                <span className="note-card-folder-dot" style={{ background: folder.color }} />
+                {folder.name}
+              </span>
+            ))}
+          </span>
+        </div>
+        <StatusBadge status={note.status} />
+      </>
+    )
+
+    if (selectable) {
+      return (
+        <div
+          className={`note-list-row ${bgClass} ${selected ? 'selected' : ''}`}
+          onClick={() => onToggleSelect?.(note.id)}
+          role="checkbox"
+          aria-checked={selected}
+          tabIndex={0}
+        >
+          {rowBody}
+        </div>
+      )
+    }
+
+    return (
+      <Link to={`/notes/${note.id}`} className={`note-list-row ${bgClass}`}>
+        {rowBody}
+      </Link>
+    )
+  }
 
   const body = (
     <>
