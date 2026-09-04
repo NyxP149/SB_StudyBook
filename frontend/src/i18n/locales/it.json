@@ -6,6 +6,7 @@
     "saving": "Salvataggio…",
     "cancel": "Annulla",
     "delete": "Elimina",
+    "close": "Chiudi",
     "saveFailed": "Salvataggio non riuscito.",
     "deleteFailed": "Eliminazione non riuscita.",
     "or": "oppure",
@@ -126,6 +127,10 @@
     "allTemplates": "Tutti i modelli",
     "allFolders": "Tutte le cartelle",
     "sortByImportance": "🔴 Ordina per importanza",
+    "viewMode": "Modalità di visualizzazione",
+    "viewGrid": "Griglia",
+    "viewDenseGrid": "Griglia densa",
+    "viewList": "Lista compatta",
     "noMatch": "Nessuna nota corrisponde a questi filtri."
   },
   "noteDetail": {
@@ -210,7 +215,16 @@
     "addNote": "Aggiungi una nota",
     "addNotePlaceholder": "Scegli una nota…",
     "addNoteButton": "Aggiungi",
-    "noNotesToAdd": "Tutte le tue note sono già in questa cartella."
+    "noNotesToAdd": "Tutte le tue note sono già in questa cartella.",
+    "subfolders": "Sottocartelle",
+    "newSubfolder": "+ Nuova sottocartella",
+    "subfoldersFirst": "Sottocartelle per prime",
+    "confirmDeleteFolder": "Eliminare questa cartella e tutte le sue sottocartelle? Questa azione è irreversibile.",
+    "sortNotesBy": "Ordina le note",
+    "sortName": "Nome (A-Z)",
+    "sortDateNewest": "Data (più recenti)",
+    "sortDateOldest": "Data (più vecchie)",
+    "sortImportance": "Importanza"
   },
   "templates": {
     "title": "I miei modelli",

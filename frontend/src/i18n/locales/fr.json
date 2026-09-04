@@ -6,6 +6,7 @@
     "saving": "Sauvegarde…",
     "cancel": "Annuler",
     "delete": "Supprimer",
+    "close": "Fermer",
     "saveFailed": "Échec de la sauvegarde.",
     "deleteFailed": "Échec de la suppression.",
     "or": "ou",
@@ -126,6 +127,10 @@
     "allTemplates": "Tous les templates",
     "allFolders": "Tous les dossiers",
     "sortByImportance": "🔴 Trier par importance",
+    "viewMode": "Mode d'affichage",
+    "viewGrid": "Grille",
+    "viewDenseGrid": "Grille dense",
+    "viewList": "Liste compacte",
     "noMatch": "Aucune note ne correspond à ces filtres."
   },
   "noteDetail": {
@@ -210,7 +215,16 @@
     "addNote": "Ajouter une note",
     "addNotePlaceholder": "Choisir une note…",
     "addNoteButton": "Ajouter",
-    "noNotesToAdd": "Toutes tes notes sont déjà dans ce dossier."
+    "noNotesToAdd": "Toutes tes notes sont déjà dans ce dossier.",
+    "subfolders": "Sous-dossiers",
+    "newSubfolder": "+ Nouveau sous-dossier",
+    "subfoldersFirst": "Sous-dossiers en premier",
+    "confirmDeleteFolder": "Supprimer ce dossier et tous ses sous-dossiers ? Cette action est irréversible.",
+    "sortNotesBy": "Trier les notes",
+    "sortName": "Nom (A-Z)",
+    "sortDateNewest": "Date (plus récentes)",
+    "sortDateOldest": "Date (plus anciennes)",
+    "sortImportance": "Importance"
   },
   "templates": {
     "title": "Mes templates",

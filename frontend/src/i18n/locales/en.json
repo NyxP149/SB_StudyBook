@@ -6,6 +6,7 @@
     "saving": "Saving…",
     "cancel": "Cancel",
     "delete": "Delete",
+    "close": "Close",
     "saveFailed": "Save failed.",
     "deleteFailed": "Delete failed.",
     "or": "or",
@@ -126,6 +127,10 @@
     "allTemplates": "All templates",
     "allFolders": "All folders",
     "sortByImportance": "🔴 Sort by importance",
+    "viewMode": "View mode",
+    "viewGrid": "Grid",
+    "viewDenseGrid": "Dense grid",
+    "viewList": "Compact list",
     "noMatch": "No notes match these filters."
   },
   "noteDetail": {
@@ -210,7 +215,16 @@
     "addNote": "Add a note",
     "addNotePlaceholder": "Choose a note…",
     "addNoteButton": "Add",
-    "noNotesToAdd": "All your notes are already in this folder."
+    "noNotesToAdd": "All your notes are already in this folder.",
+    "subfolders": "Subfolders",
+    "newSubfolder": "+ New subfolder",
+    "subfoldersFirst": "Subfolders first",
+    "confirmDeleteFolder": "Delete this folder and all its subfolders? This cannot be undone.",
+    "sortNotesBy": "Sort notes",
+    "sortName": "Name (A-Z)",
+    "sortDateNewest": "Date (newest first)",
+    "sortDateOldest": "Date (oldest first)",
+    "sortImportance": "Importance"
   },
   "templates": {
     "title": "My templates",
