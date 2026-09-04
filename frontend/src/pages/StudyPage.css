@@ -65,6 +65,8 @@
 
 .study-program-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
   background: var(--paper-card);
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -74,7 +76,7 @@
 
 .study-program-card-link {
   display: block;
-  padding: 20px;
+  padding: 20px 20px 8px;
   text-decoration: none;
   color: var(--ink);
 }
@@ -86,9 +88,7 @@
 }
 
 .study-program-edit {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+  flex-shrink: 0;
   border: 1px solid var(--line);
   background: var(--paper);
   color: var(--ink-faint);
@@ -97,6 +97,11 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.study-program-card > .study-program-edit {
+  align-self: flex-start;
+  margin: 0 20px 16px;
 }
 
 .study-program-edit:hover {
@@ -228,6 +233,14 @@
   overflow: hidden;
   border: 1px solid var(--line);
   background: var(--paper-deep);
+  cursor: pointer;
+}
+
+.image-lightbox-full {
+  display: block;
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
 }
 
 .study-image-thumb,

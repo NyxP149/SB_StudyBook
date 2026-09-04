@@ -77,7 +77,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {collapsed && (
         <button type="button" className="quick-logout" onClick={logout} aria-label={t('shell.logout')} title={t('shell.logout')}>
-          ⏻
+          {/* SVG plutôt que le glyphe unicode ⏻ (U+23FB) : absent de la police système
+              par défaut sur une partie des appareils Android, rendu invisible. */}
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M12 3v8" />
+            <path d="M7 5.5a8 8 0 1 0 10 0" />
+          </svg>
         </button>
       )}
 

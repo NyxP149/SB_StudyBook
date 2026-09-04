@@ -21,6 +21,13 @@ const sanitizeSchema = {
     ...defaultSchema.attributes,
     mark: [['className', ...HIGHLIGHT_COLORS.map((c) => `hl-${c}`)]],
   },
+  // rehype-sanitize a son propre filtre de protocole sur `src`, indépendant du
+  // urlTransform de react-markdown ci-dessous — sans ça il vide quand même
+  // "note-image:{id}" avant que le composant img ne le voie.
+  protocols: {
+    ...defaultSchema.protocols,
+    src: [...(defaultSchema.protocols?.src ?? []), NOTE_IMAGE_PREFIX.slice(0, -1)],
+  },
 }
 
 // react-markdown sanitise les URLs de schéma inconnu (protection XSS sur les
